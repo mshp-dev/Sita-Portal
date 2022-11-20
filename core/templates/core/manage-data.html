@@ -1,0 +1,643 @@
+{% extends "layouts/base.html" %} {% block title %} مدیریت اطلاعات {% endblock %} {% load static %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<link type="text/css" href="/static/assets/css/tree.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" />
+{% endblock stylesheets %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript">
+  function addTreeItemsFunctionality() {
+    var treeitems = document.querySelectorAll('[role="treeitem"]');
+    for (var i = 0; i < treeitems.length; i++) {
+      treeitems[i].addEventListener("click", function (event) {
+        var appendPermCheck = document.getElementById("appendPermCheck");
+        var writePermCheck = document.getElementById("writePermCheck");
+        var readPermCheck = document.getElementById("readPermCheck");
+        var overwritePermCheck = document.getElementById("overwritePermCheck");
+        var listPermCheck = document.getElementById("listPermCheck");
+        var renameFilesPermCheck = document.getElementById("renameFilesPermCheck");
+        var deleteFilesPermCheck = document.getElementById("deleteFilesPermCheck");
+        var checksumPermCheck = document.getElementById("checksumPermCheck");
+        var shareFilesPermCheck = document.getElementById("shareFilesPermCheck");
+        var createPermCheck = document.getElementById("createPermCheck");
+        var renamePermCheck = document.getElementById("renamePermCheck");
+        var deletePermCheck = document.getElementById("deletePermCheck");
+        var sharePermCheck = document.getElementById("sharePermCheck");
+        var applySubPermCheck = document.getElementById("applySubPermCheck");
+        var confirmedByAdmin = document.getElementById("confirmedByAdmin");
+
+        var absolutePath1 = document.getElementById("absolute-path-1");
+        var absolutePath2 = document.getElementById("absolute-path-2");
+        var parentId = document.getElementById("parent-id");
+        var currentDirId = document.getElementById("current-dir-id");
+        var indexCode = document.getElementById("index-code");
+
+        var treeitem = event.currentTarget;
+        var uid = document.getElementById("current-user-id").innerHTML;
+        var did = treeitem.getAttribute("current-dir-id");
+        var path = treeitem.getAttribute("absolute-path");
+        var pid = treeitem.getAttribute("parent-id");
+        var index = treeitem.getAttribute("indexcode");
+        currentDirId.innerHTML = did;
+        parentId.innerHTML = pid;
+        indexCode.innerHTML = index;
+        absolutePath1.innerHTML = path + '/{<span class="text-danger">NEW</span>}';
+        absolutePath2.innerHTML = path;
+        getPermissions(uid);
+
+        event.stopPropagation();
+        event.preventDefault();
+      });
+    }
+  }
+
+  function getPermissions(uid) {
+    var did = document.getElementById("current-dir-id").innerHTML;
+    var currentUserId = document.getElementById("current-user-id");
+    currentUserId.innerHTML = uid;
+
+    var appendPermCheck = document.getElementById("appendPermCheck");
+    var writePermCheck = document.getElementById("writePermCheck");
+    var readPermCheck = document.getElementById("readPermCheck");
+    var overwritePermCheck = document.getElementById("overwritePermCheck");
+    var listPermCheck = document.getElementById("listPermCheck");
+    var renameFilesPermCheck = document.getElementById("renameFilesPermCheck");
+    var deleteFilesPermCheck = document.getElementById("deleteFilesPermCheck");
+    var checksumPermCheck = document.getElementById("checksumPermCheck");
+    var shareFilesPermCheck = document.getElementById("shareFilesPermCheck");
+    var createPermCheck = document.getElementById("createPermCheck");
+    var renamePermCheck = document.getElementById("renamePermCheck");
+    var deletePermCheck = document.getElementById("deletePermCheck");
+    var sharePermCheck = document.getElementById("sharePermCheck");
+    var applySubPermCheck = document.getElementById("applySubPermCheck");
+    var confirmedByAdmin = document.getElementById("confirmedByAdmin");
+
+    var url = "/mftuser/" + uid + "/permissions/" + did + "/";
+    fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+    })
+      .then((Result) => Result.json())
+      .then((string) => {
+        appendPermCheck.checked = false;
+        writePermCheck.checked = false;
+        readPermCheck.checked = false;
+        overwritePermCheck.checked = false;
+        listPermCheck.checked = false;
+        renameFilesPermCheck.checked = false;
+        deleteFilesPermCheck.checked = false;
+        checksumPermCheck.checked = false;
+        shareFilesPermCheck.checked = false;
+        sharePermCheck.checked = false;
+        createPermCheck.checked = false;
+        renamePermCheck.checked = false;
+        deletePermCheck.checked = false;
+        applySubPermCheck.checked = false;
+        string.forEach((perm) => {
+          if (perm.value == 1024) {
+            // Append
+            appendPermCheck.checked = true;
+          } else if (perm.value == 2) {
+            // Upload (Write)
+            writePermCheck.checked = true;
+          } else if (perm.value == 1) {
+            // Download (Read)
+            readPermCheck.checked = true;
+          } else if (perm.value == 512) {
+            // Overwrit
+            overwritePermCheck.checked = true;
+          } else if (perm.value == 256) {
+            // List
+            listPermCheck.checked = true;
+          } else if (perm.value == 8) {
+            // Rename Files
+            renameFilesPermCheck.checked = true;
+          } else if (perm.value == 32) {
+            // Delete Files
+            deleteFilesPermCheck.checked = true;
+          } else if (perm.value == 128) {
+            // Checksum
+            checksumPermCheck.checked = true;
+          } else if (perm.value == 4096) {
+            // Share File
+            shareFilesPermCheck.checked = true;
+          } else if (perm.value == 4) {
+            // Create
+            createPermCheck.checked = true;
+          } else if (perm.value == 16) {
+            // Rename
+            renamePermCheck.checked = true;
+          } else if (perm.value == 64) {
+            // Delete
+            deletePermCheck.checked = true;
+          } else if (perm.value == 2048) {
+            // Share
+            sharePermCheck.checked = true;
+          } else if (perm.value == 0) {
+            // Apply To Subfolders
+            applySubPermCheck.checked = true;
+          } else if (perm.value == "notconfirmed") {
+            // hide confirmed label
+            confirmedByAdmin.setAttribute("style", "display: none");
+          } else if (perm.value == "isconfirmed") {
+            // show confirmed label
+            confirmedByAdmin.removeAttribute("style");
+          }
+        });
+      })
+      .catch((errorMsg) => {
+        console.log(errorMsg);
+      });
+  }
+</script>
+<script type="text/javascript">
+  $(function () {
+    $("input[role='mftuser-confirm-btn']").click(function () {
+      var uid = $(this).attr("uid");
+      var csrf = "{{ csrf_token }}";
+      $.post(
+        "/entities/" + uid + "/confirm/",
+        {
+          csrfmiddlewaretoken: csrf,
+          entity: "mftuser",
+        },
+        function (response) {
+          if (response.result == "success") {
+            document.getElementById(response.mftuser).remove();
+            var btn = document.getElementById(response.id);
+            if (btn != null) {
+              btn.setAttribute("class", "btn btn-md btn-success mt-2");
+            }
+            if (response.confirmed) {
+              alert("کاربر با موفقیت تأیید شد.");
+            } else {
+              alert("اطلاعات کاربر با موفقیت تأیید شد، لطفاً دسترسی های آن را تأیید کنید.");
+            }
+          } else if (response.result == "error") {
+            alert("مشکلی پیش آمده است!");
+          }
+        }
+      );
+    });
+
+    $("input[role='mftuser-dissmiss-changes-btn']").click(function () {
+      var uid = $(this).attr("uid");
+      var csrf = "{{ csrf_token }}";
+      $.post(
+        "/mftuser/" + uid + "/dismiss-changes/",
+        {
+          csrfmiddlewaretoken: csrf,
+        },
+        function (response) {
+          if (response.result == "success") {
+            document.getElementById(response.dismissed).remove();
+            var btn = document.getElementById(response.id);
+            if (btn != null) {
+              btn.setAttribute("class", "btn btn-md btn-success mt-2");
+            }
+            alert("تغییرات کاربر تأیید نشد.");
+          } else if (response.result == "error") {
+            alert("مشکلی پیش آمده است!");
+          }
+        }
+      );
+    });
+
+    $("input[role='mftuser-restore-or-delete-btn']").click(function () {
+      var uid = $(this).attr("uid");
+      var action = $(this).attr("action");
+      var csrf = "{{ csrf_token }}";
+      $.post(
+        "/mftuser/" + uid + "/restore-or-delete/",
+        {
+          csrfmiddlewaretoken: csrf,
+          action: action,
+        },
+        function (response) {
+          if (response.result == "success") {
+            document.getElementById(response.object).remove();
+            if (action == "restore") {
+              alert("کاربر با موفقیت بازگردانی شد.");
+            } else if (action == "purge") {
+              alert("کاربر با موفقیت حذف شد.");
+            }
+          } else if (response.result == "error") {
+            alert("مشکلی پیش آمده است!");
+          }
+        }
+      );
+    });
+
+    $("input[role='mftuser-get-dirs-btn']").click(function () {
+      var uid = $(this).attr("uid");
+      $("#current-user-id").html(uid);
+      var csrf = "{{ csrf_token }}";
+      $("#appendPermCheck").prop("checked", false);
+      $("#writePermCheck").prop("checked", false);
+      $("#readPermCheck").prop("checked", false);
+      $("#overwritePermCheck").prop("checked", false);
+      $("#listPermCheck").prop("checked", false);
+      $("#renameFilesPermCheck").prop("checked", false);
+      $("#deleteFilesPermCheck").prop("checked", false);
+      $("#checksumPermCheck").prop("checked", false);
+      $("#shareFilesPermCheck").prop("checked", false);
+      $("#createPermCheck").prop("checked", false);
+      $("#renamePermCheck").prop("checked", false);
+      $("#deletePermCheck").prop("checked", false);
+      $("#sharePermCheck").prop("checked", false);
+      $("#applySubPermCheck").prop("checked", false);
+      $("#confirmedByAdmin").prop("style", "display: none");
+      const contents_list = $("#replaceable-content");
+      $.get("/directory/" + uid + "/mftusers/", function (response) {
+        contents_list.html(response["html_from_view"]);
+        addTreeItemsFunctionality();
+      });
+    });
+  });
+</script>
+{% endblock javascripts %} {% block content %}
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <div class="section-header pb-6 bg-primary text-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-10 text-center" style="direction: rtl">
+          <h1 class="display-3 mb-4">مدیریت کاربران و دسترسی ها</h1>
+          <p class="lead">
+            لیست کاربران ساخته شده ای که تأیید نشده اند و یا کاربرانی که ویرایش شده اند و همچنین دایرکتوری های جدید و لیست دسترسی کاربران به آن ها را
+            مشاهده می کنید.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section section-md">
+    <div class="container">
+      <div class="row mb-5">
+        {% comment %}
+        <div class="col-10 mx-auto">
+          <div class="nav-wrapper position-relative mb-2">
+            <ul class="nav nav-pills nav-fill flex-column flex-md-row" id="tabs-manage-data" role="tablist">
+              <li class="col-4 nav-item">
+                <a
+                  class="nav-link mb-sm-3 mb-md-0"
+                  id="tabs-permissions-tab"
+                  data-bs-toggle="tab"
+                  href="#tabs-permissions"
+                  role="tab"
+                  aria-controls="tabs-permissions"
+                  aria-selected="false"
+                  ><strong>دایرکتوری ها و دسترسی های تأیید نشده</strong> <span class="fas fa-folder-open"></span
+                ></a>
+              </li>
+              <li class="col-4 nav-item">
+                <a
+                  class="nav-link mb-sm-3 mb-md-0 active"
+                  id="tabs-mftusers-tab"
+                  data-bs-toggle="tab"
+                  href="#tabs-mftusers"
+                  role="tab"
+                  aria-controls="tabs-mftusers"
+                  aria-selected="true"
+                  ><strong>کاربران تأیید نشده</strong> <span class="fas fa-address-book"></span
+                ></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="card border-0">
+          <div class="card-body p-0">
+            <div class="tab-content" id="tabcontent">
+              <div class="tab-pane fade active show" id="tabs-mftusers" role="tabpanel" aria-labelledby="tabs-info-tab">
+                {% endcomment %}
+                <div class="row mb-5">
+                  <div class="mb-3">
+                    <h4 class="display-4" style="direction: rtl">کاربران تأیید نشده</h4>
+                  </div>
+                </div>
+                {% include "includes/users-list.html" %} {% comment %} with users=new_users
+                <div class="row mt-7 mb-5">
+                  <div class="mb-3">
+                    <h4 class="display-4" style="direction: rtl">کاربران ویرایش شده</h4>
+                  </div>
+                </div>
+                {% include "includes/users-list.html" with users=changed_users deleted=deleted_users differences=differences edited_user=True %}
+              </div>
+              <div class="tab-pane fade" id="tabs-permissions" role="tabpanel" aria-labelledby="tabs-permissions-tab">
+                {% endcomment %}
+                <div class="row mt-10 mb-5">
+                  <div class="row mb-5">
+                    <div class="mb-3">
+                      <h4 class="display-4" style="direction: rtl">دسترسی های تأیید نشده</h4>
+                    </div>
+                  </div>
+                  <div style="display: none">
+                    <p id="absolute-path-1"></p>
+                    <p id="absolute-path-2"></p>
+                    <p id="current-dir-id"></p>
+                    <p id="current-user-id"></p>
+                    <p id="parent-id"></p>
+                    <p id="index-code"></p>
+                  </div>
+                  <div class="col-4 col-lg-4">
+                    <legend class="h4 mb-3">MftUsers:</legend>
+                    <div id="users-with-permissions" class="p-3">
+                      {% for user in elements %}
+                      <input
+                        id="{{ user.id }}"
+                        class="btn btn-md btn-{% if user.is_confirmed %}success{% else %}warning{% endif %} mt-2"
+                        role="mftuser-get-dirs-btn"
+                        type="button"
+                        style="width: 80%"
+                        uid="{{ user.id }}"
+                        value="{{ user.username }}"
+                      />
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <div class="col-4 col-lg-4">
+                    <legend class="h4 mb-3">Directory Tree:</legend>
+                    <!--Directories-->
+                    <ul id="replaceable-content" role="tree" aria-labelledby="tree_label">
+                      {% comment %} {% include "includes/directory-list.html" %} {% endcomment %}
+                    </ul>
+                    <!--End of Directories-->
+                  </div>
+                  <div class="col-4 col-lg-4 ps-5">
+                    <span class="h4">Permissions: <span id="confirmedByAdmin" style="display: none" class="fa fa-check text-success"></span></span>
+                    <div class="row mt-3">
+                      <legend class="h5">General</legend>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="1" id="readPermCheck" />
+                        <label class="form-check-label" for="readPermCheck"> Read (خواندن) </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="2" id="writePermCheck" />
+                        <label class="form-check-label" for="writePermCheck"> Write (نوشتن) </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="32" id="deleteFilesPermCheck" />
+                        <label class="form-check-label" for="deleteFilesPermCheck"> Delete (حذف کردن) </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="256" id="listPermCheck" />
+                        <label class="form-check-label" for="listPermCheck"> List (مشاهده) </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="8" id="renameFilesPermCheck" />
+                        <label class="form-check-label" for="renameFilesPermCheck"> Rename Files </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="512" id="overwritePermCheck" />
+                        <label class="form-check-label" for="overwritePermCheck"> Overwrite </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="1024" id="appendPermCheck" />
+                        <label class="form-check-label" for="appendPermCheck"> Append </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="128" id="checksumPermCheck" />
+                        <label class="form-check-label" for="checksumPermCheck"> Checksum </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="4096" id="shareFilesPermCheck" />
+                        <label class="form-check-label" for="shareFilesPermCheck"> Share Files </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="0" id="applySubPermCheck" />
+                        <label class="form-check-label" for="applySubPermCheck"> Apply To Subdirectories </label>
+                      </div>
+                      <legend class="h5 mt-3">Subdirectories</legend>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="4" id="createPermCheck" />
+                        <label class="form-check-label" for="createPermCheck"> Create </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="16" id="renamePermCheck" />
+                        <label class="form-check-label" for="renamePermCheck"> Rename </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="64" id="deletePermCheck" />
+                        <label class="form-check-label" for="deletePermCheck"> Delete </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="2048" id="sharePermCheck" />
+                        <label class="form-check-label" for="sharePermCheck"> Share </label>
+                      </div>
+                      <div class="form-check row mt-4">
+                        {% comment %}
+                        <button
+                          id="btn-confirm-permission"
+                          aria-label="تأیید دسترسی ها"
+                          title="تأیید دسترسی ها"
+                          class="btn btn-sm btn-info"
+                          name="Confirm"
+                        >
+                          تأیید دسترسی ها
+                        </button>
+                        {% endcomment %}
+                        <button
+                          id="btn-change-or-confirm-permission"
+                          aria-label="تغییر دسترسی ها"
+                          title="تغییر دسترسی ها"
+                          class="btn btn-sm btn-warning mt-2"
+                          name="Change"
+                        >
+                          تأیید/تغییر دسترسی ها
+                        </button>
+                        <script>
+                          $(function () {
+                            /*$("#btn-confirm-permission").click(function () {
+                              var did = $("#current-dir-id").html();
+                              var uid = $("#current-user-id").html();
+                              var csrf = "{{ csrf_token }}";
+                              if (did == "") {
+                                alert("یک دایرکتوری را انتخاب نمائید!");
+                              } else if (uid == "") {
+                                alert("یک کاربر را انتخاب نمائید!");
+                              } else {
+                                $.post(
+                                  "/entities/" + did + "/confirm/",
+                                  {
+                                    csrfmiddlewaretoken: csrf,
+                                    user: uid,
+                                    entity: "directory",
+                                  },
+                                  function (response) {
+                                    if (response.result == "success") {
+                                      alert("دسترسی های فوق تأیید شد.");
+                                      $("#confirmedByAdmin").removeAttr("style");
+                                    } else if (response.result == "error") {
+                                      alert("خطایی رخ داده است، لطفاً با مدیر سیستم تماس بگیرید!");
+                                    }
+                                  }
+                                );
+                              }
+                            });*/
+                            $("#btn-change-or-confirm-permission").click(function () {
+                              var did = $("#current-dir-id").html();
+                              var uid = $("#current-user-id").html();
+                              var csrf = "{{ csrf_token }}";
+                              if (did == "") {
+                                alert("یک دایرکتوری را انتخاب نمائید!");
+                              } else if (uid == "") {
+                                alert("یک کاربر را انتخاب نمائید!");
+                              } else {
+                                var permissions = "";
+                                if ($("#appendPermCheck").prop("checked")) {
+                                  permissions += $("#appendPermCheck").prop("value") + ",";
+                                }
+                                if ($("#writePermCheck").prop("checked")) {
+                                  permissions += $("#writePermCheck").prop("value") + ",";
+                                }
+                                if ($("#readPermCheck").prop("checked")) {
+                                  permissions += $("#readPermCheck").prop("value") + ",";
+                                }
+                                if ($("#overwritePermCheck").prop("checked")) {
+                                  permissions += $("#overwritePermCheck").prop("value") + ",";
+                                }
+                                if ($("#listPermCheck").prop("checked")) {
+                                  permissions += $("#listPermCheck").prop("value") + ",";
+                                }
+                                if ($("#renameFilesPermCheck").prop("checked")) {
+                                  permissions += $("#renameFilesPermCheck").prop("value") + ",";
+                                }
+                                if ($("#deleteFilesPermCheck").prop("checked")) {
+                                  permissions + $("#deleteFilesPermCheck").prop("value") + ",";
+                                }
+                                if ($("#checksumPermCheck").prop("checked")) {
+                                  permissions += $("#checksumPermCheck").prop("value") + ",";
+                                }
+                                if ($("#shareFilesPermCheck").prop("checked")) {
+                                  permissions += $("#shareFilesPermCheck").prop("value") + ",";
+                                }
+                                if ($("#createPermCheck").prop("checked")) {
+                                  permissions += $("#createPermCheck").prop("value") + ",";
+                                }
+                                if ($("#renamePermCheck").prop("checked")) {
+                                  permissions += $("#renamePermCheck").prop("value") + ",";
+                                }
+                                if ($("#deletePermCheck").prop("checked")) {
+                                  permissions += $("#deletePermCheck").prop("value") + ",";
+                                }
+                                if ($("#sharePermCheck").prop("checked")) {
+                                  permissions += $("#sharePermCheck").prop("value") + ",";
+                                }
+                                if ($("#applySubPermCheck").prop("checked")) {
+                                  permissions += $("#applySubPermCheck").prop("value") + ",";
+                                }
+                                $.post(
+                                  "/mftuser/" + uid + "/permissions/" + did + "/",
+                                  {
+                                    permissions: permissions,
+                                    csrfmiddlewaretoken: csrf,
+                                  },
+                                  function (response) {
+                                    if (response.result == "success") {
+                                      $.post(
+                                        "/entities/" + did + "/confirm/",
+                                        {
+                                          csrfmiddlewaretoken: csrf,
+                                          user: uid,
+                                          entity: "directory",
+                                        },
+                                        function (response) {
+                                          if (response.result == "success") {
+                                            $("#confirmedByAdmin").removeAttr("style");
+                                            if (response.confirmed) {
+                                              var btn = document.getElementById(response.id);
+                                              btn.setAttribute("class", "btn btn-md btn-success mt-2");
+                                              alert("دسترسی های فوق بروزرسانی و تأیید شد.");
+                                            } else {
+                                              alert("دسترسی های فوق بروزرسانی و تأیید شد، لطفاً اطلاعات کاربر را تأیید کنید.");
+                                            }
+                                          } else if (response.result == "error") {
+                                            alert("خطایی رخ داده است، لطفاً با مدیر سیستم تماس بگیرید!");
+                                          }
+                                        }
+                                      );
+                                      //alert("دسترسی های فوق بروزرسانی شد.");
+                                    } else if (response.result == "error") {
+                                      alert("خطایی رخ داده است، لطفاً با مدیر سیستم تماس بگیرید!");
+                                      var perms = response.perms.split(",");
+                                      perms.forEach((perm) => {
+                                        if (perm == 1024) {
+                                          // Append
+                                          $("#appendPermCheck").prop("checked", true);
+                                        } else if (perm == 2) {
+                                          // Upload (Write)
+                                          $("#writePermCheck").prop("checked", true);
+                                        } else if (perm == 1) {
+                                          // Download (Read)
+                                          $("#readPermCheck").prop("checked", true);
+                                        } else if (perm == 512) {
+                                          // Overwrit
+                                          $("#overwritePermCheck").prop("checked", true);
+                                        } else if (perm == 256) {
+                                          // List
+                                          $("#listPermCheck").prop("checked", true);
+                                        } else if (perm == 8) {
+                                          // Rename Files
+                                          $("#renameFilesPermCheck").prop("checked", true);
+                                        } else if (perm == 32) {
+                                          // Delete Files
+                                          $("#deleteFilesPermCheck").prop("checked", true);
+                                        } else if (perm == 128) {
+                                          // Checksum
+                                          $("#checksumPermCheck").prop("checked", true);
+                                        } else if (perm == 4096) {
+                                          // Share File
+                                          $("#shareFilesPermCheck").prop("checked", true);
+                                        } else if (perm == 4) {
+                                          // Create
+                                          $("#createPermCheck").prop("checked", true);
+                                        } else if (perm == 16) {
+                                          // Rename
+                                          $("#renamePermCheck").prop("checked", true);
+                                        } else if (perm == 64) {
+                                          // Delete
+                                          $("#deletePermCheck").prop("checked", true);
+                                        } else if (perm == 2048) {
+                                          // Share
+                                          $("#sharePermCheck").prop("checked", true);
+                                        } else if (perm == 0) {
+                                          // Apply To Subfolders
+                                          $("#applySubPermCheck").prop("checked", true);
+                                        }
+                                      });
+                                    }
+                                  }
+                                );
+                              }
+                              return false;
+                            });
+                          });
+                        </script>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% comment %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endcomment %}
+      </div>
+      <div class="row mt-8 mb-5">
+        <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="javascript:history.go(-1);" />
+      </div>
+    </div>
+  </div>
+</main>
+
+{% include "includes/footer.html" %} {% endblock content %}

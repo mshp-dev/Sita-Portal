@@ -1,0 +1,422 @@
+{% extends "layouts/base-fullscreen.html" %}
+
+<!-- prettier-ignore -->
+{% block title %} فرم ایجاد کاربر {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %} {% endblock stylesheets %} {% block content %}
+
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <!-- Section -->
+  <section
+    class="min-vh-100 d-flex align-items-center overlay-soft-dark"
+    style="background-image: url('/static/assets/img/bg.png'); background-repeat: no-repeat; background-size: 100% 100%"
+  >
+    {% comment %} data-background="/static/assets/img/pages/form-image.jpg" {% endcomment %}
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 d-flex align-items-center justify-content-center">
+          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-800">
+            <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
+              <h1 class="mb-0 h3">{{ page_title }}</h1>
+              <br />
+              <span class="font-weight-normal"> {% if msg %} {{ msg | safe }} {% endif %} </span>
+            </div>
+            {% if not success %}{% if crud != 'delete' %} {% comment %} {% if msg %}
+            <script>
+              window.onload = scroll;
+            </script>
+            {% endif %} {% endcomment %} {% comment %}
+            <div id="description-div" style="direction: rtl" class="col">
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* وارد نمودن تمامی موارد ستاره دار الزامی است</strong></p>
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* سامانه</strong> همان نام پروژه یا بیزینس که به تبادل فایل نیاز دارد</p>
+              <p class="text-danger" style="font-size: 0.7rem">
+                <strong>* سازمان</strong> همان نام شرکت، ارگان و یا بانکی که کاربر در آن مشغول می باشد
+              </p>
+              <p class="text-danger" style="font-size: 0.7rem">
+                <strong>* نام کاربری</strong> به صورت خودکار از ترکیب نام و نام خانوادگی ایجاد می شود
+              </p>
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* ایمیل</strong> به صورت خودکار از نام کاربری ایجاد می شود</p>
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* نام مستعار</strong> در صورت نیاز به استفاده سیستمی و مشترک تکمیل شود</p>
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* تلفن محل کار </strong> بدون پیش شماره و به طور کامل (هشت رقم) وارد شود</p>
+              <p class="text-danger" style="font-size: 0.7rem">
+                <strong>* تلفن همراه </strong> در ده رقم بدون صفر و یا به طور کامل (یازده رقم) وارد شود
+              </p>
+              <p class="text-danger" style="font-size: 0.7rem">
+                <strong>* توضیحات </strong> نام گروه، اداره یا قسمت مربوطه کاربر در سازمان را بنویسید
+              </p>
+            </div>
+            {% endcomment %}
+            <form class="mt-5" method="POST" action="" id="mftuser-form">
+              {% csrf_token %}
+              <div class="form-group mb-4" style="direction: rtl">
+                <!-- prettier-ignore -->
+                <label for="business">سامانه/پروژه تحت اختیار <span style="font-size: 0.7rem">(با نگهداشتن کلید CTRL می توانید چند سامانه را انتخاب نمایید)</span> <sup class="text-danger"><strong>*</strong></sup></label>
+                <div class="input-group" style="direction: ltr">
+                  {{ form.business }}
+                  <span class="input-group-text" id="business"><span class="fas fa-sitemap"></span></span>
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <!-- prettier-ignore -->
+                <label for="organization">سازمان/بانک <sup class="text-danger"><strong>*</strong></sup></label>
+                <div class="input-group" style="direction: ltr">
+                  {{ form.organization }} {% comment %} {% for acc in access %}
+                  <option value="{{ acc.id }}">{{ acc.code }}</option>
+                  {% endfor %} {% endcomment %}
+                  <span class="input-group-text" id="organization"><span class="fas fa-building"></span></span>
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <!-- prettier-ignore -->
+                <label for="firstname">نام <sup class="text-danger"><strong>*</strong></sup></label>
+                <div class="input-group" style="direction: ltr">
+                  {{ form.firstname }}
+                  <span class="input-group-text" id="firstname"><span class="fas fa-address-book"></span></span>
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="lastname"
+                  >نام خانوادگی <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  {{ form.lastname }}
+                  <span class="input-group-text" id="lastname"><span class="fas fa-address-book"></span></span>
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="username">نام کاربری</label>
+                {% comment %}
+                <p class="text-danger" style="font-size: 0.7rem">* به صورت خودکار از ترکیب نام و نام خانوادگی ایجاد می شود</p>
+                {% endcomment %}
+                <div class="input-group" style="direction: ltr">
+                  {{ form.username }}
+                  <span class="input-group-text" id="username"><span class="fas fa-user"></span></span>
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="email">آدرس ایمیل</label>
+                {% comment %}
+                <p class="text-danger" style="font-size: 0.7rem">* به صورت خودکار از نام کاربری ایجاد می شود</p>
+                {% endcomment %}
+                <div class="input-group" style="direction: ltr">
+                  {{ form.email }}
+                  <span class="input-group-text" id="email"><span class="fas fa-envelope"></span></span>
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="alias">نام مستعار</label>
+                {% comment %}
+                <p class="text-danger" style="font-size: 0.7rem">* در صورت نیاز به استفاده در سیستم تکمیل شود</p>
+                {% endcomment %}
+                <div class="input-group" style="direction: ltr">
+                  {{ form.alias }}
+                  <span class="input-group-text" id="alias"><span class="fa fa-at"></span></span>
+                </div>
+              </div>
+              {% comment %}
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="email">فضای مورد نیاز</label>
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="quota"><span class="fas fa-floppy"></span></span>
+                  {{ form.disk_quota }}
+                </div>
+              </div>
+              {% endcomment %}
+              <div class="form-group mb-4" style="direction: rtl">
+                <!-- prettier-ignore -->
+                <label for="officephone">تلفن دفتر کار <sup class="text-danger"><strong>*</strong></sup></label>
+                <div class="input-group" style="direction: ltr">
+                  {{ form.officephone }}
+                  <span class="input-group-text" id="officephone"><span class="fas fa-phone"></span></span>
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <!-- prettier-ignore -->
+                <label for="mobilephone">شماره تلفن همراه <sup class="text-danger"><strong>*</strong></sup></label>
+                <div class="input-group" style="direction: ltr">
+                  {{ form.mobilephone }}
+                  <span class="input-group-text" id="mobilephone"><span class="fas fa-mobile"></span></span>
+                </div>
+              </div>
+              {% comment %}
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="description"
+                  >توضیحات <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group">{{ form.description }}</div>
+              </div>
+              {% endcomment %}
+              <br />
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary">{{ submit_action }}</button>
+              </div>
+              <div class="d-grid mt-3">
+                <input type="button" class="btn btn-success" value="بازگشت" onClick="goBack();" />
+              </div>
+              {% comment %}
+              <div class="d-flex justify-content-center align-items-center mt-4">
+                <span style="direction: rtl; text-align: center" class="fw-normal">
+                  &copy; کلیه حقوق مادی و معنوی این پرتال متعلق به شرکت خدمات انفورماتیک گروه عملیات سامانه های اطلاعاتی و نظارتی می باشد.
+                </span>
+              </div>
+              {% endcomment %}
+            </form>
+            {% else %}
+            <form method="POST" action="" id="delete-form">
+              {% csrf_token %}
+              <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-danger">{{ submit_action }}</button>
+              </div>
+              <div class="d-grid">
+                <input type="button" class="btn btn-success" value="بازگشت" onClick="goBack();" />
+              </div>
+              {% comment %}
+              <div class="d-flex justify-content-center align-items-center mt-4">
+                <span class="fw-normal">
+                  &copy; کلیه حقوق مادی و معنوی این پرتال متعلق به شرکت خدمات انفورماتیک گروه عملیات سامانه های اطلاعاتی و نظارتی می باشد.
+                </span>
+              </div>
+              {% endcomment %}
+            </form>
+            {% endif %} {% else %}
+            <div class="mt-4 text-sm text-center">
+              <div class="d-grid mb-3">
+                {% comment %} <a href="{% url 'mftuser-create' %}" class="btn btn-success">ایجاد کاربر جدید</a> {% endcomment %}
+                <input type="button" class="btn btn-success" value="ایجاد کاربر جدید" onClick="addNewUser();" />
+              </div>
+              {% if crud != 'delete' %}
+              <div class="d-grid mb-3">
+                <a href="{% url 'mftuser-access' new_user_id %}" class="btn btn-info">ایجاد دسترسی برای کاربر ایجاد شده</a>
+              </div>
+              {% endif %} {% comment %}
+              <div class="d-grid mb-3">
+                <a href="{% url 'mftusers-list' %}" class="btn btn-tertiary">رفتن به لیست کاربران</a>
+              </div>
+              {% endcomment %}
+              <div class="d-grid">
+                <a href="{% url 'home' %}" class="btn btn-secondary">رفتن به داشبورد</a>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+  function scroll() {
+    $("html, body").animate(
+      {
+        scrollTop: $("#description-div").offset().top,
+      },
+      1000
+    );
+  }
+
+  function goBack() {
+    var url = "/";
+    window.location = url;
+  }
+
+  function addNewUser() {
+    var url = "/mftuser/create/";
+    window.location = url;
+  }
+
+  var bus = document.getElementById("id_business");
+  var bic = document.getElementById("id_organization");
+  bic.addEventListener("change", function (event) {
+    var first = document.getElementById("id_firstname");
+    var last = document.getElementById("id_lastname");
+    var user = document.getElementById("id_username");
+    var email = document.getElementById("id_email");
+    if (last.value != "" && first.value != "") {
+      var url = `/mftuser/create/?fn=${first.value}&ln=${last.value}&bic=${event.currentTarget.options[event.currentTarget.selectedIndex].text}`;
+      fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      })
+        .then((Result) => Result.json())
+        .then((json) => {
+          if (json["username"] != "null") {
+            user.value = json["username"];
+            email.value = user.value + "@sita.nibn.net";
+          } else {
+            console.log(json["error"]);
+          }
+        })
+        .catch((errorMsg) => {
+          console.log(errorMsg);
+        });
+    }
+  });
+
+  var opt_zero = document.createElement("option");
+  opt_zero.setAttribute("value", "0");
+  opt_zero.setAttribute("style", "direction: rtl");
+  opt_zero.innerHTML = "یک سازمان را انتخاب کنید...";
+  bic.appendChild(opt_zero);
+  bic.value = 0;
+
+  var options = document.querySelectorAll("option");
+  options.forEach((opt) => {
+    opt.setAttribute("style", "direction: rtl");
+    if (opt.getAttribute("parent") == "organization") {
+      bic.appendChild(opt);
+    } else if (opt.getAttribute("parent") == "business") {
+      bus.appendChild(opt);
+    }
+  });
+
+  var username = document.getElementById("id_username");
+  var email = document.getElementById("id_email");
+
+  var firstname = document.getElementById("id_firstname");
+  firstname.addEventListener("change", function (event) {
+    var first = cleanInputValue(event.currentTarget.value, "name");
+    event.currentTarget.value = first;
+    if (lastname.value != "") {
+      if (firstname.value.length > 2 && lastname.value.length > 2) {
+        var last = cleanInputValue(lastname.value, "name");
+        var url = `/mftuser/create/?fn=${first}&ln=${last}&bic=${bic.options[bic.selectedIndex].text}`;
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        })
+          .then((Result) => Result.json())
+          .then((json) => {
+            if (json["username"] != "null") {
+              username.value = json["username"];
+              email.value = username.value + "@sita.nibn.net";
+            } else {
+              console.log(json["error"]);
+            }
+          })
+          .catch((errorMsg) => {
+            console.log(errorMsg);
+          });
+      } else {
+        alert("عبارت وارد شده برای نام یا نام خانوادگی نمی تواند کمتر از 2 حرف باشد!");
+        username.value = "";
+        email.value = "";
+      }
+    }
+  });
+
+  var lastname = document.getElementById("id_lastname");
+  lastname.addEventListener("change", function (event) {
+    var last = cleanInputValue(event.currentTarget.value, "name");
+    event.currentTarget.value = last;
+    if (firstname.value != "") {
+      if (firstname.value.length > 2 && lastname.value.length > 2) {
+        var first = cleanInputValue(firstname.value, "name");
+        var url = `/mftuser/create/?fn=${first}&ln=${last}&bic=${bic.options[bic.selectedIndex].text}`;
+        fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        })
+          .then((Result) => Result.json())
+          .then((json) => {
+            if (json["username"] != "null") {
+              username.value = json["username"];
+              email.value = username.value + "@sita.nibn.net";
+            } else {
+              console.log(json["error"]);
+            }
+          })
+          .catch((errorMsg) => {
+            console.log(errorMsg);
+          });
+      } else {
+        alert("عبارت وارد شده برای نام یا نام خانوادگی نمی تواند کمتر از 2 حرف باشد!");
+        username.value = "";
+        email.value = "";
+      }
+    }
+  });
+
+  var alias = document.getElementById("id_alias");
+  alias.addEventListener("change", function (event) {
+    var als = cleanInputValue(event.currentTarget.value, "alias");
+    event.currentTarget.value = als;
+  });
+
+  var phone = document.getElementById("id_officephone");
+  phone.addEventListener("change", function (event) {
+    var ph = cleanInputValue(event.currentTarget.value, "number");
+    event.currentTarget.value = ph;
+  });
+
+  var mobile = document.getElementById("id_mobilephone");
+  mobile.addEventListener("change", function (event) {
+    var mb = cleanInputValue(event.currentTarget.value, "number");
+    event.currentTarget.value = mb;
+  });
+
+  function cleanInputValue(input, type) {
+    if (type == "name") {
+      input = input.replace(/[\u0600-\u06FF]/g, "");
+    } else if (type == "number") {
+      input = input.replace(/[a-z]/g, "");
+      input = input.replace(/[A-Z]/g, "");
+      input = input.replace(/\_/g, "");
+      input = input.replace(/\-/g, "");
+    } else if (type == "alias") {
+      input = input.replace(/[\u0600-\u06FF]/g, "");
+    }
+    if (type != "alias") {
+      input = input.replace(/\_/g, "");
+      input = input.replace(/\-/g, "");
+    }
+    input = input.replace(/\@/g, "");
+    input = input.replace(/\#/g, "");
+    input = input.replace(/\!/g, "");
+    input = input.replace(/\$/g, "");
+    input = input.replace(/\%/g, "");
+    input = input.replace(/\^/g, "");
+    input = input.replace(/\&/g, "");
+    input = input.replace(/\*/g, "");
+    input = input.replace(/\(/g, "");
+    input = input.replace(/\)/g, "");
+    input = input.replace(/\[/g, "");
+    input = input.replace(/\]/g, "");
+    input = input.replace(/\{/g, "");
+    input = input.replace(/\}/g, "");
+    input = input.replace(/\+/g, "");
+    input = input.replace(/\=/g, "");
+    input = input.replace(/\//g, "");
+    input = input.replace(/\\/g, "");
+    input = input.replace(/\|/g, "");
+    input = input.replace(/\~/g, "");
+    input = input.replace(/\'/g, "");
+    input = input.replace(/\`/g, "");
+    input = input.replace(/\"/g, "");
+    input = input.replace(/\,/g, "");
+    input = input.replace(/\./g, "");
+    input = input.replace(/\?/g, "");
+    input = input.replace(/\;/g, "");
+    input = input.replace(/\:/g, "");
+    input = input.replace(/\>/g, "");
+    input = input.replace(/\</g, "");
+    return input;
+  }
+</script>
+{% endblock javascripts %}

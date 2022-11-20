@@ -1,0 +1,179 @@
+{% extends "layouts/base.html" %} {% block title %} استخراج اطلاعات {% endblock %} {% load static %}
+
+<!-- Specific Page CSS goes HERE -->
+{% block stylesheets %}
+<link type="text/css" href="/static/assets/css/tree.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" />
+{% endblock stylesheets %}
+
+<!-- Specific Page JS goes HERE -->
+{% block javascripts %}
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript">
+  function delay(time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+  }
+
+  function transportOperation() {
+    alert("عملیات انتقال اطلاعات به MFT آغاز شد.");
+  }
+
+  $(function () {
+    $("a[role='download-exported-btn']").click(function () {
+      var eid = $(this).attr("eid");
+      var csrf = "{{ csrf_token }}";
+      delay(1500).then(() => {
+        $.post(
+          "/export-data/",
+          {
+            csrfmiddlewaretoken: csrf,
+            eid: eid,
+          },
+          function (response) {
+            if (response.result == "success") {
+              document.getElementById(response.deleted).remove();
+              alert("فایل XML حاوی اطلاعات کاربر با موفقیت دانلود شد.");
+            } else if (response.result == "error") {
+              alert("مشکلی پیش آمده است!");
+            }
+          }
+        );
+      });
+    });
+
+    $("#download-in-zip-format").click(function () {
+      var fileCount = document.querySelectorAll('[role="mftuser"]');
+      if (fileCount.length > 0) {
+        $.get("/download/0/", function () {
+          delay(1500).then(() => {
+            var csrf = "{{ csrf_token }}";
+            var files = document.querySelectorAll('[role="mftuser"]');
+            for (var i = 0; i < files.length; i++) {
+              var eid = files[i].getAttribute("eid");
+              $.post(
+                "/export-data/",
+                {
+                  csrfmiddlewaretoken: csrf,
+                  eid: eid,
+                },
+                function (response) {
+                  if (response.result == "success") {
+                    document.getElementById(response.deleted).remove();
+                    //alert("فایل XML حاوی اطلاعات کاربر با موفقیت دانلود شد.");
+                  } else if (response.result == "error") {
+                    alert("مشکلی پیش آمده است!");
+                  }
+                }
+              );
+            }
+            alert("فایل ZIP حاوی اطلاعات کاربران با موفقیت دانلود شد.");
+          });
+        });
+      } else {
+        alert("موردی برای استخراج وجود ندارد!");
+      }
+    });
+  });
+</script>
+{% endblock javascripts %} {% block content %}
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <div class="section-header pb-6 bg-primary text-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-10 text-center" style="direction: rtl">
+          <h1 class="display-3 mb-4">استخراج اطلاعات کاربران</h1>
+          <p class="lead">لیست کاربرانی که به تازگی ایجاد و تأیید شده و یا کاربران قدیمی که بعد از ویرایش تأیید شده اند.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section section-md">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="mb-3">
+          <h4 class="display-4" style="direction: rtl" for="search">جستجو در بین کاربران</h4>
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              style="text-align: right"
+              id="search-input"
+              placeholder="...چیزی بنویسید"
+              aria-label="Search"
+              aria-describedby="basic-addon"
+            /><span class="input-group-text" id="basic-addon"><span id="search-icon" class="fas fa-search"></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div id="replaceable-content" class="row mb-5">{% include "includes/users-list.html" %}</div>
+    </div>
+    <div class="container mt-8">
+      <div class="row mb-5">
+        <div class="d-flex justify-content-center">
+          <input id="download-in-zip-format" type="button" style="width: 60%" class="btn btn-tertiary animate-up-1" value="ZIP دانلود یکجا به صورت" />
+        </div>
+        <div class="d-flex justify-content-center mt-3">
+          <input
+            type="button"
+            style="width: 60%"
+            class="btn btn-warning animate-up-1"
+            value="MFT شروع عملیات انتقال اطلاعات به"
+            onclick="transportOperation()"
+          />
+        </div>
+      </div>
+      <div class="row mt-8 mb-5">
+        <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="javascript:history.go(-1);" />
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    const search_input = $("#search-input");
+    const search_icon = $("#search-icon");
+    const contents_list = $("#replaceable-content");
+    const endpoint = window.location.pathname;
+    const delay_by_in_ms = 700;
+    var scheduled_function = false;
+
+    var ajax_call = function (endpoint, request_parameters) {
+      $.getJSON(endpoint, request_parameters).done((response) => {
+        // fade out the users_list, then:
+        contents_list
+          .fadeTo("slow", 0)
+          .promise()
+          .then(() => {
+            // replace the HTML contents
+            contents_list.html(response["html_from_view"]);
+            // fade-in the div with new contents
+            contents_list.fadeTo("slow", 1);
+            // stop animating search icon
+            search_icon.removeClass("blink");
+          });
+      });
+    };
+
+    search_input.on("keyup", function () {
+      const request_parameters = {
+        q: $(this).val(), // value of search_input: the HTML element with ID search-input
+      };
+
+      // start animating the search icon with the CSS class
+      search_icon.addClass("blink");
+
+      // if scheduled_function is NOT false, cancel the execution of the function
+      if (scheduled_function) {
+        clearTimeout(scheduled_function);
+      }
+
+      // setTimeout returns the ID of the function to be executed
+      scheduled_function = setTimeout(ajax_call, delay_by_in_ms, endpoint, request_parameters);
+    });
+  </script>
+</main>
+
+{% include "includes/footer.html" %} {% endblock content %}

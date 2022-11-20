@@ -1,0 +1,122 @@
+<!--Tables-->
+{% load coretags %}
+<div id="downloadable" class="container">
+  <div style="display: none">
+    <p id="invoice"></p>
+  </div>
+  <div class="row justify-content-center">
+    <div class="col-lg-12" style="direction: rtl">
+      {% comment %} <div id="header">
+      </div> {% endcomment %}
+      <div class="col text-center">
+        <span class="h4">اطلاعات کاربر در سامانه سیتا</span>
+      </div>
+      <div class="col">
+        <div class="ms-4 me-4 d-flex justify-content-center">
+          <table class="table table-bordered" style="direction: rtl">
+            <tr>
+              <th class="col-4" scope="col" id="firstname-label">نام</th>
+              <td class="col-4" scope="col" id="firstname-value">{{ mftuser.firstname }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="lastname-label">نام خانوادگی</th>
+              <td class="col-4" scope="col" id="lastname-value">{{ mftuser.lastname }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="username-label">نام کاربری</th>
+              <td class="col-4" scope="col" id="username-value">{{ mftuser.username }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="alias-label">نام مستعار <span style="font-size: 0.5rem">(2)</span></th>
+              <td class="col-4" scope="col" id="alias-value">{{ mftuser.alias }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="email-label">ایمیل</th>
+              <td class="col-4" scope="col" id="email-value">{{ mftuser.email }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="officephone-label">تلفن دفتر کار</th>
+              <td class="col-4" scope="col" id="officephone-value">{{ mftuser.officephone }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="mobilephone-label">شماره تلفن همراه</th>
+              <td class="col-4" scope="col" id="mobilephone-value">{{ mftuser.mobilephone }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="organization-label">سازمان/بانک</th>
+              <td class="col-4" scope="col" id="organization-value">{{ mftuser.organization }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="business-label">سامانه/پروژه <span style="font-size: 0.5rem">(3)</span></th>
+              <td class="col-4" scope="col" id="business-value">{{ mftuser.business.all|get_businesses }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="description-label">جزئیات</th>
+              <td class="col-4" scope="col" id="description-value">{{ mftuser.description }}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="col mt-2 text-center">
+        <span class="h4">اطلاعات پوشه ها و سطح دسترسی</span>
+      </div>
+      <div class="col">
+        <table class="table table-bordered" style="direction: rtl">
+          <tr>
+            <th class="col-4 text-center" scope="col"><span>سطح دسترسی <span style="font-size: 0.5rem">(4)</span></p><p style="font-size: 0.8rem">دانلود (READ) <span style="font-size: 0.5rem">(5)</span> - آپلود (WRITE) <span style="font-size: 0.5rem">(6)</span> - حذف/تغییر (MODIFY) <span style="font-size: 0.5rem">(7)</span> - ایجاد پوشه <span style="font-size: 0.5rem">(8)</span></p></th>
+            <th style="direction: ltr" class="col-4 text-center" scope="col"><span>مسیر/پوشه</span></th>
+          </tr>
+          {% for acc in user_accesses %}
+          <tr>
+            <th class="col-4" scope="col" id="{{ acc.dir }}-perm-label">{{ acc.perms }}</th>
+            <td style="direction: ltr" class="col-4" scope="col" id="{{ acc.dir }}-label"><span>{{ acc.dir }}</span></td>
+          </tr>
+          {% endfor %}
+          {% comment %} <tr>
+            <th class="col-4" scope="col" id="lastname-label">نام خانوادگی</th>
+            <td class="col-4" scope="col" id="lastname-value">{{ mftuser.lastname }}</th>
+          </tr>
+          <tr>
+            <th class="col-4" scope="col" id="username-label">نام کاربری</th>
+            <td class="col-4" scope="col" id="username-value">{{ mftuser.username }}</th>
+          </tr>
+          <tr>
+            <th class="col-4" scope="col" id="email-label">ایمیل</th>
+            <td class="col-4" scope="col" id="email-value">{{ mftuser.email }}</th>
+          </tr>
+          <tr>
+            <th class="col-4" scope="col" id="officephone-label">تلفن دفتر کار</th>
+            <td class="col-4" scope="col" id="officephone-value">{{ mftuser.officephone }}</th>
+          </tr>
+          <tr>
+            <th class="col-4" scope="col" id="mobilephone-label">شماره تلفن همراه</th>
+            <td class="col-4" scope="col" id="mobilephone-value">{{ mftuser.mobilephone }}</th>
+          </tr>
+          <tr>
+            <th class="col-4" scope="col" id="organization-label">سازمان</th>
+            <td class="col-4" scope="col" id="organization-value">{{ mftuser.organization }}</th>
+          </tr>
+          <tr>
+            <th class="col-4" scope="col" id="business-label">بیزینس</th>
+            <td class="col-4" scope="col" id="business-value"></th>
+          </tr>
+          <tr>
+            <th class="col-4" scope="col" id="description-label">جزئیات</th>
+            <td class="col-4" scope="col" id="description-value">{{ mftuser.description }}</th>
+          </tr> {% endcomment %}
+        </table>
+      </div>
+    </div>
+    <div class="row justify-content-center"><div class="col mt-2" style="direction: rtl">
+      <div class="mb-1 h6">1) شناسه درخواست تولید شده می بایست هنگام ارسال درخواست درمتن نامه ثبت شده در سیستم اتوماسیون اداری (چارگون) درج شود.</div>
+      <div class="mb-1 h6">2) کاربر میتواند علاوه بر نام کاربری خود ( ترکیب حرف ابتدایی نام و نام خانوادگی ) از نام مستعار تعیین شده جهت اتصال به سامانه استفاده نماید.</div>
+      <div class="mb-1 h6">3) سامانه هایی که کاربر در آن فعالیت دارد.</div>
+      <div class="mb-1 h6">4) سطح دسترسی به 4 گروه (مشاهده ، دانلود ، آپلود ، حذف/تغییر) تقسیم میشود.دسترسی مشاهده به ازای ساخت پوشه به صورت پیشفرض به کاربر مورد نظر اعطا میشود.این 4 سطوح دسترسی در سطح دسترسی به فایل می باشد.</div>
+      <div class="mb-1 h6">5) دسترسی دانلود به کاربر این امکان را میدهد که فایلهای داخل آن پوشه را روی سیستم خود دانلود نماید.</div>
+      <div class="mb-1 h6">6)  نوع دسترسی آپلود Write : به کاربر این امکان را میدهد که محتویات مورد نظر خود را بر روی سامانه سیتا بارگزاری نماید.( این دسترسی قابلیت تغییر نام فایل قرارداده شده را ندارد ولی می تواند فایل دیگری با همان نام را جایگزین فایل قبلی نماید)</div>
+      <div class="mb-1 h6">7)  دسترسی حذف/تغییر Modify : به کاربر این امکان را میدهد که فایل مورد نظر را حذف و یا تغییر نام بدهد.</div>
+      <div class="mb-1 h6">8) دسترسی ایجاد پوشه : کاربر میتواند داخل پوشه ( پوشه سطح چهارم و بعد از آن ) و بعد از آن پوشه جدید ایجاد نماید.</div>
+    </div>
+  </div>
+</div>
+<!--End of Tables-->

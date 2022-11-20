@@ -1,0 +1,363 @@
+{% extends "layouts/base.html" %} {% block title %} مشخصات کاربر {% endblock %} {% load static %} {% load coretags %}
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<link type="text/css" href="/static/assets/css/tree.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" />
+{% endblock stylesheets %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %} {% comment %}
+<script type="text/javascript" src="{% static 'js/tree.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/treeitem.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+{% endcomment %}
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+{% if access == 'ADMIN' %}
+<script type="text/javascript">
+  $(function () {
+    $("input[role='confirm-btn']").click(function () {
+      var uid = $(this).attr("uid");
+      var csrf = "{{ csrf_token }}";
+      $.post(
+        "/entities/" + uid + "/confirm/",
+        {
+          csrfmiddlewaretoken: csrf,
+          entity: "mftuser",
+        },
+        function (response) {
+          if (response.result == "success") {
+            //document.getElementById(response.confirmed).remove();
+            //el = document.getElementById("id_isconfirmed");
+            //el.value = "این کاربر توسط مدیر تأیید شده است";
+            if (response.confirmed == false) {
+              alert("مشخصات کاربر تأیید شد. لطفاً دسترسی های این کاربر را نیز تأیید کنید.");
+            } else {
+              alert("کاربر با موفقیت تأیید شد.");
+            }
+            location.reload();
+          } else if (response.result == "error") {
+            console.log(response.result);
+          }
+        }
+      );
+    });
+  });
+</script>
+{% endif %} {% endblock javascripts %} {% block content %}
+
+<!-- prettier-ignore -->
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <div class="section-header pb-6 bg-primary text-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 text-center" style="direction: rtl">
+          <h1 class="display-3 mb-4">مشخصات کاربر {{ mftuser.username }}</h1>
+          <p class="lead mb-5">
+            اطلاعات و مشخصات کامل کاربر {{ mftuser.username }} را در زیر مشاهده می کنید.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section section-md">
+    <div class="container">
+      <div class="row mb-8">
+        <div class="col-8 mx-auto">
+          {% comment %} <div class="nav-wrapper position-relative mb-2">
+            <ul class="nav nav-pills nav-fill flex-column flex-md-row" id="tabs-manage-data" role="tablist">
+              <li class="nav-item">
+                <a
+                  class="nav-link mb-sm-3 mb-md-0 active"
+                  id="tabs-permissions-tab"
+                  data-bs-toggle="tab"
+                  href="#tabs-permissions"
+                  role="tab"
+                  aria-controls="tabs-permissions"
+                  aria-selected="true"
+                  ><strong>دسترسی ها</strong> <span class="fas fa-folder-open"></span
+                ></a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link mb-sm-3 mb-md-0"
+                  id="tabs-info-tab"
+                  data-bs-toggle="tab"
+                  href="#tabs-info"
+                  role="tab"
+                  aria-controls="tabs-info"
+                  aria-selected="false"
+                  ><strong>مشخصات</strong> <span class="fas fa-address-book"></span
+                ></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="card border-0">
+          <div class="card-body p-0">
+            <div class="tab-content" id="tabcontent">
+              <div class="tab-pane fade" id="tabs-info" role="tabpanel" aria-labelledby="tabs-info-tab"> {% endcomment %}
+                <div class="col-10 mx-auto">
+                  <div class="text-center text-md-center mb-4 mt-4" style="direction: rtl">
+                    {% comment %} <h1 class="mb-0 h3">مشخصات کاربر {{ mftuser.username }}</h1>
+                    <br /> {% endcomment %}
+                    <span class="font-weight-normal"> {% if msg %} {{ msg | safe }} {% endif %} </span>
+                  </div>
+                  <div>
+                    <p id="current-user-id" style="display: none">{{ mftuser.id }}</p>
+                  </div>
+                  <form method="POST" action="" id="mftuser-form">
+                    {% csrf_token %}
+                    {% comment %} <div class="form-group mb-4" style="direction: rtl">
+                      <label for="username">تأیید شده توسط مدیر؟</label>
+                      <div class="input-group" style="direction: ltr">
+                        <span class="input-group-text" id="isconfirmed">
+                          <span class="fas fa-file-signature"></span>
+                        </span>
+                        <input id="id_isconfirmed" class="form-control" type="textarea" readonly="true"
+                          {% if mftuser.is_confirmed %}value="این کاربر توسط مدیر تأیید شده است" style="color: green;"
+                          {% else %}value="این کاربر توسط مدیر تأیید نشده است" style="color: red;"
+                          {% endif %}
+                        />
+                      </div>
+                    </div> {% endcomment %}
+                    <div class="form-group mb-4" style="direction: rtl">
+                      <label for="firstname">نام</label>
+                      <div class="input-group" style="direction: ltr">
+                        <span class="input-group-text" id="firstname"><span class="fas fa-address-book"></span></span>
+                        {{ form.firstname }}
+                      </div>
+                    </div>
+                    <div class="form-group mb-4" style="direction: rtl">
+                      <label for="lastname">نام خانوادگی</label>
+                      <div class="input-group" style="direction: ltr">
+                        <span class="input-group-text" id="lastname"><span class="fas fa-address-book"></span></span>
+                        {{ form.lastname }}
+                      </div>
+                    </div>
+                    <div class="form-group mb-4" style="direction: rtl">
+                      <label for="username">نام کاربری</label>
+                      <div class="input-group" style="direction: ltr">
+                        <span class="input-group-text" id="username"><span class="fas fa-user"></span></span>
+                        {{ form.username }}
+                      </div>
+                    </div>
+                    <div class="form-group mb-4" style="direction: rtl">
+                      <label for="email">آدرس ایمیل</label>
+                      <div class="input-group" style="direction: ltr">
+                        <span class="input-group-text" id="email"><span class="fas fa-envelope"></span></span>
+                        {{ form.email }}
+                      </div>
+                    </div>
+                    <div class="form-group mb-4" style="direction: rtl">
+                      <label for="alias">نام مستعار</label>
+                      <div class="input-group" style="direction: ltr">
+                        <span class="input-group-text" id="alias"><span class="fa fa-at"></span></span>
+                        {{ form.alias }}
+                      </div>
+                    </div>
+                    <div class="form-group mb-4" style="direction: rtl">
+                      <label for="officephone">تلفن دفتر کار</label>
+                      <div class="input-group" style="direction: ltr">
+                        <span class="input-group-text" id="officephone"><span class="fas fa-phone"></span></span>
+                        {{ form.officephone }}
+                      </div>
+                    </div>
+                    <div class="form-group mb-4" style="direction: rtl">
+                      <label for="mobilephone">شماره تلفن همراه</label>
+                      <div class="input-group" style="direction: ltr">
+                        <span class="input-group-text" id="mobilephone"><span class="fas fa-mobile"></span></span>
+                        {{ form.mobilephone }}
+                      </div>
+                    </div>
+                    <div class="form-group mb-4" style="direction: rtl">
+                      <label for="business">سامانه/پروژه</label>
+                      <div class="input-group" style="direction: ltr">
+                        <span class="input-group-text" id="business" bus-id="{{ mftuser.business.all|get_business_ids }}"><span class="fas fa-sitemap"></span></span>
+                        {{ form.business }}
+                      </div>
+                    </div>
+                    <div class="form-group mb-4" style="direction: rtl">
+                      <label for="organization">سازمان/بانک</label>
+                      <div class="input-group" style="direction: ltr">
+                        {{ form.organization }}
+                        <span class="input-group-text" id="organization" org-id={{ mftuser.organization.id }}><span class="fas fa-building"></span></span>
+                      </div>
+                    </div>
+                    {% comment %} <div class="form-group mb-4" style="direction: rtl">
+                      <label for="description">توضیحات</label>
+                      <div class="input-group">
+                        <span class="input-group-text" id="description"><span class="fas fa-landmark"></span></span>
+                        {{ form.description }}
+                      </div>
+                    </div> {% endcomment %}
+                    <br />
+                    <div class="d-grid px-5 py-2">
+                      <button
+                        type="submit"
+                        class="btn btn-tertiary"
+                        {% comment %} {% if not mftuser.is_confirmed %}disabled{% endif %} {% endcomment %}
+                      >بروزرسانی مشخصات</button>
+                    </div>
+                    {% comment %} <div class="d-grid px-5 py-2">
+                      <a href="{% url 'mftuser-delete' mftuser.id %}" style="width: 100%" class="btn btn-danger animate-up-1">حذف کاربر</a>
+                    </div> {% endcomment %}
+                  </form>
+                  <script>
+                    $("#id_firstname").prop("readonly", "readonly");
+                    $("#id_lastname").prop("readonly", "readonly");
+                  </script>
+                </div>
+              {% comment %} </div>
+              <div class="tab-pane fade active show" id="tabs-permissions" role="tabpanel" aria-labelledby="tabs-permissions-tab">
+                {% include "includes/directories-list.html" %}
+              </div>
+            </div>
+          </div> {% endcomment %}
+        </div>
+      </div>
+      {% comment %} {% if access == 'ADMIN' and not confirmed %}
+      <div class="row mb-3">
+        <input
+          type="button"
+          role="confirm-btn"
+          uid="{{ mftuser.id }}"
+          style="width: 50%"
+          class="btn btn-info mx-auto"
+          value="تأیید اطلاعات کاربر"
+        />
+      </div>
+      {% elif access != 'ADMIN' and not confirmed %}
+      <div class="row mb-3">
+        <input type="button" style="width: 50%" class="btn btn-primary mx-auto" value="تبدیل به فرم چارگون" onClick="makeInvoice();" />
+      </div>
+      {% endif %} {% endcomment %}
+      <div class="row mb-3">
+        <a href="{% url 'mftuser-access' mftuser.id %}" style="width: 50%" class="btn btn-warning mx-auto">مشاهده دسترسی های کاربر</a>
+      </div>
+      <div class="row mb-6">
+        <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="goBack();" />
+      </div>
+    </div>
+  </div>
+</main>
+
+<script type="text/javascript">
+  window.onload = function () {
+    var org = document.getElementById("id_organization");
+    var orgParent = document.getElementById("organization");
+    org.value = parseInt(orgParent.getAttribute("org-id"));
+    //var bus = document.getElementById("id_business");
+    //var busParent = document.getElementById("business");
+    //bus.value = parseInt(busParent.getAttribute("bus-id"));
+  };
+
+  $(function () {
+    var bus_ids = $("#business").attr("bus-id");
+    $.each(bus_ids.split(","), function (i, e) {
+      $("#id_business option[value='" + e + "']").prop("selected", true);
+    });
+  });
+
+  function goBack() {
+    var url = "/";
+    window.location = url;
+  }
+
+  function makeInvoice() {
+    var mftuser = document.getElementById("current-user-id");
+    var url = "/invoice/?user=" + mftuser.innerHTML;
+    window.location = url;
+  }
+
+  /*var bus = document.getElementById("id_business");
+  bus.addEventListener("change", function (event) {
+    var busParent = document.getElementById("business");
+    event.currentTarget.value = parseInt(busParent.getAttribute("bus-id"));
+  });*/
+
+  var options = document.querySelectorAll("option");
+  options.forEach((opt) => {
+    opt.setAttribute("style", "direction: rtl");
+    /*if (opt.getAttribute("parent") == "organization") {
+      bic.appendChild(opt);
+    } else if (opt.getAttribute("parent") == "business") {
+      bus.appendChild(opt);
+    }*/
+  });
+
+  var org = document.getElementById("id_organization");
+  org.addEventListener("change", function (event) {
+    var orgParent = document.getElementById("organization");
+    event.currentTarget.value = parseInt(orgParent.getAttribute("org-id"));
+  });
+
+  var alias = document.getElementById("id_alias");
+  alias.addEventListener("change", function (event) {
+    var als = cleanInputValue(event.currentTarget.value, "alias");
+    event.currentTarget.value = als;
+  });
+
+  var phone = document.getElementById("id_officephone");
+  phone.addEventListener("change", function (event) {
+    var ph = cleanInputValue(event.currentTarget.value, "number");
+    event.currentTarget.value = ph;
+  });
+
+  var mobile = document.getElementById("id_mobilephone");
+  mobile.addEventListener("change", function (event) {
+    var mb = cleanInputValue(event.currentTarget.value, "number");
+    event.currentTarget.value = mb;
+  });
+
+  function cleanInputValue(input, type) {
+    if (type == "name") {
+      input = input.replace(/[\u0600-\u06FF]/g, "");
+    } else if (type == "number") {
+      input = input.replace(/[a-z]/g, "");
+      input = input.replace(/[A-Z]/g, "");
+      input = input.replace(/\_/g, "");
+      input = input.replace(/\-/g, "");
+    } else if (type == "alias") {
+      input = input.replace(/[\u0600-\u06FF]/g, "");
+    }
+    if (type != "alias") {
+      input = input.replace(/\_/g, "");
+      input = input.replace(/\-/g, "");
+    }
+    input = input.replace(/\@/g, "");
+    input = input.replace(/\#/g, "");
+    input = input.replace(/\!/g, "");
+    input = input.replace(/\$/g, "");
+    input = input.replace(/\%/g, "");
+    input = input.replace(/\^/g, "");
+    input = input.replace(/\&/g, "");
+    input = input.replace(/\*/g, "");
+    input = input.replace(/\(/g, "");
+    input = input.replace(/\)/g, "");
+    input = input.replace(/\[/g, "");
+    input = input.replace(/\]/g, "");
+    input = input.replace(/\{/g, "");
+    input = input.replace(/\}/g, "");
+    input = input.replace(/\+/g, "");
+    input = input.replace(/\=/g, "");
+    input = input.replace(/\//g, "");
+    input = input.replace(/\\/g, "");
+    input = input.replace(/\|/g, "");
+    input = input.replace(/\~/g, "");
+    input = input.replace(/\'/g, "");
+    input = input.replace(/\`/g, "");
+    input = input.replace(/\"/g, "");
+    input = input.replace(/\,/g, "");
+    input = input.replace(/\./g, "");
+    input = input.replace(/\?/g, "");
+    input = input.replace(/\;/g, "");
+    input = input.replace(/\:/g, "");
+    input = input.replace(/\>/g, "");
+    input = input.replace(/\</g, "");
+    return input;
+  }
+</script>
+{% include "includes/footer.html" %} {% endblock content %}

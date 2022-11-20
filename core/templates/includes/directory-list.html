@@ -1,0 +1,30 @@
+{% load coretags %} {% load static %} {% if elements %} {% for el in elements %}
+<!--prettier-ignore-->
+<li
+  id="treeitem-{{ el.dir.id }}"
+  {% if admin_view %}
+  function="admin-view"
+  {% else %}
+  function="user-view"
+  {% endif %}
+  role="treeitem"
+  aria-expanded="false"
+  indexcode="{{ el.dir.index_code.code }}"
+  absolute-path="{{ el.dir.relative_path }}"
+  parent-id="{{ el.dir.parent }}"
+  current-dir-id="{{ el.dir.id }}"
+  current-dir-name="{{ el.dir.name }}"
+  {% comment %} {% if mftuser %}permission="{{ permissions|item:el.dir.name }}"{% endif %} {% endcomment %}
+>
+  {% if filtered %}
+  <span>{{ el.dir.relative_path }}</span>
+  {% else %}
+  <span>{{ el.dir.name }}</span>
+  {% endif %}
+  <ul id="group-{{ el.dir.id }}" role="group">
+    {% include "includes/directory-list.html" with elements=el.children %}
+  </ul>
+</li>
+{% endfor %} {% else %}
+<p style="width: 200px">No directory found</p>
+{% endif %}

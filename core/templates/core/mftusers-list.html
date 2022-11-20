@@ -1,0 +1,144 @@
+{% extends "layouts/base.html" %} {% block title %} لیست همه کاربران {% endblock %} {% load static %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+{% endblock javascripts %} {% block content %}
+
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <div class="section-header pb-6 bg-primary text-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 text-center" style="direction: rtl">
+          <h1 class="display-3 mb-4">{{ title }}</h1>
+          <p class="lead mb-5">{{ desc }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section section-md">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="mb-3">
+          <h4 class="display-4" style="direction: rtl" for="search">جستجو در بین کاربران</h4>
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              style="text-align: right"
+              id="search-input"
+              placeholder="...چیزی بنویسید"
+              aria-label="Search"
+              aria-describedby="basic-addon"
+            /><span class="input-group-text" id="basic-addon"><span id="search-icon" class="fas fa-search"></span></span>
+          </div>
+        </div>
+      </div>
+      {% if view != 'create' %}
+      <div class="row mb-5">
+        <div class="mb-3">
+          <h4 class="display-5" style="direction: rtl">لطفاً نام کاربری را جهت تعیین/تغییر سطح دسترسی انتخاب نمایید.</h4>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% if view == 'create' %}
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-4 mx-auto">
+          <div class="d-grid mb-3">
+            <a href="{% url 'mftuser-create' %}" class="btn btn-info">ایجاد کاربر جدید</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    <div class="container">
+      <div id="replaceable-content" class="row mb-5">{% include "includes/users-list.html" %}</div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    const search_input = $("#search-input");
+    const search_icon = $("#search-icon");
+    const contents_list = $("#replaceable-content");
+    const endpoint = window.location.pathname;
+    const delay_by_in_ms = 700;
+    var scheduled_function = false;
+
+    var ajax_call = function (endpoint, request_parameters) {
+      $.getJSON(endpoint, request_parameters).done((response) => {
+        // fade out the users_list, then:
+        contents_list
+          .fadeTo("slow", 0)
+          .promise()
+          .then(() => {
+            // replace the HTML contents
+            contents_list.html(response["html_from_view"]);
+            // fade-in the div with new contents
+            contents_list.fadeTo("slow", 1);
+            // stop animating search icon
+            search_icon.removeClass("blink");
+          });
+      });
+    };
+
+    search_input.on("keyup", function () {
+      const request_parameters = {
+        q: $(this).val(), // value of search_input: the HTML element with ID search-input
+      };
+
+      // start animating the search icon with the CSS class
+      search_icon.addClass("blink");
+
+      // if scheduled_function is NOT false, cancel the execution of the function
+      if (scheduled_function) {
+        clearTimeout(scheduled_function);
+      }
+
+      // setTimeout returns the ID of the function to be executed
+      scheduled_function = setTimeout(ajax_call, delay_by_in_ms, endpoint, request_parameters);
+    });
+
+    $(function () {
+      $("input[role='make-invoice-btn']").click(function () {
+        var uid = $(this).attr("uid");
+        var url = "/invoice/?user=" + uid;
+        window.location = url;
+      });
+    });
+  </script>
+  {% if access == 'ADMIN' %}
+  <script type="text/javascript">
+    $(function () {
+      $("input[role='mftuser-confirm-btn']").click(function () {
+        var uid = $(this).attr("uid");
+        var csrf = "{{ csrf_token }}";
+        $.post(
+          "/entities/" + uid + "/confirm/",
+          {
+            csrfmiddlewaretoken: csrf,
+            entity: "mftuser",
+          },
+          function (response) {
+            if (response.result == "success") {
+              //document.getElementById(response.confirmed).remove();
+              alert("کاربر با موفقیت تأیید شد.");
+              location.reload();
+            } else if (response.result == "error") {
+              console.log(response.result);
+            }
+          }
+        );
+      });
+    });
+  </script>
+  {% endif %}
+</main>
+
+{% include "includes/footer.html" %} {% endblock content %}

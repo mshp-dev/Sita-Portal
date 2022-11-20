@@ -1,0 +1,88 @@
+{% extends "layouts/base-fullscreen.html" %} {% block title %} ورود {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <!-- Section -->
+  <section
+    class="min-vh-100 d-flex align-items-center overlay-soft-dark"
+    style="background-image: url('/static/assets/img/bg.png'); background-repeat: no-repeat; background-size: 100% 100%"
+  >
+    {% comment %} data-background="/static/assets/img/pages/form-image-1.jpg" {% endcomment %}
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 d-flex align-items-center justify-content-center">
+          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-600">
+            <div class="text-center text-md-center mb-4 mt-md-0">
+              <h1 class="mb-0 h3">پرتال سامانه سیتا</h1>
+              <br />
+              <span class="font-weight-normal"> {% if msg %} {{ msg | safe }} {% else %} نام کاربری و کلمه عبور خود را وارد نمائید {% endif %} </span>
+            </div>
+
+            <form method="post" action="" class="mt-4">
+              {% csrf_token %}
+
+              <!-- Form -->
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="email">نام کاربری</label>
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="basic-addon1"><span class="fas fa-user"></span></span>
+                  {{ form.username }}
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="password">کلمه عبور</label>
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="basic-addon2"><span class="fas fa-unlock-alt"></span></span>
+                  {{ form.password }}
+                </div>
+              </div>
+              <div class="form-group mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="checkbox" value="" id="remember" />
+                    <label class="form-check-label mb-0" for="remember"> مرا به خاطر بسپار </label>
+                  </div>
+                  <div>
+                    <a href="{% url 'register' %}" class="text-right text-danger"><strong>ثبت نام</strong></a>
+                  </div>
+                </div>
+              </div>
+              <div class="d-grid">
+                <button type="submit" name="login" class="btn btn-primary">ورود</button>
+              </div>
+            </form>
+            <!-- End of Form -->
+
+            <br />
+
+            <div class="d-flex justify-content-center align-items-center mt-4">
+              <div class="col-10 text-center text-info" style="direction: rtl">
+                <a href="/media/documents/Sita2-Manual.rar" class="fw-normal font-small mb-0"><strong>مستندات سامانه سیتا 2</strong></a
+                ><br />
+                <a href="/media/documents/Sita2OPR.mp4" class="fw-normal font-small mb-0"
+                  ><strong>ویدئو جلسه نحوه مهاجرت به سیتا 2 - گروه عملیات</strong></a
+                >
+              </div>
+            </div>
+            <div class="d-flex justify-content-center align-items-center mt-4">
+              <div class="col-10 text-center" style="direction: rtl">
+                <p style="font-size: 0.5rem" class="fw-normal mb-0">
+                  کلیه حقوق متعلق به &copy; شرکت خدمات انفورماتیک گروه عملیات سامانه های اطلاعاتی و نظارتی می باشد
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

@@ -1,0 +1,274 @@
+{% load coretags %}
+<!--Users in mftusers-list or manage-view-->
+{% if users %} {% for user in users %}
+<div class="col-10 mx-auto">
+  <div class="accordion mb-2" id="{{ user.username|remove_dot }}">
+    <!--User Node-->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#{{ user.username|remove_dot }}{{ user.id }}"
+          aria-expanded="false"
+          aria-controls="{{ user.username|remove_dot }}{{ user.id }}"
+        >
+          <span class={% if user.is_confirmed %}"fas fa-user-check text-success"{% else %}"fas fa-user me-1"{% endif %}></span>
+          <h3 class="display-5 ms-2">
+            {{ user.username }} {% if user.alias != '' %}({{ user.alias }}) {% endif %}- {{ user.organization }}
+            {% comment %} - {{ user.business.all|get_businesses }} {% endcomment %}
+          </h3>
+        </button>
+      </h2>
+      <div
+        id="{{ user.username|remove_dot }}{{ user.id }}"
+        class="accordion-collapse collapse"
+        aria-labelledby="headingOne"
+        data-bs-parent="#{{ user.username|remove_dot }}"
+      >
+        <div class="accordion-body">
+          <div class="container">
+            <div class="row">
+              {% if admin_view %}
+              <div class="row mt-5 mb-5">
+                {% if differences|item:user.username %} {% for diff in differences|item:user.username %}
+                <span
+                  >{{ diff.field.0 }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <span class="display-6 text-info"><strong> {{ diff.field.1 }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong></span> to
+                  <span class="display-6 text-warning"
+                    ><strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ diff.field.2 }}</strong></span
+                  ></span
+                >
+                {% endfor %}{% else %}
+                <span
+                  >Username: <span class="display-6 text-info"><strong> {{ user.username }}</strong></span></span
+                >
+                <span
+                  >Alias: <span class="display-6 text-info"><strong> {{ user.alias }}</strong></span></span
+                >
+                <span
+                  >Email: <span class="display-6 text-info"><strong> {{ user.email }}</strong></span></span
+                >
+                <span
+                  >Firstname: <span class="display-6 text-info"><strong> {{ user.firstname }}</strong></span></span
+                >
+                <span
+                  >Lastname: <span class="display-6 text-info"><strong> {{ user.lastname }}</strong></span></span
+                >
+                <span
+                  >Organization: <span class="display-6 text-info"><strong> {{ user.organization }}</strong></span></span
+                >
+                <span
+                  >Business: <span class="display-6 text-info"><strong> {{ user.business.all|get_businesses }}</strong></span></span
+                >
+                <span
+                  >MobilePhone: <span class="display-6 text-info"><strong> {{ user.mobilephone }}</strong></span></span
+                >
+                <span
+                  >OfficePhone: <span class="display-6 text-info"><strong> {{ user.officephone }}</strong></span></span
+                >
+                <span
+                  >Description: <span class="display-6 text-info"><strong> {{ user.description }}</strong></span></span
+                >
+                {% endif %}
+              </div>
+              <div class="col">
+                <a href="{% url 'mftuser-delete' user.id %}" style="width: 100%" class="btn btn-danger animate-up-1">حذف کاربر</a>
+              </div>
+              <div class="col">
+                <input
+                  type="button"
+                  role="mftuser-dissmiss-changes-btn"
+                  uid="{{ user.id }}"
+                  style="width: 100%"
+                  class="btn btn-warning animate-up-1"
+                  value="عدم تأیید"
+                />
+              </div>
+              <div class="col">
+                <input
+                  type="button"
+                  role="mftuser-confirm-btn"
+                  uid="{{ user.id }}"
+                  style="width: 100%"
+                  class="btn btn-tertiary animate-up-1"
+                  value="تأیید کاربر"
+                />
+              </div>
+              {% else %}
+              {% if view == 'create' %}
+              <div class="col">
+                <a href="{% url 'mftuser-details' user.id %}" style="width: 100%" class="btn btn-success animate-up-1">مشاهده جزئیات</a>
+              </div>
+              {% else %}
+              <div class="col">
+                <a href="{% url 'mftuser-access' user.id %}" style="width: 105%" class="btn btn-warning animate-up-1">مشاهده دسترسی ها</a>
+              </div>
+              {% endif %}
+              {% endif %} {% comment %} {% if admin_view and not user.is_confirmed %}
+              <div class="col">
+                <input
+                  type="button"
+                  role="mftuser-confirm-btn"
+                  uid="{{ user.id }}"
+                  style="width: 100%"
+                  class="btn btn-tertiary animate-up-1"
+                  value="تأیید کاربر"
+                />
+              </div>
+              {% if user.is_confirmed and not admin_view %}
+              <div class="col">
+                <input
+                  type="button"
+                  role="make-invoice-btn"
+                  uid="{{ user.id }}"
+                  style="width: 100%"
+                  class="btn btn-tertiary animate-up-1"
+                  value="تبدیل به فرم چارگون"
+                />
+              </div>
+              {% endif %}{% endcomment %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--End of UserNode-->
+  </div>
+</div>
+{% endfor %} {% endif %}
+<!--Users in manage-view-->
+{% if deleted %} {% for du in deleted %}
+<div class="col-10 mx-auto">
+  <div class="accordion mb-2" id="{{ du.username|remove_dot }}">
+    <!--User Node-->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#{{ du.username|remove_dot }}{{ du.id }}"
+          aria-expanded="false"
+          aria-controls="{{ du.username|remove_dot }}{{ du.id }}"
+        >
+          <span class="fas fa-user-slash me-1" style="color: red"></span>
+          <h3 class="display-5 ms-2">
+            {{ du.username }} {% if du.alias != '' %}({{ du.alias }}) {% endif %}- {{ du.organization }} - {{ du.business.all|get_businesses }}
+          </h3>
+        </button>
+      </h2>
+      <div
+        id="{{ du.username|remove_dot }}{{ du.id }}"
+        class="accordion-collapse collapse"
+        aria-labelledby="headingOne"
+        data-bs-parent="#{{ du.username|remove_dot }}"
+      >
+        <div class="accordion-body">
+          <ul class="list-unstyled mb-4"></ul>
+          <div class="container">
+            <div class="row">
+              <div class="col">
+                <input
+                  type="button"
+                  role="mftuser-restore-or-delete-btn"
+                  uid="{{ du.id }}"
+                  action="purge"
+                  style="width: 100%"
+                  class="btn btn-danger animate-up-1"
+                  value="حذف دائمی کاربر"
+                />
+              </div>
+              <div class="col">
+                <input
+                  type="button"
+                  role="mftuser-restore-or-delete-btn"
+                  uid="{{ du.id }}"
+                  action="restore"
+                  style="width: 100%"
+                  class="btn btn-success animate-up-1"
+                  value="بازگرداندن"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--End of UserNode-->
+  </div>
+</div>
+{% endfor %} {% endif %}
+<!--Users in export-view-->
+{% if exported %} {% for eu in exported %}
+<div class="col-10 mx-auto">
+  <div class="accordion mb-2" id="{{ eu.mftuser.username|remove_dot }}" role="mftuser" eid="{{ eu.id }}">
+    <!--User Node-->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#{{ eu.mftuser.username|remove_dot }}{{ eu.id }}"
+          aria-expanded="false"
+          aria-controls="{{ eu.mftuser.username|remove_dot }}{{ eu.id }}"
+        >
+          <span class="fas fa-user-check me-1"></span>
+          <h3 class="display-5 ms-2">
+            <!--prettier-ignore-->
+            {{ eu.mftuser.username }} {% if eu.mftuser.alias != '' %}({{ eu.mftuser.alias }}) {% endif %}- {{ eu.mftuser.organization }} - {{ eu.mftuser.business.all|get_businesses }} {% if eu.number_of_exports == 0 %}<span
+              class="text-success"
+              >(NEW)</span
+            >{% endif %}
+          </h3>
+        </button>
+      </h2>
+      <div
+        id="{{ eu.mftuser.username|remove_dot }}{{ eu.id }}"
+        class="accordion-collapse collapse"
+        aria-labelledby="headingOne"
+        data-bs-parent="#{{ eu.mftuser.username|remove_dot }}"
+      >
+        <div class="accordion-body">
+          <ul class="list-unstyled mb-4"></ul>
+          <div class="container">
+            <div class="row">
+              <div class="col">
+                {% comment %}
+                <input
+                  type="button"
+                  role="download-exported-btn"
+                  eid="{{ eu.id }}"
+                  link="{{ eu.export.url }}"
+                  style="width: 100%"
+                  class="btn btn-warning animate-up-1"
+                  value="دانلود به صورت XML"
+                />
+                {% endcomment %}
+                <a
+                  href="{% url 'download-view' eu.id %}"
+                  role="download-exported-btn"
+                  eid="{{ eu.id }}"
+                  style="width: 100%"
+                  class="btn btn-warning animate-up-1"
+                  >XML دانلود به صورت</a
+                >
+              </div>
+              <div class="col">
+                <a href="{% url 'mftuser-details' eu.mftuser.id %}" style="width: 100%" class="btn btn-success animate-up-1">مشاهده جزئیات</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--End of UserNode-->
+  </div>
+</div>
+{% endfor %} {% endif %}
+<!--No Users Found-->
+{% if not users and not deleted and not exported %}
+<h4>No mft user found</h4>
+{% endif %}

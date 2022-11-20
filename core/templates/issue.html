@@ -1,0 +1,45 @@
+{% extends "layouts/base-fullscreen.html" %} {% block title %} ورود {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <!-- Section -->
+  <section
+    class="min-vh-100 d-flex align-items-center overlay-soft-dark"
+    style="background-image: url('/static/assets/img/bg.png'); background-repeat: no-repeat; background-size: 100% 100%"
+  >
+    {% comment %} data-background="/static/assets/img/pages/form-image-1.jpg" {% endcomment %}
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 d-flex align-items-center justify-content-center">
+          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-600">
+            <div class="text-center text-md-center mb-5 mt-md-0">
+              <h1 class="mb-0 h3">پرتال سامانه سیتا</h1>
+            </div>
+
+            <div class="text-center text-md-center">
+              <h1 style="direction: rtl" class="display-4 mb-4 text-info">با عرض پوزش در حال رفع مشکل پیش آمده هستیم!</h1>
+            </div>
+
+            <br />
+
+            <div class="d-flex justify-content-center align-items-center mt-4">
+              <div class="col-10 text-center" style="direction: rtl">
+                <p class="fw-normal font-small mb-0">کلیه حقوق متعلق به &copy; شرکت خدمات انفورماتیک</p>
+                <p class="fw-normal font-small mb-0">گروه عملیات سامانه های اطلاعاتی و نظارتی می باشد</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

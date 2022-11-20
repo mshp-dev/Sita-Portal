@@ -1,0 +1,147 @@
+{% extends "layouts/base.html" %} {% block title %} افزودن اطلاعات {% endblock %} {% load static %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %} {% endblock javascripts %}
+
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <div class="section-header pb-6 bg-primary text-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-10 text-center" style="direction: rtl">
+          <h1 class="display-3 mb-4">افزودن سازمان/پروژه</h1>
+          <p class="lead">برای افزودن سازمان یا پروژه از فرم های زیر اقدام نمائید.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section section-md">
+    <div class="container">
+      <div class="row mb-5 d-flex align-items-center justify-content-center">
+        <div class="col-6">
+          <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
+            <h1 class="mb-0 h3">{{ page_title }}</h1>
+            <br />
+            <span class="font-weight-normal"> {% if msg %} {{ msg | safe }} {% endif %} </span>
+          </div>
+          <form class="mt-5" method="POST" action="" id="add-data-form">
+            {% csrf_token %}
+            <div class="form-group mb-4" style="direction: rtl">
+              <label for="code"
+                >کد سامانه/پروژه <sup class="text-danger"><strong>*</strong></sup></label
+              >
+              <div class="input-group" style="direction: ltr">
+                <span class="input-group-text" id="code"><span class="fas fa-sitemap"></span></span>
+                {{ form.code }}
+              </div>
+            </div>
+            <div class="form-group mb-4" style="direction: rtl">
+              <label for="description"
+                >نام کامل پروژه/سامانه <sup class="text-danger"><strong>*</strong></sup></label
+              >
+              <div class="input-group" style="direction: ltr">
+                <span class="input-group-text" id="description"><span class="fas fa-building"></span></span>
+                {{ form.description }}
+              </div>
+            </div>
+            <div class="form-group mb-4" style="direction: rtl">
+              <label for="address"
+                >آدرس فیزیکی <sup class="text-danger"><strong>*</strong></sup></label
+              >
+              <div class="input-group" style="direction: ltr">
+                <span class="input-group-text" id="address"><span class="fas fa-address-book"></span></span>
+                {{ form.address }}
+              </div>
+            </div>
+            <br />
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">افزودن</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="row mt-8 mb-5">
+        <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="goBack();" />
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  function goBack() {
+    var url = "/";
+    window.location = url;
+  }
+
+  var code = document.getElementById("id_code");
+  code.addEventListener("change", function (event) {
+    var c = cleanInputValue(event.currentTarget.value, "code");
+    event.currentTarget.value = c;
+  });
+
+  var desc = document.getElementById("id_description");
+  desc.addEventListener("change", function (event) {
+    var d = cleanInputValue(event.currentTarget.value, "desc");
+    event.currentTarget.value = d;
+  });
+
+  var address = document.getElementById("id_address");
+  address.addEventListener("change", function (event) {
+    var addr = cleanInputValue(event.currentTarget.value, "addr");
+    event.currentTarget.value = addr;
+  });
+
+  function cleanInputValue(input, type) {
+    /*else if (type == "desc") {
+      input = input.replace(/[a-z]/g, "");
+      input = input.replace(/[A-Z]/g, "");
+    } */
+    if (type == "code") {
+      input = input.replace(/[\u0600-\u06FF]/g, "");
+    } else if (type == "addr") {
+      input = input.replace(/[\u0600-\u06FF]/g, "");
+    }
+    if (type != "addr") {
+      input = input.replace(/\//g, "");
+    }
+    input = input.replace(/\_/g, "");
+    input = input.replace(/\-/g, "");
+    input = input.replace(/\@/g, "");
+    input = input.replace(/\#/g, "");
+    input = input.replace(/\!/g, "");
+    input = input.replace(/\$/g, "");
+    input = input.replace(/\%/g, "");
+    input = input.replace(/\^/g, "");
+    input = input.replace(/\&/g, "");
+    input = input.replace(/\*/g, "");
+    //input = input.replace(/\(/g, "");
+    //input = input.replace(/\)/g, "");
+    input = input.replace(/\[/g, "");
+    input = input.replace(/\]/g, "");
+    input = input.replace(/\{/g, "");
+    input = input.replace(/\}/g, "");
+    input = input.replace(/\+/g, "");
+    input = input.replace(/\=/g, "");
+    input = input.replace(/\\/g, "");
+    input = input.replace(/\|/g, "");
+    input = input.replace(/\~/g, "");
+    input = input.replace(/\'/g, "");
+    input = input.replace(/\`/g, "");
+    input = input.replace(/\"/g, "");
+    input = input.replace(/\,/g, "");
+    input = input.replace(/\./g, "");
+    input = input.replace(/\?/g, "");
+    input = input.replace(/\;/g, "");
+    input = input.replace(/\:/g, "");
+    input = input.replace(/\>/g, "");
+    input = input.replace(/\</g, "");
+    return input;
+  }
+</script>
+
+{% include "includes/footer.html" %} {% endblock content %}

@@ -1,0 +1,41 @@
+<!-- prettier-ignore -->
+{% extends "layouts/base-fullscreen.html" %} {% block title %} خطای 401 {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <!-- Section -->
+  <section
+    class="min-vh-100 d-flex align-items-center overlay-soft-dark"
+    style="background-image: url('/static/assets/img/pages/form-image.jpg'); background-repeat: no-repeat; background-size: 100% 100%"
+  >
+    {% comment %} data-background="/static/assets/img/pages/form-image-1.jpg" {% endcomment %}
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 d-flex align-items-center justify-content-center">
+          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-500">
+            <div class="text-center text-md-center mb-4 mt-md-0">
+              <h1 class="mb-0 h3">خطای 401</h1>
+              <br />
+              <p>!شما مجاز به مشاهده این صفحه نیستید</p>
+            </div>
+
+            <div class="d-flex justify-content-center align-items-center mt-4">
+              <span class="fw-normal">
+                <a href="/" class="fw-bold text-underline">Home</a> - Contact <a href="#" class="fw-bold text-underline">Support</a>.
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

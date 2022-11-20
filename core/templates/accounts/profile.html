@@ -1,0 +1,309 @@
+{% extends "layouts/base.html" %} {% block title %} پروفایل کاربری {% endblock %} {% load static %} {% load coretags %}
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" />
+{% endblock stylesheets %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+{% endblock javascripts %} {% block content %}
+
+<!-- prettier-ignore -->
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <div class="section-header pb-6 bg-primary text-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 text-center" style="direction: rtl">
+          <h1 class="display-3 mb-4">پروفایل {{ username }}</h1>
+          <p class="lead mb-5">
+            اطلاعات و مشخصات کاربری خود را در زیر مشاهده می کنید.<br />
+            در بخش پروژه/سامانه ها می توانید دسترسی به پروژه های دیگر را به کاربری خود اضافه کنید.
+          </p>
+          <p class="lead mb-5">
+            در صورت تغییر در مشخصات {% if access != 'CUSTOMER' %}و یا لیست پروژه ها{% endif %}، کاربری شما <strong class="text-danger">غیرفعال</strong> شده و نیاز به <strong class="text-success">فعالسازی</strong> خواهید داشت.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section section-md">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 d-flex align-items-center justify-content-center">
+          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-800">
+            <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
+              <h1 class="mb-0 h3">اطلاعات کاربر</h1>
+              <br />
+              <span class="font-weight-normal">
+                {% if error %}{% if profile_msg %}
+                {{ profile_msg | safe }}
+                {% endif %}{% else %}{% if profile_msg %}
+                <script type="text/javascript">
+                  var msg = "{{ profile_msg }}";
+                  alert(msg);
+                  window.location = "/logout/";
+                </script>
+                {% endif %}{% endif %}
+              </span>
+            </div>
+            <form class="mt-5" method="POST" action="" id="profile-form">
+              {% csrf_token %}
+              <input type="hidden" name="form-type" value="profile-form">
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="firstname"
+                  >نام <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  {{ profile_form.firstname }}
+                  <span class="input-group-text" id="firstname"><span class="fas fa-address-book"></span></span>
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="lastname"
+                  >نام خانوادگی <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  {{ profile_form.lastname }}
+                  <span class="input-group-text" id="lastname"><span class="fas fa-address-book"></span></span>
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="username"
+                  >نام کاربری <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  {{ profile_form.username }}
+                  <span class="input-group-text" id="username"><span class="fas fa-user"></span></span>
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="email"
+                  >آدرس ایمیل <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  {{ profile_form.email }}
+                  <span class="input-group-text" id="email"><span class="fas fa-envelope"></span></span>
+                </div>
+              </div>
+              {% comment %} <div class="form-group mb-4" style="direction: rtl">
+                <label for="password"
+                  >کلمه عبور <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="basic-addon2"><span class="fas fa-unlock-alt"></span></span>
+                  {{ profile_form.password }}
+                </div>
+              </div> {% endcomment %}
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="officephone"
+                  >تلفن دفتر کار <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  {{ profile_form.officephone }}
+                  <span class="input-group-text" id="officephone"><span class="fas fa-phone"></span></span>
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="mobilephone"
+                  >شماره تلفن همراه <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  {{ profile_form.mobilephone }}
+                  <span class="input-group-text" id="mobilephone"><span class="fas fa-mobile"></span></span>
+                </div>
+              </div>
+              {% comment %} <div class="form-group mb-4" style="direction: rtl">
+                <label for="business"
+                  >سامانه/پروژه های تحت اختیار <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="business"><span class="fas fa-sitemap"></span></span>
+                  {{ profile_form.business }}
+                </div>
+              </div> {% endcomment %}
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="department"
+                  >گروه/دپارتمان</label
+                >
+                <div class="input-group" style="direction: ltr">
+                  {{ profile_form.department }}
+                  <span class="input-group-text" id="department"><span class="fas fa-building"></span></span>
+                </div>
+              </div>
+              <br />
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary">بروزرسانی مشخصات</button>
+              </div>
+              {% comment %} <div class="d-grid mt-3">
+                <input type="button" class="btn btn-success" value="بازگشت" onClick="goBack();" />
+              </div> {% endcomment %}
+            </form>
+          </div>
+        </div>
+      </div>
+      {% if access != 'CUSTOMER' %}
+      <div class="row justify-content-center mt-5">
+        <div class="col-12 d-flex align-items-center justify-content-center">
+          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-800">
+            <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
+              <h1 class="mb-0 h3">پروژه/سامانه ها</h1>
+              <br />
+              <span class="font-weight-normal">
+                {% if error %}{% if bus_msg %}
+                {{ bus_msg | safe }}
+                {% endif %}{% else %}{% if bus_msg %}
+                <script type="text/javascript">
+                  var msg = "{{ bus_msg }}";
+                  alert(msg);
+                  window.location = "/logout/";
+                </script>
+                {% endif %}{% endif %}
+              </span>
+            </div>
+            <form class="mt-5" method="POST" action="" id="business-form">
+              {% csrf_token %}
+              <input type="hidden" name="form-type" value="business-form">
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="business"
+                  >سامانه/پروژه هایی که سرویس می دهید <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="owned-business" o-bus-id="{{ owned_business|get_business_ids }}"><span class="fas fa-sitemap"></span></span>
+                  {{ business_form.owned_business }}
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="business"
+                  >سامانه/پروژه ای که سرویس می گیرید</label
+                >
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="used-business" u-bus-id="{{ used_business|get_business_ids }}"><span class="fas fa-sitemap"></span></span>
+                  {{ business_form.used_business }}
+                </div>
+              </div>
+              <br />
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary">بروزرسانی پروژه/سامانه ها</button>
+              </div>
+              {% comment %} <div class="d-grid mt-3">
+                <input type="button" class="btn btn-success" value="بازگشت" onClick="goBack();" />
+              </div> {% endcomment %}
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    <div class="container mt-8">
+      <div class="row mb-6">
+        <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="goBack();" />
+      </div>
+    </div>
+  </div>
+</main>
+
+<script type="text/javascript">
+  function goBack() {
+    var url = "/";
+    window.location = url;
+  }
+
+  $(function () {
+    var o_bus_ids = $("#owned-business").attr("o-bus-id");
+    $.each(o_bus_ids.split(","), function (i, e) {
+      $("#id_owned_business option[value='" + e + "']").prop("selected", true);
+    });
+    var u_bus_ids = $("#used-business").attr("u-bus-id");
+    $.each(u_bus_ids.split(","), function (i, e) {
+      $("#id_used_business option[value='" + e + "']").prop("selected", true);
+    });
+  });
+
+  var username = document.getElementById("id_username");
+  username.addEventListener("change", function (event) {
+    var uname = cleanInputValue(event.currentTarget.value, "username");
+    event.currentTarget.value = uname;
+  });
+
+  var email = document.getElementById("id_email");
+  email.addEventListener("change", function (event) {
+    var mail = cleanInputValue(event.currentTarget.value, "email");
+    event.currentTarget.value = mail;
+  });
+
+  var firstname = document.getElementById("id_firstname");
+  firstname.addEventListener("change", function (event) {
+    var first = cleanInputValue(event.currentTarget.value, "name");
+    event.currentTarget.value = first;
+  });
+
+  var lastname = document.getElementById("id_lastname");
+  lastname.addEventListener("change", function (event) {
+    var last = cleanInputValue(event.currentTarget.value, "name");
+    event.currentTarget.value = last;
+  });
+
+  var phone = document.getElementById("id_officephone");
+  phone.addEventListener("change", function (event) {
+    var ph = cleanInputValue(event.currentTarget.value, "number");
+    event.currentTarget.value = ph;
+  });
+
+  var mobile = document.getElementById("id_mobilephone");
+  mobile.addEventListener("change", function (event) {
+    var mb = cleanInputValue(event.currentTarget.value, "number");
+    event.currentTarget.value = mb;
+  });
+
+  function cleanInputValue(input, type) {
+    if (type == "number") {
+      input = input.replace(/[a-z]/g, "");
+      input = input.replace(/[A-Z]/g, "");
+      input = input.replace(/\_/g, "");
+      input = input.replace(/\s/g, "");
+      input = input.replace(/[\u0600-\u06FF]/g, "");
+    } else if (type == "email" || type == "username") {
+      input = input.replace(/\s/g, "");
+      input = input.replace(/[\u0600-\u06FF]/g, "");
+    }
+    if (type != "email") {
+      input = input.replace(/\@/g, "");
+      input = input.replace(/\./g, "");
+    }
+    input = input.replace(/\-/g, "");
+    input = input.replace(/\#/g, "");
+    input = input.replace(/\!/g, "");
+    input = input.replace(/\$/g, "");
+    input = input.replace(/\%/g, "");
+    input = input.replace(/\^/g, "");
+    input = input.replace(/\&/g, "");
+    input = input.replace(/\*/g, "");
+    input = input.replace(/\(/g, "");
+    input = input.replace(/\)/g, "");
+    input = input.replace(/\[/g, "");
+    input = input.replace(/\]/g, "");
+    input = input.replace(/\{/g, "");
+    input = input.replace(/\}/g, "");
+    input = input.replace(/\+/g, "");
+    input = input.replace(/\=/g, "");
+    input = input.replace(/\//g, "");
+    input = input.replace(/\\/g, "");
+    input = input.replace(/\|/g, "");
+    input = input.replace(/\~/g, "");
+    input = input.replace(/\'/g, "");
+    input = input.replace(/\`/g, "");
+    input = input.replace(/\"/g, "");
+    input = input.replace(/\,/g, "");
+    input = input.replace(/\?/g, "");
+    input = input.replace(/\;/g, "");
+    input = input.replace(/\:/g, "");
+    input = input.replace(/\>/g, "");
+    input = input.replace(/\</g, "");
+    return input;
+  }
+</script>
+{% include "includes/footer.html" %} {% endblock content %}

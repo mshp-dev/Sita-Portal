@@ -1,0 +1,121 @@
+<footer class="footer pt-6 pb-5 bg-dark text-white" style="direction: rtl">
+  <div class="container">
+    <div class="row">
+      <div class="text-center">
+        <img class="navbar-brand-dark mb-4" height="200" src="/static/assets/img/isc-logo2.svg" alt="Logo light" />
+        {% comment %}
+        <p style="width: 85%">
+          این وبسایت در گروه عملیات سامانه های اطلاعاتی و نظارتی، مدیریت عملیات 3، معاونت عملیات شرکت خدمات انفورماتیک توسعه داده شده است.
+        </p>
+        <ul class="social-buttons mb-5 mb-lg-0">
+          <li>
+            <a href="https://isc.co.ir" aria-label="twitter social link" class="icon-white me-2">
+              <span class="fab fa-twitter"></span>
+            </a>
+          </li>
+          <li>
+            <a href="https://isc.co.ir" class="icon-white me-2" aria-label="facebook social link">
+              <span class="fab fa-facebook"></span>
+            </a>
+          </li>
+          <li>
+            <a href="https://isc.co.ir" aria-label="github social link" class="icon-white me-2">
+              <span class="fab fa-github"></span>
+            </a>
+          </li>
+          <li>
+            <a href="https://isc.co.ir" class="icon-white" aria-label="dribbble social link">
+              <span class="fab fa-dribbble"></span>
+            </a>
+          </li>
+        </ul>
+        {% endcomment %}
+      </div>
+      {% comment %}
+      <div class="col-md-3">
+        <span class="h5">سایر</span>
+        <ul class="footer-links mt-2">
+          <li>
+            <a href="{% url 'register' %}">ثبت نام</a>
+          </li>
+          <li>
+            <a href="{% url 'change-password' %}">تغییر کلمه عبور</a>
+          </li>
+          <li>
+            <a href="#">درباره ما</a>
+          </li>
+          <li>
+            <a href="#">ارتباط با ما</a>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-3">
+        <span class="h5">رفتن به</span>
+        <ul class="footer-links mt-2">
+          {% if access != 'VIEWER' %}
+          <li>
+            <a target="_blank" href="{% url 'home' %}">صفحه اصلی</a>
+          </li>
+          <li>
+            <a target="_blank" href="{% url 'mftuser-create' %}">ایجاد کاربر</a>
+          </li>
+          <li>
+            <a target="_blank" href="{% url 'home' %}">ایجاد دایرکتوری</a>
+          </li>
+          {% endif %}
+          <li>
+            <a target="_blank" href="{% url 'mftusers-list' %}">لیست همه کاربران</a>
+          </li>
+          <li>
+            <a target="_blank" href="{% url 'directories-list' %}">لیست همه دایرکتوری ها</a>
+          </li>
+        </ul>
+      </div>
+      <div class="col-12 col-md-4 mb-5 mb-lg-0">
+        <span class="h5">اشتراک</span>
+        <p class="text-muted font-small mt-2">به لیست ایمیل ما بپیوندید. ما به ندرت می نویسیم, اما بهترین محتوا را تولید می کنیم.</p>
+        <form action="#">
+          <div class="form-row mb-2">
+            <div class="col-12">
+              <label class="h6 fw-normal text-muted d-none" for="exampleInputEmail3">Email address</label>
+              <input
+                type="email"
+                class="form-control mb-2"
+                placeholder="example@company.com"
+                name="email"
+                aria-label="Subscribe form"
+                id="exampleInputEmail3"
+                required
+              />
+            </div>
+            <div class="col-12 d-grid">
+              <button type="submit" class="btn btn-tertiary" data-loading-text="Sending">
+                <span>اشتراک</span>
+              </button>
+            </div>
+          </div>
+        </form>
+        <p class="text-muted font-small m-0">
+          ما هرگز اطلاعات شخصی شما را به اشتراک نخواهیم گذاشت، مشاهده نمودن
+          <a class="text-white" href="#">سیاست حریم شخصی</a>
+        </p>
+      </div>
+      {% endcomment %}
+    </div>
+    <br />
+    <div class="row">
+      <div class="col mb-md-0">
+        {% comment %}
+        <a href="https://isc.co.ir" target="_blank" class="d-flex justify-content-center mb-3">
+          <img src="/static/assets/img/isc-logo.svg" height="180" class="me-2" alt="ISC Logo" />
+        </a>
+        <p class="text-white text-center fw-bold footer-logo-text m-0">شرکت خدمات انفورماتیک</p>
+        <br /><br />
+        {% endcomment %}
+        <div class="d-flex text-center justify-content-center align-items-center" role="contentinfo">
+          <p class="fw-normal font-small mb-0">کلیه حقوق متعلق به &copy; شرکت خدمات انفورماتیک گروه عملیات سامانه های اطلاعاتی و نظارتی می باشد.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
