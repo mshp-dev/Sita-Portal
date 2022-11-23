@@ -3,16 +3,23 @@ from django.utils import timezone
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User
 
-from core.models import IscUser, MftUser, Directory, Permission, BankIdentifierCode
+from core.models import IscUser, BaseCoding
 
 from datetime import datetime as dt
 import random
 
+
+class InvoiceType(BaseCoding):
+    code = models.CharField(max_length=20, blank=False, unique=True, default='DEFAULT')
+
+
 class Invoice(models.Model):
-    id         = models.AutoField(primary_key=True)
-    mftuser    = models.IntegerField(blank=False)
-    created_by = models.ForeignKey(IscUser, blank=False, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(default=timezone.now)
+    id            = models.AutoField(primary_key=True)
+    mftuser       = models.IntegerField(blank=False)
+    invoice_type  = models.ForeignKey(InvoiceType, to_field='code', null=True, on_delete=models.CASCADE)
+    used_business = models.IntegerField(default=0, blank=True)
+    created_by    = models.ForeignKey(IscUser, blank=False, on_delete=models.CASCADE)
+    created_at    = models.DateTimeField(default=timezone.now)
     
     @property
     def serial_number(self):

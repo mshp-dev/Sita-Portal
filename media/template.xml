@@ -6,11 +6,11 @@
 		<email></email>
 		<enabled>true</enabled>
 		<firstName></firstName>
-		<forcePasswordChange>true</forcePasswordChange>
+		<forcePasswordChange>false</forcePasswordChange>
 		<certificateKeyLocation>KeyVault</certificateKeyLocation>
 		<certificateKeyVaultName>Default</certificateKeyVaultName>
-		<ftpesFingerprint>7E:90:D3:3F:B3:A1:5D:47:75:EE:3C:CA:6A:97:0E:4A:48:F0:AC:7B</ftpesFingerprint>
-		<ftpsFingerprint>7E:90:D3:3F:B3:A1:5D:47:75:EE:3C:CA:6A:97:0E:4A:48:F0:AC:7B </ftpsFingerprint>
+		<!-- <ftpesFingerprint>7E:90:D3:3F:B3:A1:5D:47:75:EE:3C:CA:6A:97:0E:4A:48:F0:AC:7B</ftpesFingerprint> -->
+		<!-- <ftpsFingerprint>7E:90:D3:3F:B3:A1:5D:47:75:EE:3C:CA:6A:97:0E:4A:48:F0:AC:7B </ftpsFingerprint> -->
 		<gftpesAuthType>P</gftpesAuthType>
 		<gftpsAuthType>P</gftpsAuthType>
 		<ghttpsAuthType>P</ghttpsAuthType>
@@ -18,12 +18,12 @@
 		<gas2AuthType>P</gas2AuthType>
 		<gsftpAuthType>P</gsftpAuthType>
 		<goFastAuthType>P</goFastAuthType>
-		<httpsFingerprint>7E:90:D3:3F:B3:A1:5D:47:75:EE:3C:CA:6A:97:0E:4A:48:F0:AC:7B</httpsFingerprint>
+		<!-- <httpsFingerprint>7E:90:D3:3F:B3:A1:5D:47:75:EE:3C:CA:6A:97:0E:4A:48:F0:AC:7B</httpsFingerprint> -->
 		<phone></phone>
 		<approved>true</approved>
-		<as2DecryptionKeyPasswordIsEncrypted>true</as2DecryptionKeyPasswordIsEncrypted>
-		<as2MdnSignatureKeyPasswordIsEncrypted>true</as2MdnSignatureKeyPasswordIsEncrypted>
-		<personalAddressBook>true</personalAddressBook>
+		<as2DecryptionKeyPasswordIsEncrypted>false</as2DecryptionKeyPasswordIsEncrypted>
+		<as2MdnSignatureKeyPasswordIsEncrypted>false</as2MdnSignatureKeyPasswordIsEncrypted>
+		<personalAddressBook>false</personalAddressBook>
 		<restrictSharingToAddressBookContacts>false</restrictSharingToAddressBookContacts>
 		<gas4AuthType>P</gas4AuthType>
 		<authenticationAlias></authenticationAlias>
@@ -57,8 +57,8 @@
 		<organization></organization>
 		<passwordIsEncrypted>true</passwordIsEncrypted>
 		<passwordHashAlgorithm>7</passwordHashAlgorithm>
-		<passwordExpirationInterval>45</passwordExpirationInterval>
-		<servicePermissions>285</servicePermissions>
+		<passwordExpirationInterval>-1</passwordExpirationInterval>
+		<servicePermissions>13</servicePermissions>
 		<secureMailPermissions>0</secureMailPermissions>
 		<viewActivityPermission>true</viewActivityPermission>
 		<goDrivePermission>false</goDrivePermission>
@@ -81,7 +81,7 @@
 			<type>D</type>
 			<filePermissions>0</filePermissions>
 			<folderPermissions>256</folderPermissions>
-			<applyToSubfolders>true</applyToSubfolders>
+			<applyToSubfolders>false</applyToSubfolders>
 			<diskQuotaOption>N</diskQuotaOption>
 			<diskQuotaSize>100</diskQuotaSize>
 			<diskQuotaUnit>M</diskQuotaUnit>

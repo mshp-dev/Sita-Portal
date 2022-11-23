@@ -51,20 +51,20 @@ class IscUserAdmin(admin.ModelAdmin):
 
 
 class MftUserAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'mobilephone', 'organization', 'get_all_business', 'ipaddr', 'created_by']
+    list_display = ['username', 'mobilephone', 'organization', 'get_all_business', 'ipaddr', 'created_by', 'is_confirmed']
     list_filter = ['organization', 'business']
     search_fields = ('username', 'firstname', 'lastname')
     ordering = ['username']
 
 
 class MftUserTempAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'mobilephone', 'organization', 'get_all_business', 'ipaddr', 'created_by']
+    list_display = ['username', 'mobilephone', 'organization', 'get_all_business', 'ipaddr', 'created_by', 'is_confirmed']
     list_filter = ['organization', 'business']
     search_fields = ('username', 'firstname', 'lastname')
     ordering = ['username']
 
 class DirectoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'absolute_path', 'bic']
+    list_display = ['name', 'absolute_path', 'bic', 'index_code']
     list_filter = ['bic', 'business']
     search_fields = ['relative_path', 'bic__description', 'business__description']
     ordering = ['name']
@@ -96,7 +96,7 @@ class CustomerBankAdmin(admin.ModelAdmin):
 
 
 class ReadyToExportAdmin(admin.ModelAdmin):
-    list_display = ['mftuser', 'created_by', 'created_at']
+    list_display = ['mftuser', 'created_by', 'created_at', 'is_downloaded', 'number_of_exports']
 
 
 admin.site.register(CodingType, CodingTypeAdmin)

@@ -64,6 +64,7 @@
                   $("#new-dir-modal").modal("show");
                 }
               });
+
               $("#btn-delete-dir").click(function () {
                 var access = "{{ access }}";
                 var absPath = $("#absolute-path-2").html();
@@ -78,6 +79,18 @@
                   }
                 } else {
                   $("#delete-modal").modal("show");
+                }
+              });
+
+              $("#subDirPermCheck").change(function () {
+                var absPath = $("#absolute-path-2").html();
+                if (absPath == "") {
+                  alert("یک دایرکتوری را انتخاب نمائید!");
+                  $("#subDirPermCheck").prop("checked", false);
+                } else {
+                  if (this.checked) {
+                    $("#confirm-modal").modal("show");
+                  }
                 }
               });
             });
@@ -206,6 +219,10 @@
                     } else {
                       $("#permission-modal").modal("show");
                     }
+                  });
+
+                  $(":button[btn-func='close']").click(function () {
+                    $("#subDirPermCheck").prop("checked", false);
                   });
                 });
               </script>
@@ -561,6 +578,28 @@
                         });
                       });
                     </script>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal fade" id="confirm-modal" role="dialog" aria-labelledby="confirm-modal" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content" style="direction: rtl">
+                  <div class="modal-header">
+                    <h2 class="h6 modal-title">اعطاء دسترسی ایجاد پوشه</h2>
+                    <button type="button" class="btn-close ms-0" btn-func="close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body" style="direction: rtl">
+                    <p id="absolute-path-2" style="direction: ltr"></p>
+                    <p style="text-align: justify">
+                      شما با این دسترسی به کاربر اجازه می دهید برای خود پوشه ایجاد نماید، پوشه هایی که توسط کاربر ایجاد می شود در پرتال قابل نمایش
+                      نبوده و امکان اعمال دسترسی روی آن میسر نیست؛ لذا حتی الامکان این مورد برای ایجاد پوشه هایی با موضوعیت تاریخ و ... (به منظور دسته
+                      بندی) فعال گردد. (همچنین این پوشه ها بعد از 7 روز پاک خواهد شد)
+                    </p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary ms-auto" data-bs-dismiss="modal">بله</button>
+                    <button type="button" class="btn btn-link ms-0" btn-func="close" data-bs-dismiss="modal">خیر</button>
                   </div>
                 </div>
               </div>

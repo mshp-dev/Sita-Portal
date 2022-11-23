@@ -28,8 +28,8 @@ logger = logging.getLogger(__name__)
 def index_view(request):
     # buck insertion into or correction in db
     # insert_into_db()
-    # clean_up(flag='perm', action=False)
-    # clean_up(flag='dir3', action=True, bic_name="FIU")
+    # clean_up(flag='perm2', action=True)
+    # clean_up(flag='dir3', action=False, bic_name="FIU")
 
     isc_user = IscUser.objects.get(user=request.user)
 
@@ -182,6 +182,7 @@ def change_password_view(request, *args, **kwargs):
         form = ChangePasswordForm()
 
     context = {
+        "access"
         "form": form,
         "msg": msg,
         "success": success
@@ -194,20 +195,14 @@ def change_password_view(request, *args, **kwargs):
 def profile_view(request, *args, **kwargs):
     isc_user = IscUser.objects.get(user=request.user)
     profile_msg = bus_msg = None
+    owned_by_user = []
+    used_by_user = []
     submit_error = False
     
     # if not isc_user.user.is_staff:
     #     logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
     #     return redirect('/error/401/')
 
-    if isc_user.role.code == 'OPERATION':
-        user_businesses = OperationBusiness.objects.filter(user=isc_user) # , owned_by_user=True .values('access_on_bus').distinct()
-        o_buss = [bus for bus in user_businesses.filter(owned_by_user=True)]
-        u_buss = [bus for bus in user_businesses.filter(owned_by_user=False)]
-    elif isc_user.role.code == 'ADMIN' or isc_user.role.code == 'CUSTOMER':
-        o_buss = [bus for bus in BusinessCode.objects.all().order_by('description')]
-        u_buss = [] # [bus for bus in BusinessCode.objects.all().order_by('description')]
-    
     isc_user_dict = {
         "username": isc_user.user.username,
         "firstname": isc_user.user.first_name,
@@ -219,10 +214,17 @@ def profile_view(request, *args, **kwargs):
     }
     profile_form = UserProfileForm(request=request, initial=isc_user_dict)
     business_form = BusinessSelectionForm()
-    owned_by_user = [ob.access_on_bus.code for ob in o_buss]
-    used_by_user = [ub.access_on_bus.code for ub in u_buss]
+    if isc_user.role.code == 'OPERATION':
+        user_businesses = OperationBusiness.objects.filter(user=isc_user) # , owned_by_user=True .values('access_on_bus').distinct()
+        o_buss = [bus for bus in user_businesses.filter(owned_by_user=True)]
+        u_buss = [bus for bus in user_businesses.filter(owned_by_user=False)]
+        owned_by_user = [ob.access_on_bus.code for ob in o_buss]
+        used_by_user = [ub.access_on_bus.code for ub in u_buss]
+        business_form.fields['used_business'].choices = [(bus.id, bus) for bus in BusinessCode.objects.exclude(code__in=owned_by_user).order_by('description')]
+    elif isc_user.role.code == 'ADMIN' or isc_user.role.code == 'CUSTOMER':
+        o_buss = [bus for bus in BusinessCode.objects.all().order_by('description')]
+        u_buss = [] # [bus for bus in BusinessCode.objects.all().order_by('description')]
     business_form.fields['owned_business'].choices = [(bus.id, bus) for bus in BusinessCode.objects.exclude(code__in=used_by_user).order_by('description')]
-    business_form.fields['used_business'].choices = [(bus.id, bus) for bus in BusinessCode.objects.exclude(code__in=owned_by_user).order_by('description')]
     
     if request.method == 'POST':
         if request.POST.get("form-type") == "profile-form": # update iscuser (profile)
@@ -570,11 +572,12 @@ def mftuser_create_view(request, *args, **kwargs):
             if mftuser.organization.code == 'ISC':
                 mftuser.description = str(isc_user.department)
             else:
-                buss = ''
-                for bus in mftuser.business.all():
-                    buss += f'{str(bus)}،'
-                project = "سامانه های" if mftuser.business.all().count() > 1 else "سامانه"
-                mftuser.description = f'کاربر {project} {buss[:-1]} {mftuser.organization}'
+                # buss = ''
+                # for bus in mftuser.business.all():
+                #     buss += f'{str(bus)}،'
+                # project = "سامانه های" if mftuser.business.all().count() > 1 else "سامانه"
+                # mftuser.description = f'کاربر {project} {buss[:-1]} {mftuser.organization}'
+                mftuser.description = f'{mftuser.organization}'
             mftuser.save()
             msg = f'<p>کاربر {mftuser.username} ایجاد شد.<p><br >{bus_error}'
             success = True
@@ -858,22 +861,22 @@ def mftuser_access_view(request, uid, pid=-1, dir_name="", *args, **kwargs):
     bic = BankIdentifierCode.objects.get(code=mftuser.organization.code)
     # bus = BusinessCode.objects.get(code=mftuser.business.code)
     # buss = mftuser.business.all()
-    buss = [ob.access_on_bus for ob in OperationBusiness.objects.filter(user=isc_user, owned_by_user=True).order_by('access_on_bus')]
+    owned_buss = [ob.access_on_bus for ob in OperationBusiness.objects.filter(user=isc_user, owned_by_user=True).order_by('access_on_bus')]
     elements = None
-    used_business = None
+    used_buss = None
     
-    if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=buss).exists():
+    if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=owned_buss).exists():
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
         return redirect('/error/401/')
 
     if isc_user.role.code == 'ADMIN':
         elements = get_all_dirs(isc_user)
     else:
-        elements = get_specific_root_dir(buss, bic)
+        elements = get_specific_root_dir(owned_buss, bic)
         if isc_user.role.code == 'OPERATION':
             o_buss = OperationBusiness.objects.filter(user=isc_user, owned_by_user=False).order_by('access_on_bus')
             if o_buss.count() > 0:
-                used_business = [ob.access_on_bus for ob in o_buss]
+                used_buss = [{'value': f'{ob.access_on_bus.id}', 'name': f'{ob.access_on_bus}'} for ob in o_buss]
     
     if request.is_ajax():
         if request.method == 'POST':
@@ -954,10 +957,48 @@ def mftuser_access_view(request, uid, pid=-1, dir_name="", *args, **kwargs):
         'mftuser': mftuser,
         'confirmed': confirmed,
         'elements': elements,
-        'used_buss': used_business
+        'used_buss': used_buss
     }
 
     return render(request, "core/mftuser-access.html", context)
+
+
+@login_required(login_url="/login/")
+def mftuser_used_business_access_view(request, uid, bid=-1, *args, **kwargs):
+    isc_user = IscUser.objects.get(user=request.user)
+    used_buss = BusinessCode.objects.filter(pk=bid)
+    mftuser = get_object_or_404(MftUser, pk=uid)
+    bic = BankIdentifierCode.objects.get(code=mftuser.organization.code)
+    elements = None
+    
+    if not isc_user.user.is_staff and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=used_buss).exists():
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        return redirect('/error/401/')
+
+    if isc_user.role.code != 'OPERATION':
+        return redirect(f'/mftuser/{mftuser.id}/directories/')
+
+    elements = get_specific_root_dir(used_buss, bic)    
+    permissions = Permission.objects.filter(user=mftuser)
+    confirmed = False
+    i = len(permissions)
+    if i != 0:
+        for p in permissions:
+            if p.is_confirmed:
+                i -= 1
+        if i == 0:
+            confirmed = True
+    
+    context = {
+        'username': str(isc_user.user.username),
+        'access': str(isc_user.role.code),
+        'mftuser': mftuser,
+        'confirmed': confirmed,
+        'elements': elements,
+        'used_bus': used_buss.first()
+    }
+
+    return render(request, "core/mftuser-used-business-access.html", context)
 
 
 @login_required(login_url="/login/")
@@ -1139,9 +1180,7 @@ def mftuser_permissions_view(request, uid, did, *args, **kwargs):
             response = {}
             try:
                 permissions = request.POST.get('permissions')
-                temp = permissions.split(',')
-                temp.pop()
-                splited = [int(t) for t in temp]
+                splited = [int(t) for t in permissions.split(',')[:-1]]
                 old_permissions = [ae for ae in Permission.objects.filter(user=mftuser, directory=directory)]
                 for op in old_permissions:
                     if op.permission not in splited:
@@ -1170,12 +1209,13 @@ def mftuser_permissions_view(request, uid, did, *args, **kwargs):
                 for pv in splited:
                     perm = DirectoryPermissionCode.objects.get(value=pv)
                     if not Permission.objects.filter(user=mftuser, directory=directory, permission=perm.value).exists():
-                        Permission.objects.get_or_create(
+                        perm = Permission(
                             user=mftuser,
                             directory=directory,
                             permission=perm.value,
                             created_by=isc_user
                         )
+                        perm.save()
                         check_parents_permission(
                             isc_user=isc_user,
                             mftuser=mftuser,
@@ -1184,98 +1224,111 @@ def mftuser_permissions_view(request, uid, did, *args, **kwargs):
                         )
                     if pv == 1: #Download (Read)
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
-                            Permission.objects.get_or_create(
+                            perm = Permission(
                                 user=mftuser,
                                 directory=directory,
                                 permission=256, #List
                                 created_by=isc_user
                             )
+                            perm.save()
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=128).exists():
-                            Permission.objects.get_or_create(
+                            perm = Permission(
                                 user=mftuser,
                                 directory=directory,
                                 permission=128, #Checksum
                                 created_by=isc_user
                             )
+                            perm.save()
                     elif pv == 2: #Upload (Write)
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
-                            Permission.objects.get_or_create(
+                            perm = Permission(
                                 user=mftuser,
                                 directory=directory,
                                 permission=256, #List
                                 created_by=isc_user
                             )
+                            perm.save()
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=128).exists():
-                            Permission.objects.get_or_create(
+                            perm = Permission(
                                 user=mftuser,
                                 directory=directory,
                                 permission=128, #Checksum
                                 created_by=isc_user
                             )
+                            perm.save()
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=1024).exists():
-                            Permission.objects.get_or_create(
+                            perm = Permission(
                                 user=mftuser,
                                 directory=directory,
                                 permission=1024, #Append
                                 created_by=isc_user
                             )
+                            perm.save()
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=512).exists():
-                            Permission.objects.get_or_create(
+                            perm = Permission(
                                 user=mftuser,
                                 directory=directory,
                                 permission=512, #Overwrite
                                 created_by=isc_user
                             )
+                            perm.save()
                     elif pv == 32: #Delete (Modify)
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
-                            Permission.objects.get_or_create(
+                            perm = Permission(
                                 user=mftuser,
                                 directory=directory,
                                 permission=256, #List
                                 created_by=isc_user
                             )
+                            perm.save()
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=128).exists():
-                            Permission.objects.get_or_create(
+                            perm = Permission(
                                 user=mftuser,
                                 directory=directory,
                                 permission=128, #Checksum
                                 created_by=isc_user
                             )
+                            perm.save()
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=512).exists():
-                            Permission.objects.get_or_create(
+                            perm = Permission(
                                 user=mftuser,
                                 directory=directory,
                                 permission=512, #Overwrite
                                 created_by=isc_user
                             )
+                            perm.save()
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=8).exists():
-                            Permission.objects.get_or_create(
+                            perm = Permission(
                                 user=mftuser,
                                 directory=directory,
                                 permission=8, #Rename
                                 created_by=isc_user
                             )
+                            perm.save()
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=1024).exists():
-                            Permission.objects.get_or_create(
+                            perm = Permission(
                                 user=mftuser,
                                 directory=directory,
                                 permission=1024, #Append
                                 created_by=isc_user
                             )
+                            perm.save()
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=1).exists():
-                            Permission.objects.get_or_create(
+                            perm = Permission(
                                 user=mftuser,
                                 directory=directory,
                                 permission=1, #Download
                                 created_by=isc_user
                             )
+                            perm.save()
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=2).exists():
-                            Permission.objects.get_or_create(
+                            perm = Permission(
                                 user=mftuser,
                                 directory=directory,
                                 permission=2, #Upload
                                 created_by=isc_user
                             )
+                            perm.save()
                     # elif pv == 0: #Subdirectory (ایجاد پوشه)
                     #     reduce_parents_permission()
                 logger.info(f'permission of directory {directory.absolute_path} for mftuser {mftuser.username} changed to {splited} by {isc_user.user.username}.')
@@ -1381,7 +1434,7 @@ def entities_confirm_view(request, id, *args, **kwargs):
                     #     perm.save()
                     # dir_.is_confirmed = True
                     # dir_.save()
-                    i = len(permissions)
+                    i = permissions.count()
                     confirmed = False
                     if mftuser.is_confirmed:
                         confirmed = False

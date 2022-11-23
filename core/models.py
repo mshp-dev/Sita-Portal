@@ -60,9 +60,6 @@ class DirectoryPermissionCode(BaseCoding):
     value            = models.IntegerField(blank=False, unique=True, default=256)
     code             = models.CharField(max_length=20, blank=False, unique=True, default='READ')
 
-    def __str__(self):
-        return self.description
-
 
 class CustomerAccessCode(BaseCoding):
     code             = models.CharField(max_length=10, blank=False, unique=True, default='MftUser')

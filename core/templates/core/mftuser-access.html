@@ -38,10 +38,15 @@
       );
     });
   });
+
+  function makeInvoice() {
+    var mftuser = document.getElementById("current-user-id");
+    var url = "/invoice/?user=" + mftuser.innerHTML + "&type=2&bus=0";
+    window.location = url;
+  }
 </script>
 {% endif %} {% endcomment %} {% endblock javascripts %} {% block content %}
 
-<!-- prettier-ignore -->
 <main>
   {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
 
@@ -63,66 +68,98 @@
     <div class="container">
       <div class="row mb-4">
         <div class="col-12 mx-auto">
-          {% comment %} <div class="nav-wrapper position-relative mb-2">
-            <ul class="nav nav-pills nav-fill flex-column flex-md-row" id="tabs-manage-data" role="tablist">
-              <li class="nav-item">
-                <a
-                  class="nav-link mb-sm-3 mb-md-0 active"
-                  id="tabs-permissions-tab"
-                  data-bs-toggle="tab"
-                  href="#tabs-permissions"
-                  role="tab"
-                  aria-controls="tabs-permissions"
-                  aria-selected="true"
-                  ><strong>دسترسی ها</strong> <span class="fas fa-folder-open"></span
-                ></a>
-              </li>
-              <li class="nav-item">
-                <a
-                  class="nav-link mb-sm-3 mb-md-0"
-                  id="tabs-info-tab"
-                  data-bs-toggle="tab"
-                  href="#tabs-info"
-                  role="tab"
-                  aria-controls="tabs-info"
-                  aria-selected="false"
-                  ><strong>مشخصات</strong> <span class="fas fa-address-book"></span
-                ></a>
-              </li>
-            </ul>
+          <div class="mx-auto text-center" style="direction: rtl">
+            <p class="h4 my-1 me-2" for="select-used-business">اختصاص دسترسی در مسیرهای سامانه/پروژه(هایی) که سرویس می دهید:</p>
           </div>
-        </div>
-        <div class="card border-0">
-          <div class="card-body p-0">
-            <div class="tab-content" id="tabcontent">
-              <div class="tab-pane fade" id="tabs-info" role="tabpanel" aria-labelledby="tabs-info-tab">
-                <div class="col-10 mx-auto">
-                  <div class="text-center text-md-center mb-4 mt-4" style="direction: rtl">
-                    <h1 class="mb-0 h3">مشخصات کاربر {{ mftuser.username }}</h1>
-                    <br />
-                    <span class="font-weight-normal"> {% if msg %} {{ msg | safe }} {% endif %} </span>
-                  </div> {% endcomment %}
-                  <div>
-                    <div class="mx-auto text-center" style="direction: rtl">
-                      {% if confirmed %}
-                      <span>دسترسی های <strong class="h5 text-info">{{ mftuser.username }}</strong> در کلیه مسیرها </span><span class="h5 text-success">تأیید شده است.</span>
-                      {% else %}
-                      <span>دسترسی های <strong class="h5 text-info">{{ mftuser.username }}</strong> در بعضی از مسیرها </span><span class="h5 text-warning">تأیید نشده است.</span>
-                      {% endif %}
-                    </div>
-                    <p id="current-user-id" style="display: none">{{ mftuser.id }}</p>
-                  </div>
-                  {% comment %}
-                </div>
-              </div>
-              <div class="tab-pane fade active show" id="tabs-permissions" role="tabpanel" aria-labelledby="tabs-permissions-tab"> {% endcomment %}
-                {% include "includes/directories-list.html" %}
-              {% comment %} </div>
+          <div class="mt-4">
+            <div class="mx-auto text-center" style="direction: rtl">
+              {% if confirmed %}
+              <span>دسترسی های <strong class="h5 text-info">{{ mftuser.username }}</strong> در کلیه مسیرها </span
+              ><span class="h5 text-success">تأیید شده است.</span>
+              {% else %}
+              <span>دسترسی های <strong class="h5 text-info">{{ mftuser.username }}</strong> در بعضی از مسیرها </span
+              ><span class="h5 text-warning">تأیید نشده است.</span>
+              {% endif %}
             </div>
-          </div> {% endcomment %}
+            <p id="current-user-id" style="display: none">{{ mftuser.id }}</p>
+          </div>
+          {% include "includes/directories-list.html" %}
         </div>
       </div>
-      {% comment %} {% if access == 'ADMIN' and not mftuser.is_confirmed %}
+      {% comment %} {% if access != 'ADMIN' and not confirmed %}
+      <div class="row mb-6">
+        <input
+          type="button"
+          style="width: 50%"
+          class="btn btn-primary mx-auto"
+          value="فرم چارگون دسترسی های کاربر در این سامانه(ها)"
+          onClick="makeInvoice();"
+        />
+      </div>
+      {% endif %} {% endcomment %} {% if access == 'OPERATION' %}
+      <div class="row">
+        <script type="text/javascript">
+          $(function () {
+            $("#select-used-business").change(function () {
+              var value = $("#select-used-business").find(":selected").val();
+              if (value != 0) {
+                $("#selected-bus").text(value);
+                $("#modal-agreement").modal("show");
+              }
+            });
+
+            $(":button[btn-func='close']").click(function () {
+              $("#select-used-business").val("0").change();
+            });
+
+            $(":button[btn-func='accept']").click(function () {
+              var uid = $("#current-user-id").html();
+              var val = $("#select-used-business").find(":selected").val();
+              window.location = "/mftuser/" + uid + "/directory/" + val + "/";
+            });
+          });
+        </script>
+        <div class="col-10 mx-auto" style="direction: rtl">
+          <label class="h4 mb-4 my-1 me-2" for="select-used-business">اختصاص دسترسی در مسیرهای سامانه/پروژه(هایی) که سرویس می گیرید:</label>
+          <select class="form-control form-select form-select-bg-left" id="select-used-business" aria-label="Default select example">
+            <option value="0">یک سامانه/پروژه را انتخاب نمائید...</option>
+            {% for bus in used_buss %}
+            <option value="{{ bus.value }}">{{ bus.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div
+          class="modal fade"
+          id="modal-agreement"
+          tabindex="-1"
+          aria-labelledby="modal"
+          style="display: none; padding-right: 17px"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header" style="direction: rtl">
+                <h2 class="h6 modal-title">پیام</h2>
+                <button type="button" class="btn-close ms-0" btn-func="close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body" style="direction: rtl">
+                <p id="selected-bus" style="display: none"></p>
+                <p style="text-align: justify">
+                  شما تقاضای اعطای دسترسی به پوشه های سامانه ای غیر از سامانه تحت اختیار خود نموده اید، لذا می بایست به منظور
+                  <u>تأیید نهایی مسئول مستفیم سامانه مورد نظر</u> درخواست را در قالب فرم چارگونی به شماره 307 به همراه فایل دریافتی PDF (جزئیات
+                  دسترسی) از پرتال برای مسئول مستقیم سامانه ارسال نمائید و پس از آن برای ثبت سیستمی به راهبر سامانه سیتا ارسال نمائید.
+                </p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" btn-func="accept" class="btn btn-secondary" data-bs-dismiss="modal">قبول می کنم</button>
+                <button type="button" btn-func="close" class="btn btn-link ms-auto" data-bs-dismiss="modal">بستن</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %} {% comment %} {% if access == 'ADMIN' and not mftuser.is_confirmed %}
       <div class="row mb-3">
         <input
           type="button"
@@ -130,16 +167,11 @@
           uid="{{ mftuser.id }}"
           style="width: 50%"
           class="btn btn-tertiary mx-auto"
-          value="تأیید اطلاعات کاربر" 
+          value="تأیید اطلاعات کاربر"
         />
       </div>
-      {% endif %}
-      {% if access != 'ADMIN' and not confirmed %}
-      <div class="row mb-3">
-        <input type="button" style="width: 50%" class="btn btn-primary mx-auto" value="تبدیل به فرم چارگون" onClick="makeInvoice();" />
-      </div>
       {% endif %} {% endcomment %}
-      <div class="row mb-3">
+      <div class="row mt-10 mb-3">
         <a href="{% url 'mftuser-details' mftuser.id %}" style="width: 50%" class="btn btn-tertiary mx-auto">مشاهده مشخصات کاربر</a>
       </div>
       <div class="row mb-6">

@@ -18,7 +18,6 @@ def get_specific_root_dir(buss, bic):
             bank_dirs = Directory.objects.filter(parent=rd.id).order_by('name') # business=rd.business, 
             all_dirs.append({'dir': rd, 'children': [{'dir': b, 'children': get_sub_dirs(b)} for b in bank_dirs]})
             # [{'dir': Directory.objects.get(bic=bic, parent=rd.id), 'children': get_sub_dirs(Directory.objects.get(bic=bic, parent=rd.id))}]})
-        
         return all_dirs
     else:
         return [{'dir': rd, 'children': [{'dir': Directory.objects.get(bic=bic, parent=rd.id), 'children': get_sub_dirs(Directory.objects.get(bic=bic, parent=rd.id))}]} for rd in root_dirs]
@@ -114,46 +113,53 @@ def create_default_permission(isc_user, mftuser, last_dir, business=None, home_d
     directory = last_dir
     list_perm = DirectoryPermissionCode.objects.get(value=256)
     while directory.parent != 0:
-        Permission.objects.get_or_create(
-            user=mftuser,
-            directory=directory,
-            permission=list_perm.value,
-            is_confirmed=preconfirmed,
-            created_by=isc_user
-        )
+        if not Permission.objects.filter(user=mftuser, directory=directory, permission=list_perm.value).exists():
+            perm = Permission(
+                user=mftuser,
+                directory=directory,
+                permission=list_perm.value,
+                is_confirmed=preconfirmed,
+                created_by=isc_user
+            )
+            perm.save()
         directory = Directory.objects.get(pk=directory.parent)
     if home_dir:
         if mftuser.organization.code == 'ISC':
             bus_dir = Directory.objects.get(business=business, relative_path=business.code)
             for dir_ in Directory.objects.filter(parent=bus_dir.id):
-                Permission.objects.get_or_create(
-                    user=mftuser,
-                    directory=dir_,
-                    permission=list_perm.value,
-                    is_confirmed=preconfirmed,
-                    created_by=isc_user
-                )
+                if not Permission.objects.filter(user=mftuser, directory=dir_, permission=list_perm.value).exists():
+                    perm = Permission(
+                        user=mftuser,
+                        directory=dir_,
+                        permission=list_perm.value,
+                        is_confirmed=preconfirmed,
+                        created_by=isc_user
+                    )
+                    perm.save()
 
-        Permission.objects.get_or_create(
-            user=mftuser,
-            directory=directory,
-            permission=list_perm.value,
-            is_confirmed=preconfirmed,
-            created_by=isc_user
-        )
+        if not Permission.objects.filter(user=mftuser, directory=dir_, permission=list_perm.value).exists():
+            perm = Permission(
+                user=mftuser,
+                directory=directory,
+                permission=list_perm.value,
+                is_confirmed=preconfirmed,
+                created_by=isc_user
+            )
+            perm.save()
 
 
 def check_parents_permission(isc_user, mftuser, parent): #, permission
     directory = None
     while parent != 0:
         directory = Directory.objects.get(pk=parent)
-        # if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
-        Permission.objects.get_or_create(
-            user=mftuser,
-            directory=directory,
-            permission=256, # List (مشاهده)
-            created_by=isc_user
-        )
+        if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
+            perm = Permission(
+                user=mftuser,
+                directory=directory,
+                permission=256, # List (مشاهده)
+                created_by=isc_user
+            )
+            perm.save()
             # Permission.objects.create(
             #     user=mftuser,
             #     directory=parent,
@@ -265,15 +271,21 @@ def export_user(id, isc_user):
     virtual_files = template.xpath('//webUsers/webUser/virtualFile/virtualFiles')
     permissions = Permission.objects.filter(user=mftuser, is_confirmed=True)
     all_dirs = permissions.values('directory').distinct()
-    bus_codes = [mb.code for mb in mftuser.business.all()]
-    bus_dirs = Directory.objects.get(relative_path__in=bus_codes)
+    # bus_codes = [ub.code for ub in mftuser.business.all()]
+    # bus_dirs = Directory.objects.filter(name__in=bus_codes)
+    bus_dirs = []
+    for d in all_dirs:
+        dir_ = Directory.objects.get(pk=d['directory'])
+        if dir_.parent == 0:
+            bus_dirs.append(dir_)
     for bus_dir in bus_dirs:
-        chs = bus_dir.children.split(',')
-        chs.pop()
-        dirs_with_perms = [dir_['directory'] for dir_ in all_dirs if str(dir_['directory']) in chs]
-        for d in dirs_with_perms:
-            virtual_file = ET.SubElement(virtual_files[0], 'virtualFile')
-            make_virtual_file(Directory.objects.get(pk=d), permissions, virtual_file)
+        virtual_file = ET.SubElement(virtual_files[0], 'virtualFile')
+        make_virtual_file(bus_dir, permissions, virtual_file)
+        # chs = bus_dir.children.split(',')[:-1]
+        # dirs_with_perms = [dir_['directory'] for dir_ in all_dirs if str(dir_['directory']) in chs]
+        # for d in dirs_with_perms:
+        #     virtual_file = ET.SubElement(virtual_files[0], 'virtualFile')
+        #     make_virtual_file(Directory.objects.get(pk=d), permissions, virtual_file)
     
     temp_file = ntf(mode='w+', encoding='utf-8', delete=True)
     bytes_template = ET.tostring(template)
@@ -313,7 +325,10 @@ def make_virtual_file(directory, permissions, virtual_file):
     _folderPermissions = ET.SubElement(virtual_file, 'folderPermissions')
     _folderPermissions.text = str(summed['permission__sum'])
     _applyToSubfolders = ET.SubElement(virtual_file, 'applyToSubfolders')
-    _applyToSubfolders.text = 'true'
+    if permissions.filter(directory=directory, permission=0).exists():
+        _applyToSubfolders.text = 'true'
+    else:
+        _applyToSubfolders.text = 'false'
     _diskQuotaOption = ET.SubElement(virtual_file, 'diskQuotaOption')
     _diskQuotaOption.text = 'N'
     _diskQuotaSize = ET.SubElement(virtual_file, 'diskQuotaSize')
@@ -323,8 +338,7 @@ def make_virtual_file(directory, permissions, virtual_file):
     _path = ET.SubElement(virtual_file, 'path')
     _path.text = directory.absolute_path
     virtual_files = ET.SubElement(virtual_file, 'virtualFiles')
-    chs = directory.children.split(',')
-    chs.pop()
+    chs = directory.children.split(',')[:-1]
     dirs_with_perms = [dir_['directory'] for dir_ in all_dirs if str(dir_['directory']) in chs]
     for d in dirs_with_perms:
         vf = ET.SubElement(virtual_files, 'virtualFile')
@@ -343,6 +357,20 @@ def zip_all_exported_users(name='export'):
 
 def insert_into_db():
     iscuser = IscUser.objects.get(pk=1)
+
+    dir_list = [
+        # 'Markazi',
+        # 'Ayandeh',
+        # 'Saderat',
+        # 'TosseSaderat',
+        # 'Karafarin',
+        # 'Melli',
+        # 'Noor',
+        # 'Tejarat',
+        # 'Keshavarzi',
+        # 'Isun',
+        # 'ISC',
+    ]
 
     # for bus in BusinessCode.objects.all().order_by('code'):
         #     dir_ = Directory(
@@ -380,6 +408,40 @@ def insert_into_db():
         #                 home_dir=True
         #             )
 
+    # for d in dir_list:
+        #     dir_ = Directory.objects.get(name=d, parent=1028)
+        #     chs = [int(dc) for dc in dir_.children.split(',')[:-1]]
+        #     i = DirectoryIndexCode.objects.get(code=str(int(dir_.index_code.code) - 1))
+        #     banki = Directory(
+        #         name='BANKI',
+        #         bic=dir_.bic,
+        #         business=dir_.business,
+        #         relative_path=f'{dir_.relative_path}/BANKI',
+        #         parent=dir_.id,
+        #         children=dir_.children,
+        #         index_code=i,
+        #         created_by=iscuser
+        #     )
+        #     banki.save()
+        #     dir_.children = f'{str(banki.id)},'
+        #     dir_.save()
+        #     for c in chs:
+        #         d_ = Directory.objects.get(pk=c)
+        #         d_.parent = banki.id
+        #         lower_directory_index(d_)
+        #         d_.save()
+
+
+def lower_directory_index(directory):
+    parent = Directory.objects.get(pk=directory.parent)
+    new_index = DirectoryIndexCode.objects.get(code=str(int(directory.index_code.code) - 1))
+    directory.index_code = new_index
+    directory.relative_path = f'{parent.relative_path}/{directory.name}'
+    directory.save()
+    chs = [int(dc) for dc in directory.children.split(',')[:-1]]
+    for c in chs:
+        lower_directory_index(Directory.objects.get(pk=c))
+
 
 def clean_up(flag='', action=False, *args, **kwargs):
     if flag == '':
@@ -410,6 +472,81 @@ def clean_up(flag='', action=False, *args, **kwargs):
                 print(f'dir with id {p.directory.id} does not exists')
                 if action:
                     p.delete()
+    elif flag == 'perm2':
+        print('Cleanup duplicate permissions.')
+        for d in Directory.objects.all():
+            for u in MftUser.objects.all():
+                print(f'checking {u.username} permissions on {d.name}')
+                if Permission.objects.filter(user=u, directory=d, permission=0).count() > 1:
+                    print(f'{u.username} has duplicate 0 permission on {d.name}')
+                    if action:
+                        p = Permission.objects.filter(user=u, directory=d, permission=0).first()
+                        p.delete()
+                if Permission.objects.filter(user=u, directory=d, permission=1).count() > 1:
+                    print(f'{u.username} has duplicate 1 permission on {d.name}')
+                    if action:
+                        p = Permission.objects.filter(user=u, directory=d, permission=1).first()
+                        p.delete()
+                if Permission.objects.filter(user=u, directory=d, permission=2).count() > 1:
+                    print(f'{u.username} has duplicate 2 permission on {d.name}')
+                    if action:
+                        p = Permission.objects.filter(user=u, directory=d, permission=2).first()
+                        p.delete()
+                if Permission.objects.filter(user=u, directory=d, permission=4).count() > 1:
+                    print(f'{u.username} has duplicate 4 permission on {d.name}')
+                    if action:
+                        p = Permission.objects.filter(user=u, directory=d, permission=4).first()
+                        p.delete()
+                if Permission.objects.filter(user=u, directory=d, permission=8).count() > 1:
+                    print(f'{u.username} has duplicate 8 permission on {d.name}')
+                    if action:
+                        p = Permission.objects.filter(user=u, directory=d, permission=8).first()
+                        p.delete()
+                if Permission.objects.filter(user=u, directory=d, permission=16).count() > 1:
+                    print(f'{u.username} has duplicate 16 permission on {d.name}')
+                    if action:
+                        p = Permission.objects.filter(user=u, directory=d, permission=16).first()
+                        p.delete()
+                if Permission.objects.filter(user=u, directory=d, permission=32).count() > 1:
+                    print(f'{u.username} has duplicate 32 permission on {d.name}')
+                    if action:
+                        p = Permission.objects.filter(user=u, directory=d, permission=32).first()
+                        p.delete()
+                if Permission.objects.filter(user=u, directory=d, permission=64).count() > 1:
+                    print(f'{u.username} has duplicate 64 permission on {d.name}')
+                    if action:
+                        p = Permission.objects.filter(user=u, directory=d, permission=64).first()
+                        p.delete()
+                if Permission.objects.filter(user=u, directory=d, permission=128).count() > 1:
+                    print(f'{u.username} has duplicate 128 permission on {d.name}')
+                    if action:
+                        p = Permission.objects.filter(user=u, directory=d, permission=128).first()
+                        p.delete()
+                if Permission.objects.filter(user=u, directory=d, permission=256).count() > 1:
+                    print(f'{u.username} has duplicate 256 permission on {d.name}')
+                    if action:
+                        p = Permission.objects.filter(user=u, directory=d, permission=256).first()
+                        p.delete()
+                if Permission.objects.filter(user=u, directory=d, permission=512).count() > 1:
+                    print(f'{u.username} has duplicate 512 permission on {d.name}')
+                    if action:
+                        p = Permission.objects.filter(user=u, directory=d, permission=512).first()
+                        p.delete()
+                if Permission.objects.filter(user=u, directory=d, permission=1024).count() > 1:
+                    print(f'{u.username} has duplicate 1024 permission on {d.name}')
+                    if action:
+                        p = Permission.objects.filter(user=u, directory=d, permission=1024).first()
+                        p.delete()
+                if Permission.objects.filter(user=u, directory=d, permission=2048).count() > 1:
+                    print(f'{u.username} has duplicate 2048 permission on {d.name}')
+                    if action:
+                        p = Permission.objects.filter(user=u, directory=d, permission=2048).first()
+                        p.delete()
+                if Permission.objects.filter(user=u, directory=d, permission=4096).count() > 1:
+                    print(f'{u.username} has duplicate 4096 permission on {d.name}')
+                    if action:
+                        p = Permission.objects.filter(user=u, directory=d, permission=4096).first()
+                        p.delete()
     elif flag == 'mftuser':
         print('Cleanup mftusers.')
         for u in MftUser.objects.all():

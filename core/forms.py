@@ -26,7 +26,7 @@ class AddBusinessForm(forms.ModelForm):
 
 
 class MftUserForm(forms.ModelForm):
-    username     = forms.CharField(max_length=101, required=True, error_messages={'required': 'تمام فیلدهای ستاره دار را تکمیل نمائید'}, widget=forms.TextInput(attrs={"placeholder": "به صورت خودکار تکمیل می گردد", "class": "form-control", "readonly": "readonly"}))
+    username     = forms.CharField(max_length=101, required=True, label='username', error_messages={'required': 'تمام فیلدهای ستاره دار را تکمیل نمائید'}, widget=forms.TextInput(attrs={"placeholder": "به صورت خودکار تکمیل می گردد", "class": "form-control", "readonly": "readonly"}))
     alias        = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={"placeholder": "برای استفاده به صورت سیستمی", "class": "form-control"}))
     firstname    = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "First Name", "class": "form-control", "pattern": "[a-zA-Z].+"}))
     lastname     = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "Last Name", "class": "form-control", "pattern": "[a-zA-Z].+"}))
@@ -88,6 +88,9 @@ class MftUserForm(forms.ModelForm):
     
     def clean_mobilephone(self):
         phone_number = str(self.cleaned_data.get('mobilephone'))
+        if MftUser.objects.filter(mobilephone=phone_number).exists():
+            # raise ValidationError
+            self.add_error(self.fields['username'].label, 'کاربری با این مشخصات در سامانه موجود می باشد.')
         if not phone_number.startswith('9'):
             raise ValidationError('یک شماره همراه صحیح وارد کنید.')
         if len(phone_number) < 10 or len(phone_number) > 10:

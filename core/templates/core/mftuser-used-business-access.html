@@ -1,0 +1,111 @@
+{% extends "layouts/base.html" %} {% block title %} دسترسی های کاربر {% endblock %} {% load static %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<link type="text/css" href="/static/assets/css/tree.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" />
+{% endblock stylesheets %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script type="text/javascript" src="{% static 'js/tree.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/treeitem.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+{% comment %} {% if access == 'ADMIN' %}
+<script type="text/javascript">
+  $(function () {
+    $("input[role='confirm-btn']").click(function () {
+      var uid = $(this).attr("uid");
+      var csrf = "{{ csrf_token }}";
+      $.post(
+        "/entities/" + uid + "/confirm/",
+        {
+          csrfmiddlewaretoken: csrf,
+          entity: "mftuser",
+        },
+        function (response) {
+          if (response.result == "success") {
+            //document.getElementById(response.confirmed).remove();
+            //el = document.getElementById("id_isconfirmed");
+            //el.value = "این کاربر توسط مدیر تأیید شده است";
+            alert("کاربر با موفقیت تأیید شد.");
+            location.reload();
+          } else if (response.result == "error") {
+            console.log(response.result);
+          }
+        }
+      );
+    });
+  });
+
+  function makeInvoice() {
+    var mftuser = document.getElementById("current-user-id");
+    var bid = "{{ used_bus.id }}";
+    var url = "/invoice/?user=" + mftuser.innerHTML + "&type=3&bus=" + bid;
+    window.location = url;
+  }
+</script>
+{% endif %} {% endcomment %} {% endblock javascripts %} {% block content %}
+
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <div class="section-header pb-6 bg-primary text-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 text-center" style="direction: rtl">
+          <h1 class="display-3 mb-4">دسترسی های کاربر {{ mftuser.username }}</h1>
+          <p class="lead mb-5">
+            دسترسی های کاربر {{ mftuser.username }} را در زیر مشاهده می کنید.<br />
+            امکان اختصاص دسترسی در مسیرهای زیر به کاربر وجود دارد.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section section-md">
+    <div class="container">
+      <div class="row mb-4">
+        <div class="col-12 mx-auto">
+          <div class="mx-auto text-center" style="direction: rtl">
+            <p class="h4 my-1 me-2" for="select-used-business">اختصاص دسترسی در مسیرهای سامانه/پروژه <u>{{ used_bus }}</u></p>
+          </div>
+          <div class="mt-4">
+            <div class="mx-auto text-center" style="direction: rtl">
+              {% if confirmed %}
+              <span>دسترسی های <strong class="h5 text-info">{{ mftuser.username }}</strong> در کلیه مسیرها </span
+              ><span class="h5 text-success">تأیید شده است.</span>
+              {% else %}
+              <span>دسترسی های <strong class="h5 text-info">{{ mftuser.username }}</strong> در بعضی از مسیرها </span
+              ><span class="h5 text-warning">تأیید نشده است.</span>
+              {% endif %}
+            </div>
+            <p id="current-user-id" style="display: none">{{ mftuser.id }}</p>
+          </div>
+          {% include "includes/directories-list.html" %}
+        </div>
+      </div>
+      {% comment %} {% if access != 'ADMIN' and not confirmed %}
+      <div class="row mb-3">
+        <input
+          type="button"
+          style="width: 50%"
+          class="btn btn-primary mx-auto"
+          value="فرم چارگون دسترسی های کاربر در این سامانه"
+          onClick="makeInvoice();"
+        />
+      </div>
+      {% endif %} {% endcomment %}
+      <div class="row mt-10 mb-3">
+        <a href="{% url 'mftuser-details' mftuser.id %}" style="width: 50%" class="btn btn-tertiary mx-auto">مشاهده مشخصات کاربر</a>
+      </div>
+      <div class="row mb-6">
+        <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onclick="history.back()" />
+      </div>
+    </div>
+  </div>
+</main>
+
+{% include "includes/footer.html" %} {% endblock content %}
