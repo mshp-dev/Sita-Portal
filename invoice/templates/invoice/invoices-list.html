@@ -1,0 +1,92 @@
+{% extends "layouts/base.html" %} {% block title %} لیست همه فرم های چارگون {% endblock %} {% load static %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+{% endblock javascripts %} {% block content %}
+
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <div class="section-header pb-6 bg-primary text-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 text-center" style="direction: rtl">
+          <h1 class="display-3 mb-4">لیست فرم های چارگون</h1>
+          <p class="lead mb-5">در اینجا می توانید لیست فرم های چارگون را که تا به حال ایجاد نموده اید، مشاهده نمائید.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section section-md">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="mb-3">
+          <h4 class="display-4" style="direction: rtl" for="search">جستجو در بین فرم های چارگون</h4>
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              style="text-align: right"
+              id="search-input"
+              placeholder="...چیزی بنویسید"
+              aria-label="Search"
+              aria-describedby="basic-addon"
+            /><span class="input-group-text" id="basic-addon"><span id="search-icon" class="fas fa-search"></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div id="replaceable-content" class="row mb-5">{% include "includes/invoice-list.html" %}</div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    const search_input = $("#search-input");
+    const search_icon = $("#search-icon");
+    const contents_list = $("#replaceable-content");
+    const endpoint = window.location.pathname;
+    const delay_by_in_ms = 700;
+    var scheduled_function = false;
+
+    var ajax_call = function (endpoint, request_parameters) {
+      $.getJSON(endpoint, request_parameters).done((response) => {
+        // fade out the users_list, then:
+        contents_list
+          .fadeTo("slow", 0)
+          .promise()
+          .then(() => {
+            // replace the HTML contents
+            contents_list.html(response["html_from_view"]);
+            // fade-in the div with new contents
+            contents_list.fadeTo("slow", 1);
+            // stop animating search icon
+            search_icon.removeClass("blink");
+          });
+      });
+    };
+
+    search_input.on("keyup", function () {
+      const request_parameters = {
+        q: $(this).val(), // value of search_input: the HTML element with ID search-input
+      };
+
+      // start animating the search icon with the CSS class
+      search_icon.addClass("blink");
+
+      // if scheduled_function is NOT false, cancel the execution of the function
+      if (scheduled_function) {
+        clearTimeout(scheduled_function);
+      }
+
+      // setTimeout returns the ID of the function to be executed
+      scheduled_function = setTimeout(ajax_call, delay_by_in_ms, endpoint, request_parameters);
+    });
+  </script>
+</main>
+
+{% include "includes/footer.html" %} {% endblock content %}

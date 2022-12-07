@@ -1,0 +1,76 @@
+{% load coretags %}
+<!--Invoices in invoices-list-->
+{% if invoices %} {% for invoice in invoices %}
+<div class="col-10 mx-auto">
+  <div class="accordion mb-2" id="{{ invoice.get_mftuser.username|remove_dot }}">
+    <!--Invoice Node-->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#{{ invoice.get_mftuser.username|remove_dot }}{{ invoice.id }}"
+          aria-expanded="false"
+          aria-controls="{{ invoice.get_mftuser.username|remove_dot }}{{ invoice.id }}"
+        >
+          <span class="fas fa-file-alt"></span>
+          <!--prettier-ignore-->
+          <h3 class="display-5 ms-2">{{ invoice.serial_number }} - ({% if invoice.invoice_type.code == 'USEDBUSINESS' %}سرویس گیرنده{% else %}سرویس دهنده{% endif %})</h3>
+        </button>
+      </h2>
+      <div
+        id="{{ invoice.get_mftuser.username|remove_dot }}{{ invoice.id }}"
+        class="accordion-collapse collapse"
+        aria-labelledby="headingOne"
+        data-bs-parent="#{{ invoice.get_mftuser.username|remove_dot }}"
+      >
+        <div class="accordion-body">
+          <div class="container">
+            <div class="row mt-5 mb-5">
+              <span
+                >Username: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.username }}</strong></span></span
+              >
+              <span
+                >Alias: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.alias }}</strong></span></span
+              >
+              <span
+                >Email: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.email }}</strong></span></span
+              >
+              <span
+                >Firstname: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.firstname }}</strong></span></span
+              >
+              <span
+                >Lastname: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.lastname }}</strong></span></span
+              >
+              <span
+                >Organization: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.organization }}</strong></span></span
+              >
+              <span
+                >Business: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.business.all|get_businesses }}</strong></span></span
+              >
+              <span
+                >MobilePhone: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.mobilephone }}</strong></span></span
+              >
+              <span
+                >OfficePhone: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.officephone }}</strong></span></span
+              >
+              <span
+                >Description: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.description }}</strong></span></span
+              >
+            </div>
+            <div class="col">
+              <a href="#" style="width: 100%" class="btn btn-danger animate-up-1">حذف درخواست</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--End of Invoice Node-->
+  </div>
+</div>
+{% endfor %}
+<!--No Invoice Found-->
+{% else %}
+<h4>No invoice found</h4>
+{% endif %}

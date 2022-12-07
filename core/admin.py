@@ -64,15 +64,15 @@ class MftUserTempAdmin(admin.ModelAdmin):
     ordering = ['username']
 
 class DirectoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'absolute_path', 'bic', 'index_code']
-    list_filter = ['bic', 'business']
+    list_display = ['name', 'relative_path', 'bic', 'index_code', 'created_by']
+    list_filter = ['bic', 'business', 'created_by']
     search_fields = ['relative_path', 'bic__description', 'business__description']
-    ordering = ['name']
+    ordering = ['name', 'relative_path']
 
 
 class PermissionAdmin(admin.ModelAdmin):
-    list_display = ['user', 'directory_path', 'permission']
-    list_filter = ['permission', 'directory__bic', 'directory__business']
+    list_display = ['user', 'directory_path', 'permission', 'created_by']
+    list_filter = ['permission', 'directory__bic', 'directory__business', 'created_by']
     search_fields = ['user__username', 'directory__name', 'permission']
     ordering = ['user__username']
 

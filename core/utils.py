@@ -7,7 +7,21 @@ from .models import *
 
 from tempfile import NamedTemporaryFile as ntf
 from lxml import etree as ET
-import os, random, zipfile
+import os, random, zipfile, csv
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def get_not_confirmed_dirs(dirs):
+    all_dirs = []
+    ids = [d['directory'] for d in ids_dict]
+    if pretify:
+        dirs = Directory.objects.filter(id__in=ids, parent=parent).order_by('relative_path')
+        return [{'dir': d, 'children': get_dirs_with_changed_permissions(ids_dict, parent=d.id)} for d in dirs]
+    else:
+        return [{'dir': d, 'children': []} for d in Directory.objects.filter(id__in=ids).order_by('relative_path')]
 
 
 def get_specific_root_dir(buss, bic):
@@ -15,7 +29,7 @@ def get_specific_root_dir(buss, bic):
     if bic.code == 'ISC':
         all_dirs = []
         for rd in root_dirs:
-            bank_dirs = Directory.objects.filter(parent=rd.id).order_by('name') # business=rd.business, 
+            bank_dirs = Directory.objects.filter(parent=rd.id, is_confirmed=True).order_by('name') # business=rd.business, 
             all_dirs.append({'dir': rd, 'children': [{'dir': b, 'children': get_sub_dirs(b)} for b in bank_dirs]})
             # [{'dir': Directory.objects.get(bic=bic, parent=rd.id), 'children': get_sub_dirs(Directory.objects.get(bic=bic, parent=rd.id))}]})
         return all_dirs
@@ -32,7 +46,7 @@ def get_all_dirs(isc_user, owned=True, query=None, pretify=True):
             root_dirs = all_dirs.filter(name=query, bic__in=d_bics).order_by('name')
         else:
             root_dirs = Directory.objects.filter(parent=0).order_by('name')
-            return [{'dir': d, 'children': [{'dir': b, 'children': get_sub_dirs(b, query)} for b in (Directory.objects.filter(parent=d.id, bic__in=d_bics).order_by('name') if pretify else Directory.objects.filter(bic__in=d_bics).order_by('name'))]} for d in root_dirs]
+            return [{'dir': d, 'children': [{'dir': b, 'children': get_sub_dirs(b, query, dir_create_view=True)} for b in (Directory.objects.filter(parent=d.id, bic__in=d_bics).order_by('name') if pretify else Directory.objects.filter(bic__in=d_bics).order_by('name'))]} for d in root_dirs]
     elif str(isc_user.role.code) == 'OPERATION':
         accesses = OperationBusiness.objects.filter(user=isc_user, owned_by_user=owned).order_by('access_on_bus')
         d_buss = [a.access_on_bus for a in accesses]
@@ -48,17 +62,17 @@ def get_all_dirs(isc_user, owned=True, query=None, pretify=True):
         else:
             root_dirs = Directory.objects.filter(parent=0).order_by('name')
         
-    return [{'dir': d, 'children': get_sub_dirs(d, query) if pretify else []} for d in root_dirs]
+    return [{'dir': d, 'children': get_sub_dirs(d, query, dir_create_view=True) if pretify else []} for d in root_dirs]
 
 
 def get_dirs_with_changed_permissions(ids_dict, pretify=True):
     parent = 0
     ids = [d['directory'] for d in ids_dict]
     if pretify:
-        dirs = Directory.objects.filter(id__in=ids, parent=parent).order_by('name')
+        dirs = Directory.objects.filter(id__in=ids, parent=parent).order_by('relative_path')
         return [{'dir': d, 'children': get_dirs_with_changed_permissions(ids_dict, parent=d.id)} for d in dirs]
     else:
-        return [{'dir': d, 'children': []} for d in Directory.objects.filter(id__in=ids).order_by('name')]
+        return [{'dir': d, 'children': []} for d in Directory.objects.filter(id__in=ids).order_by('relative_path')]
 
 
 def get_users_with_changed_permissions():
@@ -68,7 +82,7 @@ def get_users_with_changed_permissions():
     return mftusers
 
 
-def get_sub_dirs(dir_, q=None):
+def get_sub_dirs(dir_, q=None, dir_create_view=False):
     temp = dir_.children.split(',')
     children = []
     if len(temp) > 0:
@@ -78,11 +92,18 @@ def get_sub_dirs(dir_, q=None):
         for id_ in chs:
             try:
                 d = Directory.objects.get(pk=id_)
-                if q:
-                    if d.name.contains(q):
-                        children.append({'dir': d, 'children': get_sub_dirs(d, q)})
-                else:
-                    children.append({'dir': d, 'children': get_sub_dirs(d)})
+                if dir_create_view:
+                    if q:
+                        if d.name.contains(q):
+                            children.append({'dir': d, 'children': get_sub_dirs(d, q)})
+                    else:
+                        children.append({'dir': d, 'children': get_sub_dirs(d)})
+                elif d.is_confirmed:
+                    if q:
+                        if d.name.contains(q):
+                            children.append({'dir': d, 'children': get_sub_dirs(d, q)})
+                    else:
+                        children.append({'dir': d, 'children': get_sub_dirs(d)})
             except:
                 logger.error(f'directory with id {id_} does not exists, parent id is {dir_.parent}.')
     
@@ -123,6 +144,7 @@ def create_default_permission(isc_user, mftuser, last_dir, business=None, home_d
             )
             perm.save()
         directory = Directory.objects.get(pk=directory.parent)
+    
     if home_dir:
         if mftuser.organization.code == 'ISC':
             bus_dir = Directory.objects.get(business=business, relative_path=business.code)
@@ -137,7 +159,7 @@ def create_default_permission(isc_user, mftuser, last_dir, business=None, home_d
                     )
                     perm.save()
 
-        if not Permission.objects.filter(user=mftuser, directory=dir_, permission=list_perm.value).exists():
+        if not Permission.objects.filter(user=mftuser, directory=directory, permission=list_perm.value).exists():
             perm = Permission(
                 user=mftuser,
                 directory=directory,
@@ -313,6 +335,93 @@ def export_user(id, isc_user):
         )
 
 
+def export_user_with_paths(id, isc_user):
+    mftuser = MftUser.objects.get(pk=id)
+    template = ET.parse(os.path.join(settings.MEDIA_ROOT, 'template.xml'))
+    description = template.xpath('//webUsers/webUser/description')
+    description[0].text = mftuser.description
+    email = template.xpath('//webUsers/webUser/email')
+    email[0].text = mftuser.email
+    firstName = template.xpath('//webUsers/webUser/firstName')
+    firstName[0].text = mftuser.firstname
+    phone = template.xpath('//webUsers/webUser/phone')
+    phone[0].text = str(mftuser.officephone)
+    authenticationAlias = template.xpath('//webUsers/webUser/authenticationAlias')
+    authenticationAlias[0].text = mftuser.alias
+    lastName = template.xpath('//webUsers/webUser/lastName')
+    lastName[0].text = mftuser.lastname
+    organization = template.xpath('//webUsers/webUser/organization')
+    organization[0].text = mftuser.organization.code
+    mobilePhone = template.xpath('//webUsers/webUser/mobilePhone')
+    mobilePhone[0].text = str(mftuser.mobilephone)
+    name = template.xpath('//webUsers/webUser/name')
+    name[0].text = mftuser.username
+    # <ipFilterEntries>
+    #     <ipFilterEntry>
+    #         <address></address>
+    #     </ipFilterEntry>
+    # </ipFilterEntries>
+    # ip = template.xpath('//webUsers/webUser/ipFilterEntries/ipFilterEntry/address')
+    # ip[0].text = mftuser.ipaddr
+    virtualFile = template.xpath('//webUsers/webUser/virtualFile')
+    virtual_files = template.xpath('//webUsers/webUser/virtualFile/virtualFiles')
+    permissions = Permission.objects.filter(user=mftuser, is_confirmed=True)
+    all_dirs = permissions.values('directory').distinct()
+    # bus_codes = [ub.code for ub in mftuser.business.all()]
+    # bus_dirs = Directory.objects.filter(name__in=bus_codes)
+    bus_dirs = []
+    for d in all_dirs:
+        dir_ = Directory.objects.get(pk=d['directory'])
+        if dir_.parent == 0:
+            bus_dirs.append(dir_)
+    for bus_dir in bus_dirs:
+        virtual_file = ET.SubElement(virtual_files[0], 'virtualFile')
+        make_virtual_file(bus_dir, permissions, virtual_file)
+        # chs = bus_dir.children.split(',')[:-1]
+        # dirs_with_perms = [dir_['directory'] for dir_ in all_dirs if str(dir_['directory']) in chs]
+        # for d in dirs_with_perms:
+        #     virtual_file = ET.SubElement(virtual_files[0], 'virtualFile')
+        #     make_virtual_file(Directory.objects.get(pk=d), permissions, virtual_file)
+    
+    webuser_temp_file = ntf(mode='w+', encoding='utf-8', delete=True)
+    bytes_template = ET.tostring(template, pretty_print=True)
+    webuser_temp_file.write(bytes_template.decode('utf-8'))
+    webuser_temp_file.flush()
+    webuser_file = File(webuser_temp_file, name=f'{mftuser.username}.xml')
+    paths_temp_file = ntf(mode='w+', encoding='utf-8', delete=True)
+    bytes_template = ET.tostring(template)
+    dir_ids = [d['directory'] for d in all_dirs]
+    for d in Directory.objects.filter(pk__in=dir_ids).order_by('relative_path'):
+        paths_temp_file.write(f'{d.absolute_path},\n')
+    paths_temp_file.flush()
+    paths_file = File(paths_temp_file, name=f'{mftuser.username}.csv')
+    # csv_file_path, csv_file_name = make_csv_of_single_user_paths(all_dirs, name=mftuser.username)
+    if ReadyToExport.objects.filter(mftuser=mftuser).exists():
+        rte = ReadyToExport.objects.get(mftuser=mftuser)
+        rte.is_downloaded = False
+        rte.number_of_exports = rte.number_of_exports + 1
+        # if os.path.isfile(rte.export.path):
+        os.remove(rte.webuser.path)
+        os.remove(rte.paths.path)
+        rte.webuser = webuser_file
+        rte.paths = paths_file
+        rte.save()
+        # rte.delete()
+    else:
+        if os.path.exists(os.path.join(settings.MEDIA_ROOT, 'exports', f'{mftuser.username}.xml')):
+            os.remove(os.path.join(settings.MEDIA_ROOT, 'exports', f'{mftuser.username}.xml'))
+        if os.path.exists(os.path.join(settings.MEDIA_ROOT, 'exports', f'{mftuser.username}.csv')):
+            os.remove(os.path.join(settings.MEDIA_ROOT, 'exports', f'{mftuser.username}.csv'))
+        ReadyToExport.objects.create(
+            mftuser=mftuser,
+            created_by=isc_user,
+            webuser=webuser_file,
+            paths = paths_file
+            # is_downloaded=False,
+            # number_of_exports=0,
+        )
+
+
 def make_virtual_file(directory, permissions, virtual_file):
     all_dirs = permissions.values('directory').distinct()
     summed = permissions.filter(directory=directory).aggregate(Sum('permission'))
@@ -350,9 +459,21 @@ def zip_all_exported_users(name='export'):
     with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED) as zf:
         all_exported = ReadyToExport.objects.filter(is_downloaded=False)
         for ef in all_exported:
-            zf.write(ef.export.path, arcname=ef.export.name.split('/')[-1])
+            zf.write(ef.webuser.path, arcname=ef.export.name.split('/')[-1])
+            zf.write(ef.paths.path, arcname=ef.export.name.split('/')[-1])
         # return zf
     return os.path.join(os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.zip'))
+
+
+def make_csv_of_all_paths(name='paths'):
+    path = os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv')
+    with open(path, mode='w') as csv_file:
+        csv_writer = csv.writer(csv_file, delimiter=',', lineterminator='\n')
+        csv_writer.writerow(['PATHS'])
+        for d in Directory.objects.all().order_by('relative_path'):
+            csv_writer.writerow([f'{d.absolute_path}'])
+            
+    return os.path.join(os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv'))
 
 
 def insert_into_db():

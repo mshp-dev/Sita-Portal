@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
 
-import os
+import os, zipfile
 
 
 class OverwriteStorage(FileSystemStorage):
@@ -227,9 +227,16 @@ class OperationBusiness(models.Model):
 class ReadyToExport(models.Model):
     id                = models.AutoField(primary_key=True)
     mftuser           = models.OneToOneField(MftUser, blank=False, on_delete=models.CASCADE)
-    export            = models.FileField(upload_to='exports/', storage=OverwriteStorage(), default='template.xml')
+    webuser           = models.FileField(upload_to='exports/', storage=OverwriteStorage(), default='template.xml')
+    paths             = models.FileField(upload_to='exports/', storage=OverwriteStorage(), default='paths.csv')
     is_downloaded     = models.BooleanField(blank=False, default=False)
     number_of_exports = models.IntegerField(blank=False, default=0)
     created_by        = models.ForeignKey(IscUser, blank=False, on_delete=models.CASCADE)
     created_at        = models.DateTimeField(default=timezone.now)
 
+    def generate_zip_file(self, name='export'):
+        path = os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.zip')
+        with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED) as zf:
+            zf.write(self.webuser.path, arcname=self.webuser.name.split('/')[-1])
+            zf.write(self.paths.path, arcname=self.paths.name.split('/')[-1])
+        return os.path.join(os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.zip'))

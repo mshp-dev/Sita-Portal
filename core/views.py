@@ -15,6 +15,8 @@ from django.utils import timezone
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.contrib.auth.hashers import make_password
 
+from invoice.models import Invoice
+
 from .utils import *
 from .models import *
 from .forms import *
@@ -28,6 +30,7 @@ logger = logging.getLogger(__name__)
 def index_view(request):
     # buck insertion into or correction in db
     # insert_into_db()
+    # clean_up(flag='dir', action=False)
     # clean_up(flag='perm2', action=True)
     # clean_up(flag='dir3', action=False, bic_name="FIU")
 
@@ -299,7 +302,7 @@ def profile_view(request, *args, **kwargs):
 def error_view(request, err=None, *args, **kwargs):
     context = {}
     
-    if err or err == None:
+    if err == 400 or err == None:
         html_template = loader.get_template('core/400.html')
         return HttpResponse(html_template.render(context, request))
     elif err == 401:
@@ -387,6 +390,8 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
     access          = str(isc_user.role.code)
     mftusers        = MftUser.objects.filter(is_confirmed=False).order_by('username')
     deleted_users   = MftUserTemp.objects.filter(description__icontains=f"%deleted%").order_by('username')
+    # invoices        = Invoice.objects.filter(processed=False).order_by('created_at')
+    invoices        = Invoice.objects.all().order_by('created_at')
     elements        = []
     new_users       = []
     changed_users   = []
@@ -429,6 +434,7 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
         'username': username,
         'admin_view': True,
         'access': access,
+        'invoices': invoices,
         'elements': get_users_with_changed_permissions(),
         'users': mftusers,
         'new_users': new_users,
@@ -481,10 +487,10 @@ def export_data_view(request, *args, **kwargs):
 
 
 @login_required(login_url="/login/")
-def download_view(request, id, *args, **kwargs):
-    isc_user            = IscUser.objects.get(user=request.user)
-    downloadable        = None if id == 0 else ReadyToExport.objects.get(pk=id)
-    response = None
+def download_mftuser_view(request, id, *args, **kwargs):
+    isc_user     = IscUser.objects.get(user=request.user)
+    downloadable = None if id == 0 else ReadyToExport.objects.get(pk=id)
+    response     = None
     
     if not isc_user.user.is_staff:
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
@@ -492,9 +498,10 @@ def download_view(request, id, *args, **kwargs):
 
     if downloadable:
         # mime_type, _ = mimetypes.guess_type(downloadable.export.path)
-        response = FileResponse(downloadable.export, as_attachment=True)#, content_type=mime_type)
-        response['Content-Disposition'] = f"attachment; filename={downloadable.mftuser.username}.xml"
-        logger.info(f'{downloadable.mftuser.username}.xml downloaded by {isc_user.user.username}.')
+        response = FileResponse(open(downloadable.generate_zip_file(name=downloadable.mftuser.username), 'rb'), as_attachment=True)#, content_type=mime_type)
+        response['Content-Disposition'] = f"attachment; filename={downloadable.mftuser.username}.zip"
+        response['Content-Type'] = "file/zip"
+        logger.info(f'{downloadable.mftuser.username}.zip downloaded by {isc_user.user.username}.')
         # return response
     else:
         downloadable_url = zip_all_exported_users('export_sita_users')
@@ -504,6 +511,23 @@ def download_view(request, id, *args, **kwargs):
         response['Content-Type'] = "file/zip"
         logger.info(f'export_sita_users.zip downloaded by {isc_user.user.username}.')
         # response = {'result': 'success', 'url': downloadable_url}
+    
+    return response
+
+
+@login_required(login_url="/login/")
+def download_dirs_paths_view(request, *args, **kwargs):
+    isc_user = IscUser.objects.get(user=request.user)
+    
+    if not isc_user.user.is_staff:
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        return redirect('/error/401/')
+
+    downloadable_url = make_csv_of_all_paths(name="sita_all_dirs_paths")
+    response = FileResponse(open(downloadable_url, 'rb'), as_attachment=True)
+    response['Content-Disposition'] = "attachment; filename=sita_all_dirs_paths.csv"
+    response['Content-Type'] = "text/csv"
+    logger.info(f'sita_all_dirs_paths.csv downloaded by {isc_user.user.username}.')
     
     return response
 
@@ -534,12 +558,12 @@ def mftuser_create_view(request, *args, **kwargs):
     elif isc_user.role.code == 'OPERATION':
         # orgs = [bic for bic in BankIdentifierCode.objects.all().order_by('description')]
         orgs = [bic for bic in BankIdentifierCode.objects.filter(code='ISC')]
-        buss = [BusinessCode.objects.get(pk=bus.access_on_bus.id) for bus in OperationBusiness.objects.filter(user=isc_user).order_by('access_on_bus')]
+        buss = [BusinessCode.objects.get(pk=bus.access_on_bus.id) for bus in OperationBusiness.objects.filter(user=isc_user, owned_by_user=True).order_by('access_on_bus')]
     elif isc_user.role.code == 'ADMIN':
         orgs = [bic for bic in BankIdentifierCode.objects.all().order_by('description')]
         buss = [bus for bus in BusinessCode.objects.all().order_by('description')]
     
-    form = MftUserForm(request.POST or None)
+    form = MftUserForm(request.POST or None, request=request)
     form.fields['organization'].choices = [(bic.id, bic) for bic in orgs]
     form.fields['business'].choices = [(bus.id, bus) for bus in buss]
     
@@ -679,7 +703,7 @@ def mftusers_list_view(request, *args, **kwargs):
         u_bics = [a.access_on_bic for a in accesses]
         mftusers = MftUser.objects.filter(organization__in=u_bics).order_by('username')
     elif str(isc_user.role.code) == 'OPERATION':
-        accesses = OperationBusiness.objects.filter(user=isc_user)
+        accesses = OperationBusiness.objects.filter(user=isc_user, owned_by_user=True)
         u_buss = [a.access_on_bus for a in accesses]
         mftusers = MftUser.objects.filter(business__in=u_buss).order_by('username').distinct()
     else:
@@ -731,12 +755,12 @@ def mftuser_details_view(request, id, *args, **kwargs):
         buss = [bus for bus in BusinessCode.objects.all()]
     elif isc_user.role.code == 'OPERATION':
         orgs = [acc for acc in BankIdentifierCode.objects.all()]
-        buss = [bus.access_on_bus for bus in OperationBusiness.objects.filter(user=isc_user)]
+        buss = [bus.access_on_bus for bus in OperationBusiness.objects.filter(user=isc_user, owned_by_user=True)]
     elif isc_user.role.code == 'ADMIN':
         orgs = [bic for bic in BankIdentifierCode.objects.all()]
         buss = [bus for bus in BusinessCode.objects.all()]
     
-    form = MftUserForm(request.POST or None, instance=mftuser)
+    form = MftUserForm(request.POST or None, instance=mftuser, request=request)
     form.fields['organization'].choices = [(bic.id, bic) for bic in orgs]
     form.fields['business'].choices = [(bus.id, bus) for bus in buss]
 
@@ -872,11 +896,18 @@ def mftuser_access_view(request, uid, pid=-1, dir_name="", *args, **kwargs):
     if isc_user.role.code == 'ADMIN':
         elements = get_all_dirs(isc_user)
     else:
-        elements = get_specific_root_dir(owned_buss, bic)
+        buss = []
         if isc_user.role.code == 'OPERATION':
             o_buss = OperationBusiness.objects.filter(user=isc_user, owned_by_user=False).order_by('access_on_bus')
             if o_buss.count() > 0:
                 used_buss = [{'value': f'{ob.access_on_bus.id}', 'name': f'{ob.access_on_bus}'} for ob in o_buss]
+            for bus in mftuser.business.all():
+                if bus in owned_buss:
+                    buss.append(bus)
+        elif isc_user.role.code == 'CUSTOMER':
+            buss = mftuser.business.all()
+            
+        elements = get_specific_root_dir(buss, bic)
     
     if request.is_ajax():
         if request.method == 'POST':
@@ -1356,6 +1387,172 @@ def mftuser_permissions_view(request, uid, did, *args, **kwargs):
 
 
 @login_required(login_url="/login/")
+def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
+    isc_user = IscUser.objects.get(user=request.user)
+    mftuser = MftUser.objects.get(pk=uid)
+    directory = Directory.objects.get(pk=did)
+    bic = BankIdentifierCode.objects.get(code=mftuser.organization.code)
+
+    if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=mftuser.business.all()).exists():
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        return redirect('/error/401/')
+
+    if request.is_ajax():
+        if request.method == 'POST':
+            old_permissions = []
+            splited = []
+            status_code = 200
+            response = {}
+            try:
+                permissions = request.POST.get('permissions')
+                splited = [int(t) for t in permissions.split(',')[:-1]]
+                action = request.POST.get('action')
+                if action == 'remove':
+                    for pv in splited:
+                        if Permission.objects.filter(user=mftuser, directory=directory, permission=pv).exists():
+                            Permission.objects.filter(user=mftuser, directory=directory, permission=pv).delete()
+                        if pv == 1: #Download (Read)
+                            Permission.objects.filter(user=mftuser, directory=directory, permission=128).delete()   #Checksum
+                        elif pv == 2: #Upload (Write)
+                            Permission.objects.filter(user=mftuser, directory=directory, permission=512).delete()   #Overwrite
+                            Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete()  #Append
+                        elif pv == 32: #Delete (Modify)
+                            Permission.objects.filter(user=mftuser, directory=directory, permission=8).delete()      #Rename
+                elif action == 'add':
+                    for pv in splited:
+                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=pv).exists():
+                            perm = Permission(
+                                user=mftuser,
+                                directory=directory,
+                                permission=pv,
+                                created_by=isc_user
+                            )
+                            perm.save()
+                            check_parents_permission(
+                                isc_user=isc_user,
+                                mftuser=mftuser,
+                                parent=directory.parent
+                                # permission=perm.value,
+                            )
+                        if pv == 1: #Download (Read)
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=256, #List
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=128).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=128, #Checksum
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                        elif pv == 2: #Upload (Write)
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=256, #List
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=128).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=128, #Checksum
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=1024).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=1024, #Append
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=512).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=512, #Overwrite
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                        elif pv == 32: #Delete (Modify)
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=256, #List
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=128).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=128, #Checksum
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=512).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=512, #Overwrite
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=8).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=8, #Rename
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=1024).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=1024, #Append
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=1).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=1, #Download
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=2).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=2, #Upload
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                logger.info(f'permission of directory {directory.absolute_path} for mftuser {mftuser.username} changed to {splited} by {isc_user.user.username}.')
+                response = {'result': 'success'}
+            except Exception as e:
+                print(e)
+                status_code = 400
+                logger.error(f'permission change on directory {directory.absolute_path} to {splited} by {isc_user.user.username} encountered with error.')
+                response = {'result': 'error'}
+            finally:
+                return JsonResponse(data=response, safe=False, status=status_code)
+
+
+@login_required(login_url="/login/")
 def delete_directory_view(request, did, *args, **kwargs):
     isc_user = IscUser.objects.get(user=request.user)
     dir_ = Directory.objects.get(pk=did)
@@ -1420,7 +1617,8 @@ def entities_confirm_view(request, id, *args, **kwargs):
                         if i == 0:
                             confirmed = True
                     if confirmed:
-                        export_user(id=id, isc_user=isc_user)
+                        # export_user(id=id, isc_user=isc_user)
+                        export_user_with_paths(id=id, isc_user=isc_user)
                         logger.info(f'export file of mftuser {mftuser.username} is ready to download.')
                     response = {'result': 'success', 'confirmed': confirmed, 'mftuser': mftuser.username.replace('.', ''), 'id': mftuser.id}
                     # return JsonResponse(data=response, safe=False)
@@ -1444,7 +1642,8 @@ def entities_confirm_view(request, id, *args, **kwargs):
                                     i -= 1
                             if i == 0:
                                 confirmed = True
-                                export_user(id=mftuser.id, isc_user=isc_user)
+                                # export_user(id=mftuser.id, isc_user=isc_user)
+                                export_user_with_paths(id=id, isc_user=isc_user)
                                 logger.info(f'export file of mftuser {mftuser.username} is ready to download.')
                     response = {'result': 'success', 'confirmed': confirmed, 'mftuser': mftuser.username.replace('.', ''), 'id': mftuser.id}
                     # return JsonResponse(data=response, safe=False)

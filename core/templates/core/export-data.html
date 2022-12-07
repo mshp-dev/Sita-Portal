@@ -32,7 +32,7 @@
           function (response) {
             if (response.result == "success") {
               document.getElementById(response.deleted).remove();
-              alert("فایل XML حاوی اطلاعات کاربر با موفقیت دانلود شد.");
+              alert("فایل ZIP حاوی اطلاعات کاربر و مسیرها با موفقیت دانلود شد.");
             } else if (response.result == "error") {
               alert("مشکلی پیش آمده است!");
             }
@@ -44,34 +44,40 @@
     $("#download-in-zip-format").click(function () {
       var fileCount = document.querySelectorAll('[role="mftuser"]');
       if (fileCount.length > 0) {
-        $.get("/download/0/", function () {
-          delay(1500).then(() => {
-            var csrf = "{{ csrf_token }}";
-            var files = document.querySelectorAll('[role="mftuser"]');
-            for (var i = 0; i < files.length; i++) {
-              var eid = files[i].getAttribute("eid");
-              $.post(
-                "/export-data/",
-                {
-                  csrfmiddlewaretoken: csrf,
-                  eid: eid,
-                },
-                function (response) {
-                  if (response.result == "success") {
-                    document.getElementById(response.deleted).remove();
-                    //alert("فایل XML حاوی اطلاعات کاربر با موفقیت دانلود شد.");
-                  } else if (response.result == "error") {
-                    alert("مشکلی پیش آمده است!");
-                  }
+        window.location = "/download/mftuser/0/";
+        delay(1500).then(() => {
+          var csrf = "{{ csrf_token }}";
+          var files = document.querySelectorAll('[role="mftuser"]');
+          for (var i = 0; i < files.length; i++) {
+            var eid = files[i].getAttribute("eid");
+            $.post(
+              "/export-data/",
+              {
+                csrfmiddlewaretoken: csrf,
+                eid: eid,
+              },
+              function (response) {
+                if (response.result == "success") {
+                  document.getElementById(response.deleted).remove();
+                  //alert("فایل XML حاوی اطلاعات کاربر با موفقیت دانلود شد.");
+                } else if (response.result == "error") {
+                  alert("مشکلی پیش آمده است!");
                 }
-              );
-            }
-            alert("فایل ZIP حاوی اطلاعات کاربران با موفقیت دانلود شد.");
-          });
+              }
+            );
+          }
+          alert("فایل ZIP حاوی اطلاعات کاربران با موفقیت دانلود شد.");
         });
       } else {
         alert("موردی برای استخراج وجود ندارد!");
       }
+    });
+
+    $("#export-all-paths").click(function () {
+      window.location = "/download/paths/";
+      delay(2000).then(() => {
+        alert("فایل CSV حاوی کلیه مسیرها با موفقیت دانلود شد.");
+      });
     });
   });
 </script>
@@ -115,7 +121,7 @@
     <div class="container mt-8">
       <div class="row mb-5">
         <div class="d-flex justify-content-center">
-          <input id="download-in-zip-format" type="button" style="width: 60%" class="btn btn-tertiary animate-up-1" value="ZIP دانلود یکجا به صورت" />
+          <input id="download-in-zip-format" type="button" style="width: 60%" class="btn btn-tertiary animate-up-1" value="ZIP دانلود همه به صورت" />
         </div>
         <div class="d-flex justify-content-center mt-3">
           <input
@@ -125,6 +131,9 @@
             value="MFT شروع عملیات انتقال اطلاعات به"
             onclick="transportOperation()"
           />
+        </div>
+        <div class="d-flex justify-content-center mt-3">
+          <input id="export-all-paths" type="button" style="width: 60%" class="btn btn-primary animate-up-1" value="CSV دانلود کلیه مسیرها در قالب" />
         </div>
       </div>
       <div class="row mt-8 mb-5">

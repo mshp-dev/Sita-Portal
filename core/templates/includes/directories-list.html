@@ -23,30 +23,6 @@
     <div class="row justify-content-center">
       <div class="col-6 col-lg-6">
         <div class="row mb-5">
-          {% comment %}<button
-            id="btn-add-new-dir"
-            style="font-size: 0.8rem"
-            aria-label="افزودن دایرکتوری"
-            title="افزودن دایرکتوری"
-            type="button"
-            class="btn btn-outline-primary col-2 mb-4"
-          >
-            افزودن
-            <div aria-hidden="true" class="fas fa-plus" style="width: 1.2em"></div>
-          </button>
-          {% if access == 'ADMIN' %} endcomment
-          <button
-            id="btn-delete-dir"
-            style="font-size: 0.8rem"
-            aria-label="حذف دایرکتوری"
-            title="حذف دایرکتوری"
-            type="button"
-            class="btn btn-outline-primary col-2 ms-2 mb-4"
-          >
-            حذف
-            <div aria-hidden="true" class="fas fa-times" style="width: 1.2em"></div>
-          </button>
-          comment {% endif %} {% endcomment %}
           <script>
             $(function () {
               $("#btn-add-new-dir").click(function () {
@@ -92,6 +68,59 @@
                     $("#confirm-modal").modal("show");
                   }
                 }
+              });
+
+              $(":input[type='checkbox']").change(function () {
+                var absPath = $("#absolute-path-1").html();
+                var index = $("#index-code").html();
+                if (absPath == "") {
+                  alert("یک دایرکتوری را انتخاب نمائید!");
+                } else if (parseInt(index) > -3) {
+                  alert("دسترسی تغییر Permission این دایرکتوری را ندارید!");
+                  var uid = document.getElementById("current-user-id").innerHTML;
+                  getPermissions(uid);
+                } else {
+                  var did = $("#current-dir-id").html();
+                  var user_id = $("#current-user-id").html();
+                  var csrf = "{{ csrf_token }}";
+                  var permissions = "";
+                  var action = "remove";
+                  permissions += this.value + ",";
+                  if (this.checked) {
+                    action = "add";
+                    if (this.id != "subDirPermCheck") {
+                      $.post(
+                        "/mftuser/" + user_id + "/permission/" + did + "/",
+                        {
+                          permissions: permissions,
+                          action: action,
+                          csrfmiddlewaretoken: csrf,
+                        },
+                        function (response) {
+                          console.log(response.result);
+                          if (response.result == "error") {
+                            console.log(response.result);
+                          }
+                        }
+                      );
+                    }
+                  } else {
+                    $.post(
+                      "/mftuser/" + user_id + "/permission/" + did + "/",
+                      {
+                        permissions: permissions,
+                        action: action,
+                        csrfmiddlewaretoken: csrf,
+                      },
+                      function (response) {
+                        if (response.result == "error") {
+                          console.log(response.result);
+                        }
+                      }
+                    );
+                  }
+                }
+                return false;
               });
             });
           </script>
@@ -139,7 +168,7 @@
             </div>
             {% if access != 'ADMIN' %} {% comment %} {% if access == 'OPERATION' %} {% endcomment %}
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="32" id="subDirPermCheck" />
+              <input class="form-check-input" type="checkbox" value="0" id="subDirPermCheck" />
               <label style="font-size: 0.85rem" class="form-check-label" for="subDirPermCheck"> Create Folder (ایجاد پوشه) </label>
             </div>
             {% comment %} {% endif %} {% endcomment %}
@@ -202,9 +231,11 @@
               <div style="display: none">{% endif %}</div>
             </div>
             <div class="form-check row mt-4">
+              {% comment %}
               <button id="btn-change-permission" aria-label="تغییر دسترسی ها" title="تغییر دسترسی ها" class="btn btn-sm btn-warning" name="Change">
                 بروزرسانی دسترسی ها
               </button>
+              {% endcomment %}
               <script>
                 $(function () {
                   $("#btn-change-permission").click(function () {
@@ -223,6 +254,30 @@
 
                   $(":button[btn-func='close']").click(function () {
                     $("#subDirPermCheck").prop("checked", false);
+                  });
+
+                  $(":button[btn-func='ok']").click(function () {
+                    var did = $("#current-dir-id").html();
+                    var user_id = $("#current-user-id").html();
+                    var csrf = "{{ csrf_token }}";
+                    var permissions = "";
+                    var action = "add";
+                    permissions += $("#applySubPermCheck").prop("value") + ",";
+                    permissions += $("#createPermCheck").prop("value") + ",";
+                    $.post(
+                      "/mftuser/" + user_id + "/permission/" + did + "/",
+                      {
+                        permissions: permissions,
+                        action: action,
+                        csrfmiddlewaretoken: csrf,
+                      },
+                      function (response) {
+                        console.log(response.result);
+                        if (response.result == "error") {
+                          console.log(response.result);
+                        }
+                      }
+                    );
                   });
                 });
               </script>
@@ -321,7 +376,7 @@
                                   t.firstChars.push(ti.label.substring(0, 1).toLowerCase());
 
                                   new_dir_li.addEventListener("click", function (event) {
-                                    var appendPermCheck = document.getElementById("appendPermCheck");
+                                    /*var appendPermCheck = document.getElementById("appendPermCheck");
                                     var writePermCheck = document.getElementById("writePermCheck");
                                     var readPermCheck = document.getElementById("readPermCheck");
                                     var overwritePermCheck = document.getElementById("overwritePermCheck");
@@ -335,7 +390,7 @@
                                     var deletePermCheck = document.getElementById("deletePermCheck");
                                     var sharePermCheck = document.getElementById("sharePermCheck");
                                     var applySubPermCheck = document.getElementById("applySubPermCheck");
-                                    var confirmedByAdmin = document.getElementById("confirmedByAdmin");
+                                    var confirmedByAdmin = document.getElementById("confirmedByAdmin");*/
 
                                     var absolutePath1 = document.getElementById("absolute-path-1");
                                     var absolutePath2 = document.getElementById("absolute-path-2");
@@ -598,7 +653,7 @@
                     </p>
                   </div>
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary ms-auto" data-bs-dismiss="modal">بله</button>
+                    <button type="button" class="btn btn-secondary ms-auto" btn-func="ok" data-bs-dismiss="modal">بله</button>
                     <button type="button" class="btn btn-link ms-0" btn-func="close" data-bs-dismiss="modal">خیر</button>
                   </div>
                 </div>

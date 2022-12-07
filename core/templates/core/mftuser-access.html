@@ -41,7 +41,7 @@
 
   function makeInvoice() {
     var mftuser = document.getElementById("current-user-id");
-    var url = "/invoice/?user=" + mftuser.innerHTML + "&type=2&bus=0";
+    var url = "/invoices/create/?user=" + mftuser.innerHTML + "&type=2&bus=0";
     window.location = url;
   }
 </script>

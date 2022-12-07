@@ -283,7 +283,8 @@
   <div class="section section-md">
     <div class="container">
       <div class="row mb-5">
-        <div class="col-12 mx-auto">
+        {% comment %}
+        <div class="col-10 mx-auto">
           <div class="nav-wrapper position-relative mb-2">
             <ul class="nav nav-pills nav-fill flex-column flex-md-row" id="tabs-manage-data" role="tablist">
               <li class="col-4 nav-item">
@@ -295,31 +296,19 @@
                   role="tab"
                   aria-controls="tabs-permissions"
                   aria-selected="false"
-                  ><strong>دسترسی های تأیید نشده</strong> <span class="fas fa-folder-open"></span
-                ></a>
-              </li>
-              <li class="col-4 nav-item">
-                <a
-                  class="nav-link mb-sm-3 mb-md-0"
-                  id="tabs-mftusers-tab"
-                  data-bs-toggle="tab"
-                  href="#tabs-mftusers"
-                  role="tab"
-                  aria-controls="tabs-mftusers"
-                  aria-selected="false"
-                  ><strong>کاربری های تأیید نشده</strong> <span class="fas fa-address-book"></span
+                  ><strong>دایرکتوری ها و دسترسی های تأیید نشده</strong> <span class="fas fa-folder-open"></span
                 ></a>
               </li>
               <li class="col-4 nav-item">
                 <a
                   class="nav-link mb-sm-3 mb-md-0 active"
-                  id="tabs-invoices-tab"
+                  id="tabs-mftusers-tab"
                   data-bs-toggle="tab"
-                  href="#tabs-invoices"
+                  href="#tabs-mftusers"
                   role="tab"
-                  aria-controls="tabs-invoices"
+                  aria-controls="tabs-mftusers"
                   aria-selected="true"
-                  ><strong>فرم های چارگونی ایجاد شده</strong> <span class="fas fa-file-alt"></span
+                  ><strong>کاربران تأیید نشده</strong> <span class="fas fa-address-book"></span
                 ></a>
               </li>
             </ul>
@@ -328,115 +317,29 @@
         <div class="card border-0">
           <div class="card-body p-0">
             <div class="tab-content" id="tabcontent">
-              <div class="tab-pane fade active show" id="tabs-invoices" role="tabpanel" aria-labelledby="tabs-info-tab">
-                <br />
-                <br />
-                <br />
-                {% load coretags %} {% for invoice in invoices %}
-                <div class="col-10 mx-auto">
-                  <div class="accordion mb-2" id="inv-{{ invoice.mftuser }}">
-                    <!--Invoice Node-->
-                    <div class="accordion-item">
-                      <h2 class="accordion-header" id="headingOne">
-                        <button
-                          class="accordion-button collapsed"
-                          type="button"
-                          data-bs-toggle="collapse"
-                          data-bs-target="#inv-{{ invoice.id }}"
-                          aria-expanded="false"
-                          aria-controls="inv-{{ invoice.id }}"
-                        >
-                          <span class="fas fa-file-alt me-1"></span>
-                          <!--prettier-ignore-->
-                          <h3 class="display-5 ms-2">{{ invoice.serial_number }} - ({% if invoice.invoice_type.code == 'USEDBUSINESS' %}سرویس گیرنده{% else %}سرویس دهنده{% endif %})</h3>
-                        </button>
-                      </h2>
-                      <div
-                        id="inv-{{ invoice.id }}"
-                        class="accordion-collapse collapse"
-                        aria-labelledby="headingOne"
-                        data-bs-parent="#inv-{{ invoice.mftuser }}"
-                      >
-                        <div class="accordion-body">
-                          <div class="container">
-                            <div class="row">
-                              <div class="row mt-5 mb-5">
-                                <span
-                                  >Username: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.username }}</strong></span></span
-                                >
-                                <span
-                                  >Alias: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.alias }}</strong></span></span
-                                >
-                                <span
-                                  >Email: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.email }}</strong></span></span
-                                >
-                                <span
-                                  >Firstname: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.firstname }}</strong></span></span
-                                >
-                                <span
-                                  >Lastname: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.lastname }}</strong></span></span
-                                >
-                                <span
-                                  >Organization:
-                                  <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.organization }}</strong></span></span
-                                >
-                                <span
-                                  >Business:
-                                  <span class="display-6 text-info"
-                                    ><strong> {{ invoice.get_mftuser.business.all|get_businesses }}</strong></span
-                                  ></span
-                                >
-                                <span
-                                  >MobilePhone: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.mobilephone }}</strong></span></span
-                                >
-                                <span
-                                  >OfficePhone: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.officephone }}</strong></span></span
-                                >
-                                <span
-                                  >Description: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.description }}</strong></span></span
-                                >
-                              </div>
-                              <div class="col">
-                                <a href="#" style="width: 100%" class="btn btn-danger animate-up-1">حذف درخواست</a>
-                              </div>
-                              <div class="col">
-                                <input
-                                  type="button"
-                                  role="invoice-dissmiss-changes-btn"
-                                  uid="{{ invoice.id }}"
-                                  style="width: 100%"
-                                  class="btn btn-warning animate-up-1"
-                                  value="عدم تأیید"
-                                />
-                              </div>
-                              <div class="col">
-                                <input
-                                  type="button"
-                                  role="invoice-confirm-btn"
-                                  uid="{{ invoice.id }}"
-                                  style="width: 100%"
-                                  class="btn btn-tertiary animate-up-1"
-                                  value="تأیید درخواست"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <!--End of Invoice Node-->
+              <div class="tab-pane fade active show" id="tabs-mftusers" role="tabpanel" aria-labelledby="tabs-info-tab">
+                {% endcomment %}
+                <div class="row mb-5">
+                  <div class="mb-3">
+                    <h4 class="display-4" style="direction: rtl">کاربران تأیید نشده</h4>
                   </div>
                 </div>
-                {% endfor %}
-              </div>
-              <div class="tab-pane fade" id="tabs-mftusers" role="tabpanel" aria-labelledby="tabs-info-tab">
-                <br />
-                <br />
-                <br />
-                {% include "includes/users-list.html" %} {% comment %} with users=new_users {% endcomment %}
+                {% include "includes/users-list.html" %} {% comment %} with users=new_users
+                <div class="row mt-7 mb-5">
+                  <div class="mb-3">
+                    <h4 class="display-4" style="direction: rtl">کاربران ویرایش شده</h4>
+                  </div>
+                </div>
+                {% include "includes/users-list.html" with users=changed_users deleted=deleted_users differences=differences edited_user=True %}
               </div>
               <div class="tab-pane fade" id="tabs-permissions" role="tabpanel" aria-labelledby="tabs-permissions-tab">
-                <div class="row mt-5 mb-5">
+                {% endcomment %}
+                <div class="row mt-10 mb-5">
+                  <div class="row mb-5">
+                    <div class="mb-3">
+                      <h4 class="display-4" style="direction: rtl">دسترسی های تأیید نشده</h4>
+                    </div>
+                  </div>
                   <div style="display: none">
                     <p id="absolute-path-1"></p>
                     <p id="absolute-path-2"></p>
@@ -531,50 +434,29 @@
                         <label class="form-check-label" for="sharePermCheck"> Share </label>
                       </div>
                       <div class="form-check row mt-4">
+                        {% comment %}
                         <button
                           id="btn-confirm-permission"
                           aria-label="تأیید دسترسی ها"
                           title="تأیید دسترسی ها"
-                          class="btn btn-sm btn-warning mt-2"
+                          class="btn btn-sm btn-info"
                           name="Confirm"
                         >
                           تأیید دسترسی ها
                         </button>
+                        {% endcomment %}
+                        <button
+                          id="btn-change-or-confirm-permission"
+                          aria-label="تغییر دسترسی ها"
+                          title="تغییر دسترسی ها"
+                          class="btn btn-sm btn-warning mt-2"
+                          name="Change"
+                        >
+                          تأیید/تغییر دسترسی ها
+                        </button>
                         <script>
                           $(function () {
-                            $(":input[type='checkbox']").change(function () {
-                              var absPath = $("#absolute-path-1").html();
-                              var index = $("#index-code").html();
-                              if (absPath == "") {
-                                alert("یک دایرکتوری را انتخاب نمائید!");
-                              } else {
-                                var did = $("#current-dir-id").html();
-                                var user_id = $("#current-user-id").html();
-                                var csrf = "{{ csrf_token }}";
-                                var permissions = "";
-                                var action = "remove";
-                                permissions += this.value + ",";
-                                if (this.checked) {
-                                  action = "add";
-                                }
-                                $.post(
-                                  "/mftuser/" + user_id + "/permission/" + did + "/",
-                                  {
-                                    permissions: permissions,
-                                    action: action,
-                                    csrfmiddlewaretoken: csrf,
-                                  },
-                                  function (response) {
-                                    if (response.result == "error") {
-                                      console.log(response.result);
-                                    }
-                                  }
-                                );
-                              }
-                              return false;
-                            });
-
-                            $("#btn-confirm-permission").click(function () {
+                            /*$("#btn-confirm-permission").click(function () {
                               var did = $("#current-dir-id").html();
                               var uid = $("#current-user-id").html();
                               var csrf = "{{ csrf_token }}";
@@ -592,16 +474,146 @@
                                   },
                                   function (response) {
                                     if (response.result == "success") {
+                                      alert("دسترسی های فوق تأیید شد.");
                                       $("#confirmedByAdmin").removeAttr("style");
-                                      if (response.confirmed) {
-                                        var btn = document.getElementById(response.id);
-                                        btn.setAttribute("class", "btn btn-md btn-success mt-2");
-                                        alert("دسترسی های فوق بروزرسانی و تأیید شد.");
-                                      } else {
-                                        alert("دسترسی های فوق بروزرسانی و تأیید شد، لطفاً اطلاعات کاربر را تأیید کنید.");
-                                      }
                                     } else if (response.result == "error") {
                                       alert("خطایی رخ داده است، لطفاً با مدیر سیستم تماس بگیرید!");
+                                    }
+                                  }
+                                );
+                              }
+                            });*/
+                            $("#btn-change-or-confirm-permission").click(function () {
+                              var did = $("#current-dir-id").html();
+                              var uid = $("#current-user-id").html();
+                              var csrf = "{{ csrf_token }}";
+                              if (did == "") {
+                                alert("یک دایرکتوری را انتخاب نمائید!");
+                              } else if (uid == "") {
+                                alert("یک کاربر را انتخاب نمائید!");
+                              } else {
+                                var permissions = "";
+                                if ($("#appendPermCheck").prop("checked")) {
+                                  permissions += $("#appendPermCheck").prop("value") + ",";
+                                }
+                                if ($("#writePermCheck").prop("checked")) {
+                                  permissions += $("#writePermCheck").prop("value") + ",";
+                                }
+                                if ($("#readPermCheck").prop("checked")) {
+                                  permissions += $("#readPermCheck").prop("value") + ",";
+                                }
+                                if ($("#overwritePermCheck").prop("checked")) {
+                                  permissions += $("#overwritePermCheck").prop("value") + ",";
+                                }
+                                if ($("#listPermCheck").prop("checked")) {
+                                  permissions += $("#listPermCheck").prop("value") + ",";
+                                }
+                                if ($("#renameFilesPermCheck").prop("checked")) {
+                                  permissions += $("#renameFilesPermCheck").prop("value") + ",";
+                                }
+                                if ($("#deleteFilesPermCheck").prop("checked")) {
+                                  permissions += $("#deleteFilesPermCheck").prop("value") + ",";
+                                }
+                                if ($("#checksumPermCheck").prop("checked")) {
+                                  permissions += $("#checksumPermCheck").prop("value") + ",";
+                                }
+                                if ($("#shareFilesPermCheck").prop("checked")) {
+                                  permissions += $("#shareFilesPermCheck").prop("value") + ",";
+                                }
+                                if ($("#createPermCheck").prop("checked")) {
+                                  permissions += $("#createPermCheck").prop("value") + ",";
+                                }
+                                if ($("#renamePermCheck").prop("checked")) {
+                                  permissions += $("#renamePermCheck").prop("value") + ",";
+                                }
+                                if ($("#deletePermCheck").prop("checked")) {
+                                  permissions += $("#deletePermCheck").prop("value") + ",";
+                                }
+                                if ($("#sharePermCheck").prop("checked")) {
+                                  permissions += $("#sharePermCheck").prop("value") + ",";
+                                }
+                                if ($("#applySubPermCheck").prop("checked")) {
+                                  permissions += $("#applySubPermCheck").prop("value") + ",";
+                                }
+                                $.post(
+                                  "/mftuser/" + uid + "/permissions/" + did + "/",
+                                  {
+                                    permissions: permissions,
+                                    csrfmiddlewaretoken: csrf,
+                                  },
+                                  function (response) {
+                                    if (response.result == "success") {
+                                      $.post(
+                                        "/entities/" + did + "/confirm/",
+                                        {
+                                          csrfmiddlewaretoken: csrf,
+                                          user: uid,
+                                          entity: "directory",
+                                        },
+                                        function (response) {
+                                          if (response.result == "success") {
+                                            $("#confirmedByAdmin").removeAttr("style");
+                                            if (response.confirmed) {
+                                              var btn = document.getElementById(response.id);
+                                              btn.setAttribute("class", "btn btn-md btn-success mt-2");
+                                              alert("دسترسی های فوق بروزرسانی و تأیید شد.");
+                                            } else {
+                                              alert("دسترسی های فوق بروزرسانی و تأیید شد، لطفاً اطلاعات کاربر را تأیید کنید.");
+                                            }
+                                          } else if (response.result == "error") {
+                                            alert("خطایی رخ داده است، لطفاً با مدیر سیستم تماس بگیرید!");
+                                          }
+                                        }
+                                      );
+                                      //alert("دسترسی های فوق بروزرسانی شد.");
+                                    } else if (response.result == "error") {
+                                      alert("خطایی رخ داده است، لطفاً با مدیر سیستم تماس بگیرید!");
+                                      var perms = response.perms.split(",");
+                                      perms.forEach((perm) => {
+                                        if (perm == 1024) {
+                                          // Append
+                                          $("#appendPermCheck").prop("checked", true);
+                                        } else if (perm == 2) {
+                                          // Upload (Write)
+                                          $("#writePermCheck").prop("checked", true);
+                                        } else if (perm == 1) {
+                                          // Download (Read)
+                                          $("#readPermCheck").prop("checked", true);
+                                        } else if (perm == 512) {
+                                          // Overwrit
+                                          $("#overwritePermCheck").prop("checked", true);
+                                        } else if (perm == 256) {
+                                          // List
+                                          $("#listPermCheck").prop("checked", true);
+                                        } else if (perm == 8) {
+                                          // Rename Files
+                                          $("#renameFilesPermCheck").prop("checked", true);
+                                        } else if (perm == 32) {
+                                          // Delete Files
+                                          $("#deleteFilesPermCheck").prop("checked", true);
+                                        } else if (perm == 128) {
+                                          // Checksum
+                                          $("#checksumPermCheck").prop("checked", true);
+                                        } else if (perm == 4096) {
+                                          // Share File
+                                          $("#shareFilesPermCheck").prop("checked", true);
+                                        } else if (perm == 4) {
+                                          // Create
+                                          $("#createPermCheck").prop("checked", true);
+                                        } else if (perm == 16) {
+                                          // Rename
+                                          $("#renamePermCheck").prop("checked", true);
+                                        } else if (perm == 64) {
+                                          // Delete
+                                          $("#deletePermCheck").prop("checked", true);
+                                        } else if (perm == 2048) {
+                                          // Share
+                                          $("#sharePermCheck").prop("checked", true);
+                                        } else if (perm == 0) {
+                                          // Apply To Subfolders
+                                          $("#applySubPermCheck").prop("checked", true);
+                                        }
+                                      });
                                     }
                                   }
                                 );
@@ -614,10 +626,12 @@
                     </div>
                   </div>
                 </div>
+                {% comment %}
               </div>
             </div>
           </div>
         </div>
+        {% endcomment %}
       </div>
       <div class="row mt-8 mb-5">
         <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="javascript:history.go(-1);" />

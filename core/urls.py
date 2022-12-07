@@ -21,10 +21,12 @@ from .views import (
     entities_confirm_view,
     delete_directory_view,
     mftuser_permissions_view,
+    mftuser_atomic_permission_view,
     mftuser_delete_view,
     mftuser_dismiss_changes_view,
     mftuser_restore_or_delete_view,
-    download_view,
+    download_mftuser_view,
+    download_dirs_paths_view,
 )
 
 
@@ -43,7 +45,7 @@ urlpatterns = [
     path("mftuser/<int:uid>/directory/<int:bid>/", mftuser_used_business_access_view, name="mftuser-used-business"),
     path("mftuser/<int:uid>/directories/", mftuser_access_view, name="mftuser-access"),
     path("mftuser/<int:uid>/directories/<int:pid>/<str:dir_name>/", mftuser_access_view, name="mftuser-directories"),
-    # path("mftuser/<int:uid>/directories/<int:pid>/<str:dir_name>/", mftuser_directories_view, name="mftuser-directories"),
+    path("mftuser/<int:uid>/permission/<int:did>/", mftuser_atomic_permission_view, name="mftuser-atomic-permission"),
     path("mftuser/<int:uid>/permissions/<int:did>/", mftuser_permissions_view, name="mftuser-permissions"),
     path("mftuser/<int:id>/delete/", mftuser_delete_view, name="mftuser-delete"),
     path("mftuser/<int:id>/dismiss-changes/", mftuser_dismiss_changes_view, name="mftuser-dismiss-changes"),
@@ -58,7 +60,8 @@ urlpatterns = [
     # path("directories/permission/", add_permission_view, name="add-permission"),
     # re_path(r"directories/(?P<user_id>[0-9]+)/$", directories_list_view, name="directories-list"),
     path("error/<int:err>/", error_view, name="error-view"),
-    path('invoice/', include('invoice.urls')),
-    path('download/<int:id>/', download_view, name='download-view'),
+    path('invoices/', include('invoice.urls')),
+    path('download/mftuser/<int:id>/', download_mftuser_view, name='download-mftuser-view'),
+    path('download/paths/', download_dirs_paths_view, name='download-dirs-paths-view'),
     re_path(r'^.*\.*', error_view, name='error-view'),
 ]

@@ -54,6 +54,10 @@ class MftUserForm(forms.ModelForm):
             'business',
             'ipaddr',
         ]
+    
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(MftUserForm, self).__init__(*args, **kwargs)
 
     # def clean_username(self):
     #     username = self.cleaned_data.get('username')
@@ -90,7 +94,8 @@ class MftUserForm(forms.ModelForm):
         phone_number = str(self.cleaned_data.get('mobilephone'))
         if MftUser.objects.filter(mobilephone=phone_number).exists():
             # raise ValidationError
-            self.add_error(self.fields['username'].label, 'کاربری با این مشخصات در سامانه موجود می باشد.')
+            if 'create' in self.request.path:
+                self.add_error(self.fields['username'].label, 'کاربری با این مشخصات در سامانه موجود می باشد.')
         if not phone_number.startswith('9'):
             raise ValidationError('یک شماره همراه صحیح وارد کنید.')
         if len(phone_number) < 10 or len(phone_number) > 10:

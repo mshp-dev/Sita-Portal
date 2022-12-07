@@ -142,7 +142,7 @@
 {% if deleted %} {% for du in deleted %}
 <div class="col-10 mx-auto">
   <div class="accordion mb-2" id="{{ du.username|remove_dot }}">
-    <!--User Node-->
+    <!--Deleted User Node-->
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingOne">
         <button
@@ -155,7 +155,8 @@
         >
           <span class="fas fa-user-slash me-1" style="color: red"></span>
           <h3 class="display-5 ms-2">
-            {{ du.username }} {% if du.alias != '' %}({{ du.alias }}) {% endif %}- {{ du.organization }} - {{ du.business.all|get_businesses }}
+            {{ du.username }} {% if du.alias != '' %}({{ du.alias }}) {% endif %}- {{ du.organization }}
+            {% comment %}  - {{ du.business.all|get_businesses }} {% endcomment %}
           </h3>
         </button>
       </h2>
@@ -204,7 +205,7 @@
 {% if exported %} {% for eu in exported %}
 <div class="col-10 mx-auto">
   <div class="accordion mb-2" id="{{ eu.mftuser.username|remove_dot }}" role="mftuser" eid="{{ eu.id }}">
-    <!--User Node-->
+    <!--Exported User Node-->
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingOne">
         <button
@@ -248,12 +249,12 @@
                 />
                 {% endcomment %}
                 <a
-                  href="{% url 'download-view' eu.id %}"
+                  href="{% url 'download-mftuser-view' eu.id %}"
                   role="download-exported-btn"
                   eid="{{ eu.id }}"
                   style="width: 100%"
                   class="btn btn-warning animate-up-1"
-                  >XML دانلود به صورت</a
+                  >ZIP دانلود به صورت</a
                 >
               </div>
               <div class="col">
