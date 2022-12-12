@@ -1,4 +1,4 @@
-{% extends "layouts/base.html" %} {% block title %} Invoice {% endblock %}
+{% extends "layouts/base.html" %} {% block title %} فرم چارگون {% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -155,7 +155,7 @@
       <div class="row justify-content-center">
         <div class="col-12 text-center" style="direction: rtl">
           <h1 class="display-3 mb-4">فرم چارگون مشخصات و دسترسی های کاربر</h1>
-          <h1 class="display-3 mb-4">{{ invoice_number }}</h1>
+          <h1 class="display-3 mb-4">{{ invoice.serial_number }}</h1>
           <p class="lead mb-5">اطلاعات و مشخصات کامل و دسترسی های کاربر {{ mftuser.username }} در فرم چارگون نمایش داده شده است.</p>
         </div>
       </div>

@@ -401,8 +401,8 @@ def export_user_with_paths(id, isc_user):
         rte.is_downloaded = False
         rte.number_of_exports = rte.number_of_exports + 1
         # if os.path.isfile(rte.export.path):
-        os.remove(rte.webuser.path)
-        os.remove(rte.paths.path)
+        # os.remove(rte.webuser.path)
+        # os.remove(rte.paths.path)
         rte.webuser = webuser_file
         rte.paths = paths_file
         rte.save()
@@ -416,7 +416,7 @@ def export_user_with_paths(id, isc_user):
             mftuser=mftuser,
             created_by=isc_user,
             webuser=webuser_file,
-            paths = paths_file
+            paths=paths_file
             # is_downloaded=False,
             # number_of_exports=0,
         )

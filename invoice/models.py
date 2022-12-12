@@ -3,14 +3,15 @@ from django.utils import timezone
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User
 
-from core.models import BaseCoding, IscUser, MftUser, Directory
+from core.models import BaseCoding, IscUser, MftUser, Directory, BusinessCode
 
 from datetime import datetime as dt
 import random
 
 
 class InvoiceType(BaseCoding):
-    code = models.CharField(max_length=20, blank=False, unique=True, default='DEFAULT')
+    code          = models.CharField(max_length=20, blank=False, unique=True, default='DEFAULT')
+    serial_prefix = models.CharField(max_length=20, blank=False, default='SITA')
 
 
 class BaseInvoice(models.Model):
@@ -29,14 +30,9 @@ class BaseInvoice(models.Model):
             self.serial_number = self.generate_serial_number()
         super(BaseInvoice, self).save(*args, **kwargs)
 
-    def generate_serial_number(self, prefix=''):
-        uid = str(self.mftuser)
-        count = len(uid)
-        zero = 5 - count
-        start = f'1{"0" * (zero - 1)}'
-        end = f'9{"9" * (zero - 1)}'
-        rand = random.randint(int(start), int(end))
-        return f'{prefix}{count}{rand}{uid}{dt.now().strftime("%y%m%d%H%M")}'
+    def generate_serial_number(self):
+        itype = str(self.invoice_type.id)
+        return f'{itype}{dt.now().strftime("%y%m%d%H%M%S")}'
 
 
 class Invoice(BaseInvoice):
@@ -46,15 +42,30 @@ class Invoice(BaseInvoice):
     def get_mftuser(self):
         return MftUser.objects.get(pk=self.mftuser)
 
-    def generate_serial_number(self, prefix='SITAUSER'):
-        return super(Invoice, self).generate_serial_number(prefix)
+    def generate_serial_number(self):
+        serial_number = super(Invoice, self).generate_serial_number()
+        uid = str(self.mftuser)
+        count = len(uid)
+        zero = 10 - count
+        divided = int(zero / 2)
+        remained = zero % 2
+        invoice_type = InvoiceType.objects.get(pk=int(serial_number[0]))
+        return f'{invoice_type.serial_prefix}{"0" * divided}{uid}{"0" * divided}{"0" * remained if remained > 0 else ""}{serial_number}'
+
+    def get_used_business(self):
+        if self.used_business != 0:
+            return None
+        else:
+            return BusinessCode.objects.get(pk=self.used_business)
 
 
 class PreInvoice(BaseInvoice):
     directories_list  = models.CharField(max_length=1000, default='', blank=False)
 
-    def generate_serial_number(self, prefix='SITADIR'):
-        return super(PreInvoice, self).generate_serial_number(prefix)
+    def generate_serial_number(self):
+        serial_number = super(PreInvoice, self).generate_serial_number()
+        invoice_type = InvoiceType.objects.get(pk=int(serial_number[0]))
+        return f'{invoice_type.serial_prefix}0000000000{serial_number}'
     
     def get_all_directories(self):
         dir_ids = [int(d) for d in self.directories_list.split(',')[:-1]]

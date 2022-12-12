@@ -12,9 +12,8 @@
 <script type="text/javascript" src="{% static 'js/treeitem.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
 <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
-{% comment %} {% if access == 'ADMIN' %}
 <script type="text/javascript">
-  $(function () {
+  /*$(function () {
     $("input[role='confirm-btn']").click(function () {
       var uid = $(this).attr("uid");
       var csrf = "{{ csrf_token }}";
@@ -37,15 +36,30 @@
         }
       );
     });
-  });
+  });*/
 
   function makeInvoice() {
-    var mftuser = document.getElementById("current-user-id");
-    var url = "/invoices/create/?user=" + mftuser.innerHTML + "&type=2&bus=0";
-    window.location = url;
+    var uid = $("#current-user-id").html();
+    var csrf = "{{ csrf_token }}";
+    $.post(
+      "/invoices/create/",
+      {
+        csrfmiddlewaretoken: csrf,
+        type: "INVOBUS",
+        mftuser: uid,
+      },
+      function (response) {
+        if (response.result == "success") {
+          alert("فرم چارگون با موفقیت ایجاد شد، شما اکنون به صفحه جزئیات فرم منتقل می شوید.");
+          window.location = "/invoices/details/" + response.invoice_id + "/";
+        } else if (response.result == "error") {
+          alert(response.result);
+        }
+      }
+    );
   }
 </script>
-{% endif %} {% endcomment %} {% endblock javascripts %} {% block content %}
+{% endblock javascripts %} {% block content %}
 
 <main>
   {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
@@ -86,8 +100,8 @@
           {% include "includes/directories-list.html" %}
         </div>
       </div>
-      {% comment %} {% if access != 'ADMIN' and not confirmed %}
-      <div class="row mb-6">
+      {% if access != 'ADMIN' %}
+      <div class="row mb-10">
         <input
           type="button"
           style="width: 50%"
@@ -96,7 +110,7 @@
           onClick="makeInvoice();"
         />
       </div>
-      {% endif %} {% endcomment %} {% if access == 'OPERATION' %}
+      {% endif %} {% if access == 'OPERATION' %}
       <div class="row">
         <script type="text/javascript">
           $(function () {

@@ -116,6 +116,7 @@
   </div>
 
   <div class="section section-md">
+    {% comment %}
     <div class="container">
       <div class="row">
         <div class="mb-3">
@@ -134,6 +135,7 @@
         </div>
       </div>
     </div>
+    {% endcomment %}
     <div class="section section-md">
       <div class="container">
         <div class="row justify-content-center">
@@ -214,21 +216,32 @@
                   });
 
                   $("#btn-invoice-dir").click(function () {
-                    let inv_type = "INVDIR";
-                    $.post(
-                      "/invoices/create/",
-                      {
-                        csrfmiddlewaretoken: csrf,
-                        type: inv_type,
-                      },
-                      function (response) {
-                        if (response.result == "success") {
-                          alert(response.successMessage);
-                        } else if (response.result == "error") {
-                          alert(response.errorMessage);
-                        }
+                    $.get("/directories/", function (response) {
+                      if (response.result == "empty") {
+                        alert("دایرکتوری جدیدی برای تأیید وجود ندارد.");
+                      } else if (response.result == "exists") {
+                        alert("یک درخواست با لیست دایرکتوری های فعلی موجود است.");
+                      } else {
+                        //console.log(response.dirs_list);
+                        var csrf = "{{ csrf_token }}";
+                        $.post(
+                          "/invoices/create/",
+                          {
+                            csrfmiddlewaretoken: csrf,
+                            type: "INVDIR",
+                            dirs: response.dirs_list,
+                          },
+                          function (response) {
+                            if (response.result == "success") {
+                              alert("درخواست تأیید با موفقیت ارسال شد.");
+                              //window.location = "/invoices/details/" + response.invoice_id + "/";
+                            } else if (response.result == "error") {
+                              alert("خطایی رخ داده است، با مدیر سیستم تماس بگیرید.");
+                            }
+                          }
+                        );
                       }
-                    );
+                    });
                   });
                 });
               </script>
@@ -447,6 +460,7 @@
       </div>
     </div>
   </div>
+  {% comment %}
   <script type="text/javascript">
     const search_input = $("#search-input");
     const search_icon = $("#search-icon");
@@ -489,6 +503,7 @@
       scheduled_function = setTimeout(ajax_call, delay_by_in_ms, endpoint, request_parameters);
     });
   </script>
+  {% endcomment %}
 </main>
 
 {% include "includes/footer.html" %} {% endblock content %}

@@ -12,9 +12,8 @@
 <script type="text/javascript" src="{% static 'js/treeitem.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
 <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
-{% comment %} {% if access == 'ADMIN' %}
 <script type="text/javascript">
-  $(function () {
+  /*$(function () {
     $("input[role='confirm-btn']").click(function () {
       var uid = $(this).attr("uid");
       var csrf = "{{ csrf_token }}";
@@ -37,16 +36,32 @@
         }
       );
     });
-  });
+  });*/
 
   function makeInvoice() {
-    var mftuser = document.getElementById("current-user-id");
+    var uid = $("#current-user-id").html();
+    var csrf = "{{ csrf_token }}";
     var bid = "{{ used_bus.id }}";
-    var url = "/invoice/?user=" + mftuser.innerHTML + "&type=3&bus=" + bid;
-    window.location = url;
+    $.post(
+      "/invoices/create/",
+      {
+        csrfmiddlewaretoken: csrf,
+        type: "INVUBUS",
+        ubus: bid,
+        mftuser: uid,
+      },
+      function (response) {
+        if (response.result == "success") {
+          alert("فرم چارگون با موفقیت ایجاد شد، شما اکنون به صفحه جزئیات فرم منتقل می شوید.");
+          window.location = "/invoices/details/" + response.invoice_id + "/";
+        } else if (response.result == "error") {
+          alert("مشکلی پیش آمده است، با مدیر سیستم تماس بگیرید!");
+        }
+      }
+    );
   }
 </script>
-{% endif %} {% endcomment %} {% endblock javascripts %} {% block content %}
+{% endblock javascripts %} {% block content %}
 
 <main>
   {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
@@ -73,6 +88,7 @@
             <p class="h4 my-1 me-2" for="select-used-business">اختصاص دسترسی در مسیرهای سامانه/پروژه <u>{{ used_bus }}</u></p>
           </div>
           <div class="mt-4">
+            {% comment %}
             <div class="mx-auto text-center" style="direction: rtl">
               {% if confirmed %}
               <span>دسترسی های <strong class="h5 text-info">{{ mftuser.username }}</strong> در کلیه مسیرها </span
@@ -82,12 +98,13 @@
               ><span class="h5 text-warning">تأیید نشده است.</span>
               {% endif %}
             </div>
+            {% endcomment %}
             <p id="current-user-id" style="display: none">{{ mftuser.id }}</p>
           </div>
           {% include "includes/directories-list.html" %}
         </div>
       </div>
-      {% comment %} {% if access != 'ADMIN' and not confirmed %}
+      {% if access != 'ADMIN' %}
       <div class="row mb-3">
         <input
           type="button"
@@ -97,7 +114,7 @@
           onClick="makeInvoice();"
         />
       </div>
-      {% endif %} {% endcomment %}
+      {% endif %}
       <div class="row mt-10 mb-3">
         <a href="{% url 'mftuser-details' mftuser.id %}" style="width: 50%" class="btn btn-tertiary mx-auto">مشاهده مشخصات کاربر</a>
       </div>

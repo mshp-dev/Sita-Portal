@@ -6,6 +6,30 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script>
+  $(function () {
+    $("input[role='invoice-delete-btn']").click(function () {
+      var invoice_id = $(this).attr("iid");
+      var invoice_type = $(this).attr("itype");
+      var csrf = "{{ csrf_token }}";
+      $.post(
+        "/invoices/delete/" + invoice_id + "/",
+        {
+          csrfmiddlewaretoken: csrf,
+          itype: invoice_type,
+        },
+        function (response) {
+          if (response.result == "success") {
+            console.log(response.type + "inv-" + response.deleted + "-parent");
+            document.getElementById(response.type + "inv-" + response.deleted + "-parent").remove();
+          } else if (response.result == "error") {
+            alert(response.message);
+          }
+        }
+      );
+    });
+  });
+</script>
 {% endblock javascripts %} {% block content %}
 
 <main>

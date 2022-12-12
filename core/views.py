@@ -15,7 +15,7 @@ from django.utils import timezone
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.contrib.auth.hashers import make_password
 
-from invoice.models import Invoice
+from invoice.models import Invoice, PreInvoice
 
 from .utils import *
 from .models import *
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 def index_view(request):
     # buck insertion into or correction in db
     # insert_into_db()
-    # clean_up(flag='dir', action=False)
+    # clean_up(flag='dir', action=True)
     # clean_up(flag='perm2', action=True)
     # clean_up(flag='dir3', action=False, bic_name="FIU")
 
@@ -662,17 +662,19 @@ def directories_list_view(request, *args, **kwargs):
                 }
             return JsonResponse(data=serialized_data, safe=False)
         elif request.method == 'GET':
-            query = request.GET.get('q')
-            if query != "":
-                context['filtered'] = True
-                context['elements'] = get_all_dirs(isc_user, query=query, pretify=False)
-            else:
-                context['elements'] = get_all_dirs(isc_user)
-            html = render_to_string(
-                template_name="includes/directory-list.html", context=context
-            )
-            data_dict = {"html_from_view": html}
-            return JsonResponse(data=data_dict, safe=False)
+            response = {"result": "empty"}
+            if Directory.objects.filter(created_by=isc_user, is_confirmed=False).exists():
+                dirs = Directory.objects.filter(created_by=isc_user, is_confirmed=False).values('id')
+                dirs_str = ''
+                for d in dirs:
+                    dirs_str += f'{str(d["id"])},'
+                if PreInvoice.objects.filter(directories_list=dirs_str).exists():
+                    response["result"] = "exists"
+                else:
+                    response["result"] = "ok"
+                    response["dirs_list"] = dirs_str
+            
+            return JsonResponse(data=response, safe=False)
         
     elements = get_all_dirs(isc_user)
     

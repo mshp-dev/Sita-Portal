@@ -4,7 +4,7 @@ from .models import *
 
 
 class InvoiceTypeAdmin(admin.ModelAdmin):
-    list_display = ['code', 'description']
+    list_display = ['code', 'serial_prefix', 'description']
 
 
 class InvoiceAdmin(admin.ModelAdmin):

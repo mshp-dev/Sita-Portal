@@ -2,7 +2,7 @@
 <!--Invoices in invoices-list-->
 {% if invoices %} {% for invoice in invoices %}
 <div class="col-10 mx-auto">
-  <div class="accordion mb-2" id="{{ invoice.get_mftuser.username|remove_dot }}">
+  <div class="accordion mb-2" id="inv-{{ invoice.id }}-parent">
     <!--Invoice Node-->
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingOne">
@@ -14,53 +14,63 @@
           aria-expanded="false"
           aria-controls="{{ invoice.get_mftuser.username|remove_dot }}{{ invoice.id }}"
         >
-          <span class="fas fa-file-alt"></span>
+          <span
+            class="fas fa-file-alt {% if invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
+          ></span>
           <!--prettier-ignore-->
-          <h3 class="display-5 ms-2">{{ invoice.serial_number }} - ({% if invoice.invoice_type.code == 'USEDBUSINESS' %}سرویس گیرنده{% else %}سرویس دهنده{% endif %})</h3>
+          <h3 class="display-5 ms-2">{{ invoice.serial_number }} - {% if invoice.confirm_or_reject == 'CONFIRMED' %}تأیید شده{% elif invoice.confirm_or_reject == 'REJECTED' %}رد شده{% elif invoice.confirm_or_reject == 'UNDEFINED' %}بررسی نشده{% endif %}</h3>
         </button>
       </h2>
       <div
         id="{{ invoice.get_mftuser.username|remove_dot }}{{ invoice.id }}"
         class="accordion-collapse collapse"
         aria-labelledby="headingOne"
-        data-bs-parent="#{{ invoice.get_mftuser.username|remove_dot }}"
+        data-bs-parent="#inv-{{ invoice.id }}-parent"
       >
         <div class="accordion-body">
           <div class="container">
-            <div class="row mt-5 mb-5">
-              <span
-                >Username: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.username }}</strong></span></span
-              >
-              <span
-                >Alias: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.alias }}</strong></span></span
-              >
-              <span
-                >Email: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.email }}</strong></span></span
-              >
-              <span
-                >Firstname: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.firstname }}</strong></span></span
-              >
-              <span
-                >Lastname: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.lastname }}</strong></span></span
-              >
-              <span
-                >Organization: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.organization }}</strong></span></span
-              >
-              <span
-                >Business: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.business.all|get_businesses }}</strong></span></span
-              >
-              <span
-                >MobilePhone: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.mobilephone }}</strong></span></span
-              >
-              <span
-                >OfficePhone: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.officephone }}</strong></span></span
-              >
-              <span
-                >Description: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.description }}</strong></span></span
-              >
-            </div>
-            <div class="col">
-              <a href="#" style="width: 100%" class="btn btn-danger animate-up-1">حذف درخواست</a>
+            <div class="row">
+              <div style="direction: rtl" class="row mt-5 mb-5">
+                <span
+                  >نام مستعار: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.alias }}</strong></span></span
+                >
+                <span
+                  >نام: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.firstname }}</strong></span></span
+                >
+                <span
+                  >نام خانوادگی: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.lastname }}</strong></span></span
+                >
+                <span
+                  >سازمان/بانک: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.organization }}</strong></span></span
+                >
+                <span
+                  >پروژه/سامانه:
+                  <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.business.all|get_businesses }}</strong></span></span
+                >
+                <span
+                  >شماره تلفن همراه: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.mobilephone }}</strong></span></span
+                >
+                <span
+                  >شماره تلفن محل کار: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.officephone }}</strong></span></span
+                >
+              </div>
+              <div class="col-6">
+                <input
+                  type="button"
+                  role="invoice-delete-btn"
+                  iid="{{ invoice.id }}"
+                  itype="{{ invoice.invoice_type.code }}"
+                  style="width: 100%"
+                  class="btn btn-danger animate-up-1"
+                  value="حذف درخواست"
+                />
+                {% comment %}<a href="{% url 'invoice-delete' invoice.id %}" class="btn btn-danger animate-up-1"></a>{% endcomment %}
+              </div>
+              <div class="col-6">
+                <a href="{% url 'invoice-details' invoice.id %}" style="width: 100%" class="btn btn-warning animate-up-1"
+                  >مشاهده سطح دسترسی درخواست شده</a
+                >
+              </div>
             </div>
           </div>
         </div>
@@ -69,8 +79,64 @@
     <!--End of Invoice Node-->
   </div>
 </div>
-{% endfor %}
-<!--No Invoice Found-->
-{% else %}
+{% endfor %}{% endif %}
+<!--PreInvoices in invoices-list-->
+{% if pre_invoices %} {% for pre_invoice in pre_invoices %}
+<div class="col-10 mx-auto">
+  <div class="accordion mb-2" id="preinv-{{ pre_invoice.id }}-parent">
+    <!--Invoice Node-->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#preinv-{{ pre_invoice.id }}"
+          aria-expanded="false"
+          aria-controls="preinv-{{ pre_invoice.id }}"
+        >
+          <span
+            class="fas fa-file-alt {% if pre_invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif pre_invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif pre_invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
+          ></span>
+          <!--prettier-ignore-->
+          <h3 class="display-5 ms-2">{{ pre_invoice.serial_number }} - {% if pre_invoice.confirm_or_reject == 'CONFIRMED' %}تأیید شده{% elif pre_invoice.confirm_or_reject == 'REJECTED' %}رد شده{% elif pre_invoice.confirm_or_reject == 'UNDEFINED' %}بررسی نشده{% endif %}</h3>
+        </button>
+      </h2>
+      <div
+        id="preinv-{{ pre_invoice.id }}"
+        class="accordion-collapse collapse"
+        aria-labelledby="headingOne"
+        data-bs-parent="#preinv-{{ pre_invoice.id }}-parent"
+      >
+        <div class="accordion-body">
+          <div class="container">
+            <div class="row mt-5 mb-5">
+              <p class="h5" style="direction: rtl">مسیرهای ایجاد شده:</p>
+              {% for dir in pre_invoice.get_all_directories %}
+              <span class="display-6 text-info"><strong>{{ dir.relative_path }}</strong></span>
+              {% endfor %}
+            </div>
+            <div class="col">
+              <input
+                type="button"
+                role="invoice-delete-btn"
+                iid="{{ pre_invoice.id }}"
+                itype="{{ pre_invoice.invoice_type.code }}"
+                style="width: 100%"
+                class="btn btn-danger animate-up-1"
+                value="حذف درخواست"
+              />
+              {% comment %}<a href="{% url 'invoice-delete' pre_invoice.id %}" class="btn btn-danger animate-up-1"></a>{% endcomment %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--End of Invoice Node-->
+  </div>
+</div>
+{% endfor %}{% endif %}
+<!--No Invoice or PreInvoice Found-->
+{% if not invoices and not pre_invoices %}
 <h4>No invoice found</h4>
 {% endif %}
