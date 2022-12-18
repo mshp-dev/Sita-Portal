@@ -53,7 +53,7 @@
           alert("فرم چارگون با موفقیت ایجاد شد، شما اکنون به صفحه جزئیات فرم منتقل می شوید.");
           window.location = "/invoices/details/" + response.invoice_id + "/";
         } else if (response.result == "error") {
-          alert(response.result);
+          alert(response.message);
         }
       }
     );
@@ -84,7 +84,9 @@
         <div class="col-12 mx-auto">
           <div class="mx-auto text-center" style="direction: rtl">
             <p class="h4 my-1 me-2" for="select-used-business">اختصاص دسترسی در مسیرهای سامانه/پروژه(هایی) که سرویس می دهید:</p>
+            <p id="current-user-id" style="display: none">{{ mftuser.id }}</p>
           </div>
+          {% comment %}
           <div class="mt-4">
             <div class="mx-auto text-center" style="direction: rtl">
               {% if confirmed %}
@@ -95,9 +97,8 @@
               ><span class="h5 text-warning">تأیید نشده است.</span>
               {% endif %}
             </div>
-            <p id="current-user-id" style="display: none">{{ mftuser.id }}</p>
           </div>
-          {% include "includes/directories-list.html" %}
+          {% endcomment %} {% include "includes/directories-list.html" %}
         </div>
       </div>
       {% if access != 'ADMIN' %}

@@ -4,19 +4,129 @@
 {% block stylesheets %}{% endblock stylesheets %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %} {% load static %} {% comment %}
-<script type="text/javascript" src="{% static 'js/html2pdf.bundle.min.js' %}"></script>
-<script
-  src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
-  integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-></script>
-{% endcomment %}
+{% block javascripts %} {% load static %}
 <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
 <script type="text/javascript">
   function downloadPdf() {
-    var csrf = "{{ csrf_token }}";
+    //$("#invoice").html(response.invoice_number);
+
+    var invoice = document.getElementById("invoice");
+    var element = document.getElementById("downloadable");
+    /*var header = document.getElementById("header");
+    header.innerHTML = '<div class="mt-5 mb-5">';
+    header.innerHTML += '<table class="table table-bordered" style="direction: rtl"><tbody>';
+    header.innerHTML +=
+      '<tr><td class="col-1" scope="row" rowspan="2"><img src="https://cdn.ebinews.com/imagesinv/ebinews-77004.jpg" width="100" height="100" /></td>';
+    header.innerHTML += '<td class="col-8 text-center" scope="col" colspan="2">نام سند: فرم ایجاد / تغییرات در سامانه سیتا</td>';
+    header.innerHTML += '<td class="col-2" scope="col" colspan="1">تاریخ:</td></tr>';
+    header.innerHTML += '<tr><td class="col-3" scope="col" colspan="2">شناسه درخواست <span style="font-size: 0.5rem">(1)</span> :</td>';
+    header.innerHTML += '<td class="col-3" scope="col">شماره:</td></tr>';
+    header.innerHTML += "</tbody></table></div>";*/
+    var printWindow = window.open("", "", "height=960,width=850");
+    printWindow.document.write("<html><head><style>");
+    /*printWindow.document.write(
+      "body { background-image: url('https://cdn.ebinews.com/imagesinv/ebinews-77004.jpg'); background-repeat: no-repeat; background-attachment: fixed; background-position: center center; background-size: 80%; }"
+    );*/
+    printWindow.document.write(
+      ".row { --bs-gutter-x: 1.5rem; --bs-gutter-y: 0; display: flex; flex-wrap: wrap; margin-right: 1rem; margin-left: 1rem; }"
+    );
+    printWindow.document.write(".row > * { flex-shrink: 0; width: 100%; max-width: 100%; padding-right: 1rem; padding-left: 1rem; }");
+    printWindow.document.write(".d-flex { display: flex !important; }");
+    printWindow.document.write(".justify-content-center { justify-content: center !important; }");
+    printWindow.document.write(".col-lg-12 { flex: 0 0 auto; width: 100%; }");
+    printWindow.document.write(".h4 { font-size: 2.0rem; margin-bottom: 1.25rem; }");
+    printWindow.document.write(".h5 { font-size: 1.15rem; margin-bottom: 1.25rem; }");
+    printWindow.document.write(".h6 { font-size: 0.85rem; margin-bottom: 0.25rem; }");
+    printWindow.document.write(".col { flex: 1 0 0%; }");
+    printWindow.document.write(".col-3 { flex: 0 0 auto; width: 33.33333%; }");
+    printWindow.document.write(".col-4 { flex: 0 0 auto; width: 25%; }");
+    printWindow.document.write(".col-6 { flex: 0 0 auto; width: 66.66666%; }");
+    printWindow.document.write(".col-8 { flex: 0 0 auto; width: 80%; }");
+    printWindow.document.write(".me-4 { margin-right: 5rem !important; }");
+    printWindow.document.write(".ms-4 { margin-left: 5rem !important; }");
+    printWindow.document.write(".me-8 { margin-right: 10rem !important; }");
+    printWindow.document.write(".ms-8 { margin-left: 10rem !important; }");
+    printWindow.document.write(".mb-5 { margin-bottom: 3rem !important; }");
+    printWindow.document.write(".mt-2 { margin-top: 1rem !important; }");
+    printWindow.document.write(".mt-5 { margin-top: 3rem !important; }");
+    printWindow.document.write(".mb-1 { margin-bottom: 0.25rem !important; }");
+    printWindow.document.write(".mb-2 { margin-bottom: 1rem !important; }");
+    printWindow.document.write(".mx-auto { margin-right: auto !important; margin-left: auto !important; }");
+    printWindow.document.write(".text-center { text-align: center !important; }");
+    printWindow.document.write(
+      ".table { --bs-table-bg: transparent; --bs-table-striped-color: #1f2937; --bs-table-striped-bg: rgba(23, 31, 56, 0.05); --bs-table-active-color: #1f2937; --bs-table-active-bg: rgba(23, 31, 56, 0.1); --bs-table-hover-color: #1f2937; --bs-table-hover-bg: rgba(23, 31, 56, 0.075); width: 100%; margin-bottom: 1rem; color: #1f2937; vertical-align: top; border-color: #000000; }"
+    );
+    printWindow.document.write(
+      ".table > :not(caption) > * > * { background-color: var(--bs-table-bg); border-bottom-width: 0.15rem; box-shadow: inset 0 0 0 9999px var(--bs-table-accent-bg); }"
+    );
+    printWindow.document.write(".table > tbody { vertical-align: inherit; }");
+    printWindow.document.write(".table > thead { vertical-align: bottom; }");
+    printWindow.document.write(".table > :not(:last-child) > :last-child > * { border-bottom-color: currentColor; }");
+    printWindow.document.write(".table-bordered > :not(caption) > * { border-width: 0.15rem 0; }");
+    printWindow.document.write(".table-bordered > :not(caption) > * > * { border-width: 0 0.15rem; }");
+    printWindow.document.write(".table-borderless > :not(caption) > * > * { border-bottom-width: 0; }");
+    printWindow.document.write("table { caption-side: bottom; border-collapse: collapse; }");
+    printWindow.document.write("th { text-align: inherit; text-align: -webkit-match-parent; }");
+    printWindow.document.write("thead, tbody, tfoot, tr, td, th { border-color: inherit; border-style: solid; border-width: 0; }");
+    printWindow.document.write(".center { margin: auto; width: 50%; padding: 10px; }");
+    printWindow.document.write(".fixed-bottom { position: fixed; right: 0; bottom: 0; left: 0; z-index: 1030; }</style>");
+    printWindow.document.write('</head><body><div class="row"><table class="table table-bordered" style="direction: rtl">');
+    printWindow.document.write(
+      '<tr><td class="col-1" scope="row" rowspan="2"><img src="https://cdn.ebinews.com/imagesinv/ebinews-77004.jpg" width="50" height="50" /></td>'
+    );
+    printWindow.document.write('<td class="col-8 text-center" scope="col" colspan="2">نام سند: فرم ایجاد / تغییرات در سامانه سیتا</td>');
+    printWindow.document.write('<td class="col-3" scope="col" colspan="1">تاریخ: ');
+    printWindow.document.write("{{ jdate }}");
+    printWindow.document.write(
+      '</td></tr><tr><td class="col-6" scope="col" colspan="2">شناسه درخواست <span style="font-size: 0.5rem">(1)</span> : <span id="invoice-holder">'
+    );
+    printWindow.document.write("{{ invoice.serial_number }}");
+    printWindow.document.write("</span></td>");
+    printWindow.document.write('<td class="col-3" scope="col">شماره: ');
+    printWindow.document.write("{{ counter }}");
+    printWindow.document.write("</td></tr></table></div>");
+    printWindow.document.write(element.innerHTML);
+    /*printWindow.document.write('<div class="row justify-content-center"><div class="col mt-2" style="direction: rtl">');
+    printWindow.document.write(
+      '<div class="mb-1 h6">1) شناسه درخواست تولید شده می بایست هنگام ارسال درخواست درمتن نامه ثبت شده در سیستم اتوماسیون اداری (چارگون) درج شود.</div>'
+    );
+    printWindow.document.write(
+      '<div class="mb-1 h6">2) کاربر میتواند علاوه بر نام کاربری خود ( ترکیب حرف ابتدایی نام و نام خانوادگی ) از نام مستعار تعیین شده جهت اتصال به سامانه استفاده نماید.</div>'
+    );
+    printWindow.document.write('<div class="mb-1 h6">3) سامانه هایی که کاربر در آن فعالیت دارد.</div>');
+    printWindow.document.write(
+      '<div class="mb-1 h6">4) سطح دسترسی به 4 گروه (مشاهده ، دانلود ، آپلود ، حذف/تغییر) تقسیم میشود.دسترسی مشاهده به ازای ساخت پوشه به صورت پیشفرض به کاربر مورد نظر اعطا میشود.این 4 سطوح دسترسی در سطح دسترسی به فایل می باشد.</div>'
+    );
+    printWindow.document.write(
+      '<div class="mb-1 h6">5) دسترسی دانلود به کاربر این امکان را میدهد که فایلهای داخل آن پوشه را روی سیستم خود دانلود نماید.</div>'
+    );
+    printWindow.document.write(
+      '<div class="mb-1 h6">6)  نوع دسترسی آپلود Write : به کاربر این امکان را میدهد که محتویات مورد نظر خود را بر روی سامانه سیتا بارگزاری نماید.( این دسترسی قابلیت تغییر نام فایل قرارداده شده را ندارد ولی می تواند فایل دیگری با همان نام را جایگزین فایل قبلی نماید)</div>'
+    );
+    printWindow.document.write(
+      '<div class="mb-1 h6">7)  دسترسی حذف/تغییر Modify : به کاربر این امکان را میدهد که فایل مورد نظر را حذف و یا تغییر نام بدهد.</div>'
+    );
+    printWindow.document.write(
+      '<div class="mb-1 h6">8) دسترسی ایجاد پوشه : کاربر میتواند داخل پوشه ( پوشه سطح چهارم و بعد از آن ) و بعد از آن پوشه جدید ایجاد نماید.</div></div>'
+    );*/
+    printWindow.document.write('<div class="row fixed-bottom"><table class="table table-bordered" style="direction: rtl">');
+    printWindow.document.write(
+      '<tr><th class="col-8 text-center" scope="col">مالکیت مدرک: کلیه حقوق مادی و معنوی این اثر متعلق به شرکت خدمات انفورماتیک می باشد. Copyright ISC</th>'
+    );
+    printWindow.document.write('<td class="col-3 text-center" scope="col">صفحه 1</td></tr>');
+    printWindow.document.write("</table></div></body></html>");
+    printWindow.document.close();
+    printWindow.alert("برای ذخیره به عنوان PDF کلیدهای Ctrl+P را بزنید");
+    //header.innerHTML = "";
+    //console.log(element.innerHTML);
+    /*var opt = { margin: 1,
+      filename: "{{ mftuser.username }}.pdf",
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+    };
+    html2pdf().set(opt).from(element).save();*/
+    /*var csrf = "{{ csrf_token }}";
     $.post(
       window.location.href,
       {
@@ -25,125 +135,22 @@
       },
       function (response) {
         if (response.result == "success") {
-          //$("#invoice").html(response.invoice_number);
-
-          var invoice = document.getElementById("invoice");
-          var element = document.getElementById("downloadable");
-          /*var header = document.getElementById("header");
-          header.innerHTML = '<div class="mt-5 mb-5">';
-          header.innerHTML += '<table class="table table-bordered" style="direction: rtl"><tbody>';
-          header.innerHTML +=
-            '<tr><td class="col-1" scope="row" rowspan="2"><img src="https://cdn.ebinews.com/imagesinv/ebinews-77004.jpg" width="100" height="100" /></td>';
-          header.innerHTML += '<td class="col-8 text-center" scope="col" colspan="2">نام سند: فرم ایجاد / تغییرات در سامانه سیتا</td>';
-          header.innerHTML += '<td class="col-2" scope="col" colspan="1">تاریخ:</td></tr>';
-          header.innerHTML += '<tr><td class="col-3" scope="col" colspan="2">شناسه درخواست <span style="font-size: 0.5rem">(1)</span> :</td>';
-          header.innerHTML += '<td class="col-3" scope="col">شماره:</td></tr>';
-          header.innerHTML += "</tbody></table></div>";*/
-          var printWindow = window.open("", "", "height=960,width=850");
-          printWindow.document.write("<html><head><style>");
-          /*printWindow.document.write(
-            "body { background-image: url('https://cdn.ebinews.com/imagesinv/ebinews-77004.jpg'); background-repeat: no-repeat; background-attachment: fixed; background-position: center center; background-size: 80%; }"
-          );*/
-          printWindow.document.write(
-            ".row { --bs-gutter-x: 1.5rem; --bs-gutter-y: 0; display: flex; flex-wrap: wrap; margin-right: 1rem; margin-left: 1rem; }"
-          );
-          printWindow.document.write(".row > * { flex-shrink: 0; width: 100%; max-width: 100%; padding-right: 1rem; padding-left: 1rem; }");
-          printWindow.document.write(".d-flex { display: flex !important; }");
-          printWindow.document.write(".justify-content-center { justify-content: center !important; }");
-          printWindow.document.write(".col-lg-12 { flex: 0 0 auto; width: 100%; }");
-          printWindow.document.write(".h4 { font-size: 2.0rem; margin-bottom: 1.25rem; }");
-          printWindow.document.write(".h5 { font-size: 1.15rem; margin-bottom: 1.25rem; }");
-          printWindow.document.write(".h6 { font-size: 0.85rem; margin-bottom: 0.25rem; }");
-          printWindow.document.write(".col { flex: 1 0 0%; }");
-          printWindow.document.write(".col-3 { flex: 0 0 auto; width: 33.33333%; }");
-          printWindow.document.write(".col-4 { flex: 0 0 auto; width: 25%; }");
-          printWindow.document.write(".col-6 { flex: 0 0 auto; width: 66.66666%; }");
-          printWindow.document.write(".col-8 { flex: 0 0 auto; width: 80%; }");
-          printWindow.document.write(".me-4 { margin-right: 5rem !important; }");
-          printWindow.document.write(".ms-4 { margin-left: 5rem !important; }");
-          printWindow.document.write(".me-8 { margin-right: 10rem !important; }");
-          printWindow.document.write(".ms-8 { margin-left: 10rem !important; }");
-          printWindow.document.write(".mb-5 { margin-bottom: 3rem !important; }");
-          printWindow.document.write(".mt-2 { margin-top: 1rem !important; }");
-          printWindow.document.write(".mt-5 { margin-top: 3rem !important; }");
-          printWindow.document.write(".mb-1 { margin-bottom: 0.25rem !important; }");
-          printWindow.document.write(".mb-2 { margin-bottom: 1rem !important; }");
-          printWindow.document.write(".mx-auto { margin-right: auto !important; margin-left: auto !important; }");
-          printWindow.document.write(".text-center { text-align: center !important; }");
-          printWindow.document.write(
-            ".table { --bs-table-bg: transparent; --bs-table-striped-color: #1f2937; --bs-table-striped-bg: rgba(23, 31, 56, 0.05); --bs-table-active-color: #1f2937; --bs-table-active-bg: rgba(23, 31, 56, 0.1); --bs-table-hover-color: #1f2937; --bs-table-hover-bg: rgba(23, 31, 56, 0.075); width: 100%; margin-bottom: 1rem; color: #1f2937; vertical-align: top; border-color: #000000; }"
-          );
-          printWindow.document.write(
-            ".table > :not(caption) > * > * { background-color: var(--bs-table-bg); border-bottom-width: 0.15rem; box-shadow: inset 0 0 0 9999px var(--bs-table-accent-bg); }"
-          );
-          printWindow.document.write(".table > tbody { vertical-align: inherit; }");
-          printWindow.document.write(".table > thead { vertical-align: bottom; }");
-          printWindow.document.write(".table > :not(:last-child) > :last-child > * { border-bottom-color: currentColor; }");
-          printWindow.document.write(".table-bordered > :not(caption) > * { border-width: 0.15rem 0; }");
-          printWindow.document.write(".table-bordered > :not(caption) > * > * { border-width: 0 0.15rem; }");
-          printWindow.document.write(".table-borderless > :not(caption) > * > * { border-bottom-width: 0; }");
-          printWindow.document.write("table { caption-side: bottom; border-collapse: collapse; }");
-          printWindow.document.write("th { text-align: inherit; text-align: -webkit-match-parent; }");
-          printWindow.document.write("thead, tbody, tfoot, tr, td, th { border-color: inherit; border-style: solid; border-width: 0; }");
-          printWindow.document.write(".center { margin: auto; width: 50%; padding: 10px; }");
-          printWindow.document.write(".fixed-bottom { position: fixed; right: 0; bottom: 0; left: 0; z-index: 1030; }</style>");
-          printWindow.document.write('</head><body><div class="row"><table class="table table-bordered" style="direction: rtl">');
-          printWindow.document.write(
-            '<tr><td class="col-1" scope="row" rowspan="2"><img src="https://cdn.ebinews.com/imagesinv/ebinews-77004.jpg" width="50" height="50" /></td>'
-          );
-          printWindow.document.write('<td class="col-8 text-center" scope="col" colspan="2">نام سند: فرم ایجاد / تغییرات در سامانه سیتا</td>');
-          printWindow.document.write('<td class="col-3" scope="col" colspan="1">تاریخ: ');
-          printWindow.document.write(response.jdate);
-          printWindow.document.write(
-            '</td></tr><tr><td class="col-6" scope="col" colspan="2">شناسه درخواست <span style="font-size: 0.5rem">(1)</span> : <span id="invoice-holder">'
-          );
-          printWindow.document.write(response.invoice_number);
-          printWindow.document.write("</span></td>");
-          printWindow.document.write('<td class="col-3" scope="col">شماره: ');
-          printWindow.document.write(response.counter);
-          printWindow.document.write("</td></tr></table></div>");
-          printWindow.document.write(element.innerHTML);
-          /*printWindow.document.write('<div class="row justify-content-center"><div class="col mt-2" style="direction: rtl">');
-          printWindow.document.write(
-            '<div class="mb-1 h6">1) شناسه درخواست تولید شده می بایست هنگام ارسال درخواست درمتن نامه ثبت شده در سیستم اتوماسیون اداری (چارگون) درج شود.</div>'
-          );
-          printWindow.document.write(
-            '<div class="mb-1 h6">2) کاربر میتواند علاوه بر نام کاربری خود ( ترکیب حرف ابتدایی نام و نام خانوادگی ) از نام مستعار تعیین شده جهت اتصال به سامانه استفاده نماید.</div>'
-          );
-          printWindow.document.write('<div class="mb-1 h6">3) سامانه هایی که کاربر در آن فعالیت دارد.</div>');
-          printWindow.document.write(
-            '<div class="mb-1 h6">4) سطح دسترسی به 4 گروه (مشاهده ، دانلود ، آپلود ، حذف/تغییر) تقسیم میشود.دسترسی مشاهده به ازای ساخت پوشه به صورت پیشفرض به کاربر مورد نظر اعطا میشود.این 4 سطوح دسترسی در سطح دسترسی به فایل می باشد.</div>'
-          );
-          printWindow.document.write(
-            '<div class="mb-1 h6">5) دسترسی دانلود به کاربر این امکان را میدهد که فایلهای داخل آن پوشه را روی سیستم خود دانلود نماید.</div>'
-          );
-          printWindow.document.write(
-            '<div class="mb-1 h6">6)  نوع دسترسی آپلود Write : به کاربر این امکان را میدهد که محتویات مورد نظر خود را بر روی سامانه سیتا بارگزاری نماید.( این دسترسی قابلیت تغییر نام فایل قرارداده شده را ندارد ولی می تواند فایل دیگری با همان نام را جایگزین فایل قبلی نماید)</div>'
-          );
-          printWindow.document.write(
-            '<div class="mb-1 h6">7)  دسترسی حذف/تغییر Modify : به کاربر این امکان را میدهد که فایل مورد نظر را حذف و یا تغییر نام بدهد.</div>'
-          );
-          printWindow.document.write(
-            '<div class="mb-1 h6">8) دسترسی ایجاد پوشه : کاربر میتواند داخل پوشه ( پوشه سطح چهارم و بعد از آن ) و بعد از آن پوشه جدید ایجاد نماید.</div></div>'
-          );*/
-          printWindow.document.write('</div><div class="row fixed-bottom"><table class="table table-bordered" style="direction: rtl">');
-          printWindow.document.write(
-            '<tr><th class="col-8 text-center" scope="col">مالکیت مدرک: کلیه حقوق مادی و معنوی این اثر متعلق به شرکت خدمات انفورماتیک می باشد. Copyright ISC</th>'
-          );
-          printWindow.document.write('<td class="col-3 text-center" scope="col">صفحه 1</td></tr>');
-          printWindow.document.write("</table></div></body></html>");
-          printWindow.document.close();
-          printWindow.alert("برای ذخیره به عنوان PDF کلیدهای Ctrl+P را بزنید");
-          //header.innerHTML = "";
-          //console.log(element.innerHTML);
-          /*var opt = { margin: 1,
-            filename: "{{ mftuser.username }}.pdf",
-            image: { type: "jpeg", quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
-          };
-          html2pdf().set(opt).from(element).save();*/
         }
+      }
+    );*/
+  }
+
+  function downloadPdfAjax() {
+    var csrf = "{{ csrf_token }}";
+    var contents = $("#downloadable").html();
+    $.post(
+      "/invoices/details/{{ invoice.id }}/",
+      {
+        csrfmiddlewaretoken: csrf,
+        contents: contents,
+      },
+      function () {
+        alert("فرم چارگون با موفقیت دانلود شد.");
       }
     );
   }
@@ -155,8 +162,10 @@
       <div class="row justify-content-center">
         <div class="col-12 text-center" style="direction: rtl">
           <h1 class="display-3 mb-4">فرم چارگون مشخصات و دسترسی های کاربر</h1>
+          {% comment %}
           <h1 class="display-3 mb-4">{{ invoice.serial_number }}</h1>
-          <p class="lead mb-5">اطلاعات و مشخصات کامل و دسترسی های کاربر {{ mftuser.username }} در فرم چارگون نمایش داده شده است.</p>
+          {% endcomment %}
+          <p class="lead mb-5">اطلاعات و مشخصات کامل و دسترسی های کاربر {{ invoice.get_mftuser.username }} در فرم 307 چارگون نمایش داده شده است.</p>
         </div>
       </div>
     </div>
@@ -165,8 +174,15 @@
   <div class="section section-md">
     <div class="container">
       <div class="row mb-4">
-        <!-- prettier-ignore -->
-        <input type="button" style="width: 50%" class="btn btn-warning mx-auto" value="PDF دریافت به صورت" onClick="downloadPdf()" />
+        <!--prettier-ignore-->
+        <input
+          type="button"
+          style="width: 50%"
+          class="btn btn-warning mx-auto"
+          value="PDF دریافت به صورت"
+          onClick="downloadPdf()"
+          {% comment %} onClick="downloadPdfAjax()" {% endcomment %}
+        />
       </div>
       <div class="row mb-8">
         <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="javascript:history.go(-1);" />

@@ -260,6 +260,38 @@
         addTreeItemsFunctionality();
       });
     });
+
+    $("input[role='invoice-confirm-btn']").click(function () {
+      $("#current-invoice-id").html($(this).attr("iid"));
+      $("#current-invoice-type").html($(this).attr("itype"));
+      $("#invoice-confirm-modal").modal("show");
+    });
+
+    $("input[role='invoice-reject-btn']").click(function () {
+      $("#current-invoice-id").html($(this).attr("iid"));
+      $("#current-invoice-type").html($(this).attr("itype"));
+      $("#invoice-reject-modal").modal("show");
+    });
+
+    $("input[role='invoice-delete-btn']").click(function () {
+      var invoice_id = $(this).attr("iid");
+      var invoice_type = $(this).attr("itype");
+      var csrf = "{{ csrf_token }}";
+      $.post(
+        "/invoices/delete/" + invoice_id + "/",
+        {
+          csrfmiddlewaretoken: csrf,
+          itype: invoice_type,
+        },
+        function (response) {
+          if (response.result == "success") {
+            document.getElementById(response.type + "inv-" + response.deleted + "-parent").remove();
+          } else if (response.result == "error") {
+            alert(response.message);
+          }
+        }
+      );
+    });
   });
 </script>
 {% endblock javascripts %} {% block content %}
@@ -289,37 +321,61 @@
               <li class="col-4 nav-item">
                 <a
                   class="nav-link mb-sm-3 mb-md-0"
-                  id="tabs-permissions-tab"
-                  data-bs-toggle="tab"
-                  href="#tabs-permissions"
-                  role="tab"
-                  aria-controls="tabs-permissions"
-                  aria-selected="false"
-                  ><strong>دسترسی های تأیید نشده</strong> <span class="fas fa-folder-open"></span
-                ></a>
-              </li>
-              <li class="col-4 nav-item">
-                <a
-                  class="nav-link mb-sm-3 mb-md-0"
                   id="tabs-mftusers-tab"
                   data-bs-toggle="tab"
                   href="#tabs-mftusers"
                   role="tab"
                   aria-controls="tabs-mftusers"
                   aria-selected="false"
-                  ><strong>کاربری های تأیید نشده</strong> <span class="fas fa-address-book"></span
+                  ><strong>کاربران تأیید نشده</strong> <span class="fas fa-user-alt"></span
+                ></a>
+              </li>
+              <li class="col-4 nav-item">
+                <a
+                  class="nav-link mb-sm-3 mb-md-0"
+                  id="tabs-undefined-invoice-tab"
+                  data-bs-toggle="tab"
+                  href="#tabs-undefined-invoice"
+                  role="tab"
+                  aria-controls="tabs-undefined-invoice"
+                  aria-selected="false"
+                  ><strong>درخواست های چارگونی بررسی نشده</strong> <span class="fas fa-file-alt"></span
                 ></a>
               </li>
               <li class="col-4 nav-item">
                 <a
                   class="nav-link mb-sm-3 mb-md-0 active"
-                  id="tabs-invoices-tab"
+                  id="tabs-pre-invoices-tab"
                   data-bs-toggle="tab"
-                  href="#tabs-invoices"
+                  href="#tabs-pre-invoices"
                   role="tab"
-                  aria-controls="tabs-invoices"
+                  aria-controls="tabs-pre-invoices"
                   aria-selected="true"
-                  ><strong>فرم های چارگونی ایجاد شده</strong> <span class="fas fa-file-alt"></span
+                  ><strong>درخواست های ایجاد مسیر</strong> <span class="fas fa-folder-open"></span
+                ></a>
+              </li>
+              <li class="col-4 nav-item">
+                <a
+                  class="nav-link mb-sm-3 mb-md-0"
+                  id="tabs-permissions-tab"
+                  data-bs-toggle="tab"
+                  href="#tabs-permissions"
+                  role="tab"
+                  aria-controls="tabs-permissions"
+                  aria-selected="false"
+                  ><strong>دسترسی های تأیید نشده</strong> <span class="fas fa-file-alt"></span
+                ></a>
+              </li>
+              <li class="col-4 nav-item">
+                <a
+                  class="nav-link mb-sm-3 mb-md-0"
+                  id="tabs-rejected-invoice-tab"
+                  data-bs-toggle="tab"
+                  href="#tabs-rejected-invoice"
+                  role="tab"
+                  aria-controls="tabs-rejected-invoice"
+                  aria-selected="false"
+                  ><strong>درخواست های چارگونی رد شده</strong> <span class="fas fa-file-alt"></span
                 ></a>
               </li>
             </ul>
@@ -328,114 +384,32 @@
         <div class="card border-0">
           <div class="card-body p-0">
             <div class="tab-content" id="tabcontent">
-              <div class="tab-pane fade active show" id="tabs-invoices" role="tabpanel" aria-labelledby="tabs-info-tab">
+              {% load coretags %}
+              <div class="tab-pane fade active show" id="tabs-pre-invoices" role="tabpanel" aria-labelledby="tabs-pre-invoices">
                 <br />
                 <br />
                 <br />
-                {% load coretags %} {% for invoice in invoices %}
-                <div class="col-10 mx-auto">
-                  <div class="accordion mb-2" id="inv-{{ invoice.mftuser }}">
-                    <!--Invoice Node-->
-                    <div class="accordion-item">
-                      <h2 class="accordion-header" id="headingOne">
-                        <button
-                          class="accordion-button collapsed"
-                          type="button"
-                          data-bs-toggle="collapse"
-                          data-bs-target="#inv-{{ invoice.id }}"
-                          aria-expanded="false"
-                          aria-controls="inv-{{ invoice.id }}"
-                        >
-                          <span class="fas fa-file-alt me-1"></span>
-                          <!--prettier-ignore-->
-                          <h3 class="display-5 ms-2">{{ invoice.serial_number }} - ({% if invoice.invoice_type.code == 'USEDBUSINESS' %}سرویس گیرنده{% else %}سرویس دهنده{% endif %})</h3>
-                        </button>
-                      </h2>
-                      <div
-                        id="inv-{{ invoice.id }}"
-                        class="accordion-collapse collapse"
-                        aria-labelledby="headingOne"
-                        data-bs-parent="#inv-{{ invoice.mftuser }}"
-                      >
-                        <div class="accordion-body">
-                          <div class="container">
-                            <div class="row">
-                              <div class="row mt-5 mb-5">
-                                <span
-                                  >Username: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.username }}</strong></span></span
-                                >
-                                <span
-                                  >Alias: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.alias }}</strong></span></span
-                                >
-                                <span
-                                  >Email: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.email }}</strong></span></span
-                                >
-                                <span
-                                  >Firstname: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.firstname }}</strong></span></span
-                                >
-                                <span
-                                  >Lastname: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.lastname }}</strong></span></span
-                                >
-                                <span
-                                  >Organization:
-                                  <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.organization }}</strong></span></span
-                                >
-                                <span
-                                  >Business:
-                                  <span class="display-6 text-info"
-                                    ><strong> {{ invoice.get_mftuser.business.all|get_businesses }}</strong></span
-                                  ></span
-                                >
-                                <span
-                                  >MobilePhone: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.mobilephone }}</strong></span></span
-                                >
-                                <span
-                                  >OfficePhone: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.officephone }}</strong></span></span
-                                >
-                                <span
-                                  >Description: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.description }}</strong></span></span
-                                >
-                              </div>
-                              <div class="col">
-                                <a href="#" style="width: 100%" class="btn btn-danger animate-up-1">حذف درخواست</a>
-                              </div>
-                              <div class="col">
-                                <input
-                                  type="button"
-                                  role="invoice-dissmiss-changes-btn"
-                                  uid="{{ invoice.id }}"
-                                  style="width: 100%"
-                                  class="btn btn-warning animate-up-1"
-                                  value="عدم تأیید"
-                                />
-                              </div>
-                              <div class="col">
-                                <input
-                                  type="button"
-                                  role="invoice-confirm-btn"
-                                  uid="{{ invoice.id }}"
-                                  style="width: 100%"
-                                  class="btn btn-tertiary animate-up-1"
-                                  value="تأیید درخواست"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <!--End of Invoice Node-->
-                  </div>
-                </div>
-                {% endfor %}
+                {% include "includes/admin-invoice-list.html" with invoices=pre_invoices %}
               </div>
-              <div class="tab-pane fade" id="tabs-mftusers" role="tabpanel" aria-labelledby="tabs-info-tab">
+              <div class="tab-pane fade" id="tabs-undefined-invoice" role="tabpanel" aria-labelledby="tabs-undefined-invoice">
+                <br />
+                <br />
+                <br />
+                {% include "includes/admin-invoice-list.html" with invoices=invoices|filter_invoices %}
+              </div>
+              <div class="tab-pane fade" id="tabs-rejected-invoice" role="tabpanel" aria-labelledby="tabs-rejected-invoice">
+                <br />
+                <br />
+                <br />
+                {% include "includes/admin-invoice-list.html" with invoices=invoices|filter_invoices:'REJECTED' %}
+              </div>
+              <div class="tab-pane fade" id="tabs-mftusers" role="tabpanel" aria-labelledby="tabs-mftusers">
                 <br />
                 <br />
                 <br />
                 {% include "includes/users-list.html" %} {% comment %} with users=new_users {% endcomment %}
               </div>
-              <div class="tab-pane fade" id="tabs-permissions" role="tabpanel" aria-labelledby="tabs-permissions-tab">
+              <div class="tab-pane fade" id="tabs-permissions" role="tabpanel" aria-labelledby="tabs-permissions">
                 <div class="row mt-5 mb-5">
                   <div style="display: none">
                     <p id="absolute-path-1"></p>
@@ -621,6 +595,122 @@
       </div>
       <div class="row mt-8 mb-5">
         <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="javascript:history.go(-1);" />
+      </div>
+      <div class="row">
+        <div class="col md-2">
+          <div class="modal fade" id="invoice-confirm-modal" role="dialog" aria-labelledby="inv-c-modal" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content" style="direction: rtl">
+                <div class="modal-header">
+                  <h2 class="h6 modal-title">علت رد نمودن درخواست</h2>
+                  <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="direction: ltr">
+                  <div style="display: none">
+                    <p id="current-invoice-id"></p>
+                    <p id="current-invoice-type"></p>
+                  </div>
+                  <div class="input-group mb-3">
+                    <input
+                      id="reason-input"
+                      type="text"
+                      class="form-control"
+                      placeholder="Reason"
+                      aria-label="Reason"
+                      aria-describedby="invoice-reason-input"
+                    />
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button id="submit-reason-btn" type="button" class="btn btn-secondary ms-auto">ثبت</button>
+                  <button type="button" class="btn btn-link ms-0" data-bs-dismiss="modal">انصراف</button>
+                  <script type="text/javascript">
+                    /*var nameInput = document.getElementById("reason-input");
+                    nameInput.addEventListener("change", function (event) {
+                      var n = cleanInputValue(event.currentTarget.value, "name");
+                      event.currentTarget.value = n;
+                    });*/
+
+                    $(function () {
+                      $("#submit-reason-btn").click(function () {
+                        var iid = $("#current-invoice-id").html();
+                        var itype = $("#current-invoice-type").html();
+                        var reason_text = $("#reason-input").val();
+                        var csrf = "{{ csrf_token }}";
+                        if (reason_text != "") {
+                          $.post(
+                            "/invoices/reject/" + iid + "/",
+                            {
+                              csrfmiddlewaretoken: csrf,
+                              itype: itype,
+                              reason: reason_text,
+                            },
+                            function (response) {
+                              if (response.result == "success") {
+                                document.getElementById(response.type + "inv-" + response.rejected + "-parent").remove();
+                              } else if (response.result == "error") {
+                                alert(response.message);
+                              }
+                            }
+                          );
+                        } else {
+                          alert("علت رد درخواست را وارد کنید!");
+                        }
+                        return false;
+                      });
+                    });
+                  </script>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal fade" id="invoice-reject-modal" role="dialog" aria-labelledby="inv-c-modal" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content" style="direction: rtl">
+                <div class="modal-header">
+                  <h2 class="h6 modal-title">تأیید نمودن درخواست</h2>
+                  <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div style="display: none">
+                    <p id="current-invoice-id"></p>
+                    <p id="current-invoice-type"></p>
+                  </div>
+                  <p>آیا از تأیید این درخواست، اطمینان دارید؟</p>
+                </div>
+                <div class="modal-footer">
+                  <button id="submit-reason-btn" type="button" class="btn btn-secondary ms-auto">تأیید</button>
+                  <button type="button" class="btn btn-link ms-0" data-bs-dismiss="modal">انصراف</button>
+                  <script type="text/javascript">
+                    $(function () {
+                      $("#submit-confirm-btn").click(function () {
+                        var iid = $("#current-invoice-id").html();
+                        var itype = $("#current-invoice-type").html();
+                        var csrf = "{{ csrf_token }}";
+                        $.post(
+                          "/invoices/confirm/" + iid + "/",
+                          {
+                            csrfmiddlewaretoken: csrf,
+                            itype: itype,
+                          },
+                          function (response) {
+                            if (response.result == "success") {
+                              document.getElementById(response.type + "inv-" + response.confirmed + "-parent").remove();
+                              alert(response.message);
+                            } else if (response.result == "error") {
+                              alert(response.message);
+                            }
+                          }
+                        );
+                        return false;
+                      });
+                    });
+                  </script>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

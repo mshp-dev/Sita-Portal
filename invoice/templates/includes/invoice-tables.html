@@ -16,43 +16,43 @@
           <table class="table table-bordered" style="direction: rtl">
             <tr>
               <th class="col-4" scope="col" id="firstname-label">نام</th>
-              <td class="col-4" scope="col" id="firstname-value">{{ mftuser.firstname }}</td>
+              <td class="col-4" scope="col" id="firstname-value">{{ invoice.get_mftuser.firstname }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="lastname-label">نام خانوادگی</th>
-              <td class="col-4" scope="col" id="lastname-value">{{ mftuser.lastname }}</td>
+              <td class="col-4" scope="col" id="lastname-value">{{ invoice.get_mftuser.lastname }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="username-label">نام کاربری</th>
-              <td class="col-4" scope="col" id="username-value">{{ mftuser.username }}</td>
+              <td class="col-4" scope="col" id="username-value">{{ invoice.get_mftuser.username }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="alias-label">نام مستعار <span style="font-size: 0.5rem">(2)</span></th>
-              <td class="col-4" scope="col" id="alias-value">{{ mftuser.alias }}</td>
+              <td class="col-4" scope="col" id="alias-value">{{ invoice.get_mftuser.alias }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="email-label">ایمیل</th>
-              <td class="col-4" scope="col" id="email-value">{{ mftuser.email }}</td>
+              <td class="col-4" scope="col" id="email-value">{{ invoice.get_mftuser.email }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="officephone-label">تلفن دفتر کار</th>
-              <td class="col-4" scope="col" id="officephone-value">{{ mftuser.officephone }}</td>
+              <td class="col-4" scope="col" id="officephone-value">{{ invoice.get_mftuser.officephone }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="mobilephone-label">شماره تلفن همراه</th>
-              <td class="col-4" scope="col" id="mobilephone-value">{{ mftuser.mobilephone }}</td>
+              <td class="col-4" scope="col" id="mobilephone-value">{{ invoice.get_mftuser.mobilephone }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="organization-label">سازمان/بانک</th>
-              <td class="col-4" scope="col" id="organization-value">{{ mftuser.organization }}</td>
+              <td class="col-4" scope="col" id="organization-value">{{ invoice.get_mftuser.organization }}</td>
             </tr>
             <tr>
-              <th class="col-4" scope="col" id="business-label">سامانه/پروژه <span style="font-size: 0.5rem">(3)</span></th>
-              <td class="col-4" scope="col" id="business-value">{{ mftuser.business.all|get_businesses }}</td>
+              <th class="col-4" scope="col" id="business-label">سامانه/پروژه{% if not ubus %}ها{% endif %} <span style="font-size: 0.5rem">(3)</span></th>
+              <td class="col-4" scope="col" id="business-value">{% if ubus %}{{ ubus }}{% else %}{{ invoice.get_mftuser.business.all|get_businesses }}{% endif %}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="description-label">جزئیات</th>
-              <td class="col-4" scope="col" id="description-value">{{ mftuser.description }}</td>
+              <td class="col-4" scope="col" id="description-value">{{ invoice.get_mftuser.description }}</td>
             </tr>
           </table>
         </div>
@@ -108,14 +108,14 @@
       </div>
     </div>
     <div class="row justify-content-center"><div class="col mt-2" style="direction: rtl">
-      <div class="mb-1 h6">1) شناسه درخواست تولید شده می بایست هنگام ارسال درخواست درمتن نامه ثبت شده در سیستم اتوماسیون اداری (چارگون) درج شود.</div>
-      <div class="mb-1 h6">2) کاربر میتواند علاوه بر نام کاربری خود ( ترکیب حرف ابتدایی نام و نام خانوادگی ) از نام مستعار تعیین شده جهت اتصال به سامانه استفاده نماید.</div>
-      <div class="mb-1 h6">3) سامانه هایی که کاربر در آن فعالیت دارد.</div>
-      <div class="mb-1 h6">4) سطح دسترسی به 4 گروه (مشاهده ، دانلود ، آپلود ، حذف/تغییر) تقسیم میشود.دسترسی مشاهده به ازای ساخت پوشه به صورت پیشفرض به کاربر مورد نظر اعطا میشود.این 4 سطوح دسترسی در سطح دسترسی به فایل می باشد.</div>
-      <div class="mb-1 h6">5) دسترسی دانلود به کاربر این امکان را میدهد که فایلهای داخل آن پوشه را روی سیستم خود دانلود نماید.</div>
-      <div class="mb-1 h6">6)  نوع دسترسی آپلود Write : به کاربر این امکان را میدهد که محتویات مورد نظر خود را بر روی سامانه سیتا بارگزاری نماید.( این دسترسی قابلیت تغییر نام فایل قرارداده شده را ندارد ولی می تواند فایل دیگری با همان نام را جایگزین فایل قبلی نماید)</div>
-      <div class="mb-1 h6">7)  دسترسی حذف/تغییر Modify : به کاربر این امکان را میدهد که فایل مورد نظر را حذف و یا تغییر نام بدهد.</div>
-      <div class="mb-1 h6">8) دسترسی ایجاد پوشه : کاربر میتواند داخل پوشه ( پوشه سطح چهارم و بعد از آن ) و بعد از آن پوشه جدید ایجاد نماید.</div>
+      <div class="mb-1" style="font-size: 0.6rem">1) شناسه درخواست تولید شده می بایست هنگام ارسال درخواست درمتن نامه ثبت شده در سیستم اتوماسیون اداری (چارگون) درج شود.</div>
+      <div class="mb-1" style="font-size: 0.6rem">2) کاربر میتواند علاوه بر نام کاربری خود ( ترکیب حرف ابتدایی نام و نام خانوادگی ) از نام مستعار تعیین شده جهت اتصال به سامانه استفاده نماید.</div>
+      <div class="mb-1" style="font-size: 0.6rem">3) سامانه هایی که کاربر در آن فعالیت دارد.</div>
+      <div class="mb-1" style="font-size: 0.6rem">4) سطح دسترسی به 4 گروه (مشاهده ، دانلود ، آپلود ، حذف/تغییر) تقسیم میشود.دسترسی مشاهده به ازای ساخت پوشه به صورت پیشفرض به کاربر مورد نظر اعطا میشود.این 4 سطوح دسترسی در سطح دسترسی به فایل می باشد.</div>
+      <div class="mb-1" style="font-size: 0.6rem">5) دسترسی دانلود به کاربر این امکان را میدهد که فایلهای داخل آن پوشه را روی سیستم خود دانلود نماید.</div>
+      <div class="mb-1" style="font-size: 0.6rem">6)  نوع دسترسی آپلود Write : به کاربر این امکان را میدهد که محتویات مورد نظر خود را بر روی سامانه سیتا بارگزاری نماید.( این دسترسی قابلیت تغییر نام فایل قرارداده شده را ندارد ولی می تواند فایل دیگری با همان نام را جایگزین فایل قبلی نماید)</div>
+      <div class="mb-1" style="font-size: 0.6rem">7)  دسترسی حذف/تغییر Modify : به کاربر این امکان را میدهد که فایل مورد نظر را حذف و یا تغییر نام بدهد.</div>
+      <div class="mb-1" style="font-size: 0.6rem">8) دسترسی ایجاد پوشه : کاربر میتواند داخل پوشه ( پوشه سطح چهارم و بعد از آن ) و بعد از آن پوشه جدید ایجاد نماید.</div>
     </div>
   </div>
 </div>

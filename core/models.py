@@ -162,7 +162,7 @@ class Directory(models.Model):
     is_confirmed     = models.BooleanField(blank=False, default=False)
 
     def __str__(self):
-        return f'{self.name} ({self.name})'
+        return f'{self.name} ({self.relative_path.replace(f"/{self.name}", "")})'
     
     @property
     def absolute_path(self):

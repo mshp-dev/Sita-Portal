@@ -48,12 +48,16 @@
                     <li class="mb-2 megamenu-item">
                       <a class="megamenu-link" href="{% url 'mftusers-access-list' %}">ایجاد/تغییر دسترسی</a>
                     </li>
+                    {% if access != 'CUSTOMER' %}
                     <li class="mb-2 megamenu-item">
                       <a class="megamenu-link" href="{% url 'directories-list' %}">ایجاد مسیر و پوشه</a>
                     </li>
+                    {% endif %}
+                    {% if access != 'ADMIN' %}
                     <li class="mb-2 megamenu-item">
                       <a class="megamenu-link" href="{% url 'invoices-list' %}">لیست درخواست ها</a>
                     </li>
+                    {% endif %}
                   </ul>
                 </div>
                 {% if access == 'ADMIN' %}

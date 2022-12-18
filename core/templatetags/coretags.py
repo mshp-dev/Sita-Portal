@@ -16,6 +16,16 @@ def remove_dot(string):
 
 
 @register.filter
+def replace_slash(obj, replace_with=' -> '):
+    return str(obj).replace('/', replace_with)
+
+
+@register.filter
+def filter_invoices(invoices, status='UNDEFINED'):
+    return invoices.filter(confirm_or_reject=status)
+
+
+@register.filter
 def get_businesses(buss):
     buss_str = 'سامانه های'
     if buss.count() > 1:

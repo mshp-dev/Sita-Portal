@@ -1,0 +1,192 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      .row {
+        --bs-gutter-x: 1.5rem;
+        --bs-gutter-y: 0;
+        display: flex;
+        flex-wrap: wrap;
+        margin-right: 1rem;
+        margin-left: 1rem;
+      }
+      .row > * {
+        flex-shrink: 0;
+        width: 100%;
+        max-width: 100%;
+        padding-right: 1rem;
+        padding-left: 1rem;
+      }
+      .d-flex {
+        display: flex !important;
+      }
+      .justify-content-center {
+        justify-content: center !important;
+      }
+      .col-lg-12 {
+        flex: 0 0 auto;
+        width: 100%;
+      }
+      .h4 {
+        font-size: 2rem;
+        margin-bottom: 1.25rem;
+      }
+      .h5 {
+        font-size: 1.15rem;
+        margin-bottom: 1.25rem;
+      }
+      .h6 {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+      }
+      .col {
+        flex: 1 0 0%;
+      }
+      .col-3 {
+        flex: 0 0 auto;
+        width: 33.33333%;
+      }
+      .col-4 {
+        flex: 0 0 auto;
+        width: 25%;
+      }
+      .col-6 {
+        flex: 0 0 auto;
+        width: 66.66666%;
+      }
+      .col-8 {
+        flex: 0 0 auto;
+        width: 80%;
+      }
+      .me-4 {
+        margin-right: 5rem !important;
+      }
+      .ms-4 {
+        margin-left: 5rem !important;
+      }
+      .me-8 {
+        margin-right: 10rem !important;
+      }
+      .ms-8 {
+        margin-left: 10rem !important;
+      }
+      .mb-5 {
+        margin-bottom: 3rem !important;
+      }
+      .mt-2 {
+        margin-top: 1rem !important;
+      }
+      .mt-5 {
+        margin-top: 3rem !important;
+      }
+      .mb-1 {
+        margin-bottom: 0.25rem !important;
+      }
+      .mb-2 {
+        margin-bottom: 1rem !important;
+      }
+      .mx-auto {
+        margin-right: auto !important;
+        margin-left: auto !important;
+      }
+      .text-center {
+        text-align: center !important;
+      }
+      .center {
+        margin: auto;
+        width: 50%;
+        padding: 10px;
+      }
+      .fixed-bottom {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1030;
+      }
+      .table {
+        --bs-table-bg: transparent;
+        --bs-table-striped-color: #1f2937;
+        --bs-table-striped-bg: rgba(23, 31, 56, 0.05);
+        --bs-table-active-color: #1f2937;
+        --bs-table-active-bg: rgba(23, 31, 56, 0.1);
+        --bs-table-hover-color: #1f2937;
+        --bs-table-hover-bg: rgba(23, 31, 56, 0.075);
+        width: 100%;
+        margin-bottom: 1rem;
+        color: #1f2937;
+        vertical-align: top;
+        border-color: #000000;
+      }
+      .table > :not(caption) > * > * {
+        background-color: var(--bs-table-bg);
+        border-bottom-width: 0.15rem;
+        box-shadow: inset 0 0 0 9999px var(--bs-table-accent-bg);
+      }
+      .table > tbody {
+        vertical-align: inherit;
+      }
+      .table > thead {
+        vertical-align: bottom;
+      }
+      .table > :not(:last-child) > :last-child > * {
+        border-bottom-color: currentColor;
+      }
+      .table-bordered > :not(caption) > * {
+        border-width: 0.15rem 0;
+      }
+      .table-bordered > :not(caption) > * > * {
+        border-width: 0 0.15rem;
+      }
+      .table-borderless > :not(caption) > * > * {
+        border-bottom-width: 0;
+      }
+      table {
+        caption-side: bottom;
+        border-collapse: collapse;
+      }
+      th {
+        text-align: inherit;
+        text-align: -webkit-match-parent;
+      }
+      thead,
+      tbody,
+      tfoot,
+      tr,
+      td,
+      th {
+        border-color: inherit;
+        border-style: solid;
+        border-width: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="row">
+      <table class="table table-bordered" style="direction: rtl">
+        <tr>
+          <td class="col-1" scope="row" rowspan="2">
+            <img src="https://cdn.ebinews.com/imagesinv/ebinews-77004.jpg" width="50" height="50" />
+          </td>
+          <td class="col-8 text-center" scope="col" colspan="2">نام سند: فرم ایجاد / تغییرات در سامانه سیتا</td>
+          <td class="col-3" scope="col" colspan="1">تاریخ: <span id="date"></span></td>
+        </tr>
+        <tr>
+          <td class="col-6" scope="col" colspan="2">شناسه درخواست <span style="font-size: 0.5rem">(1)</span> : <span id="invoice-holder"></span></td>
+          <td class="col-3" scope="col">شماره: <span id="counter"></span></td>
+        </tr>
+      </table>
+    </div>
+    <div id="form-contents"></div>
+    <div class="row fixed-bottom">
+      <table class="table table-bordered" style="direction: rtl">
+        <tr>
+          <th class="col-8 text-center" scope="col">
+            مالکیت مدرک: کلیه حقوق مادی و معنوی این اثر متعلق به شرکت خدمات انفورماتیک می باشد. Copyright ISC
+          </th>
+          <td class="col-3 text-center" scope="col">صفحه 1</td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>

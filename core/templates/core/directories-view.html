@@ -49,6 +49,7 @@
   function cleanInputValue(input, type) {
     if (type == "name") {
       input = input.replace(/[\u0600-\u06FF]/g, "");
+      input = input.replace(/ /g, "");
     } else if (type == "number") {
       input = input.replace(/[a-z]/g, "");
       input = input.replace(/[A-Z]/g, "");

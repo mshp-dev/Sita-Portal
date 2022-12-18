@@ -3,11 +3,16 @@ from django.core.files import File
 from django.conf import settings
 from django.db.models import Sum
 from pathlib import Path
-from .models import *
+
+from core.models import *
+from invoice.models import *
 
 from tempfile import NamedTemporaryFile as ntf
 from lxml import etree as ET
-import os, random, zipfile, csv
+from lxml import html
+import os, random, zipfile, csv, pdfkit
+
+from jdatetime import datetime as jdt
 
 import logging
 
@@ -83,10 +88,9 @@ def get_users_with_changed_permissions():
 
 
 def get_sub_dirs(dir_, q=None, dir_create_view=False):
-    temp = dir_.children.split(',')
+    temp = dir_.children.split(',')[:-1]
     children = []
     if len(temp) > 0:
-        temp.pop()
         chs = [int(t) for t in temp]
         chs.sort()
         for id_ in chs:
@@ -95,9 +99,9 @@ def get_sub_dirs(dir_, q=None, dir_create_view=False):
                 if dir_create_view:
                     if q:
                         if d.name.contains(q):
-                            children.append({'dir': d, 'children': get_sub_dirs(d, q)})
+                            children.append({'dir': d, 'children': get_sub_dirs(d, q, dir_create_view=True)})
                     else:
-                        children.append({'dir': d, 'children': get_sub_dirs(d)})
+                        children.append({'dir': d, 'children': get_sub_dirs(d, dir_create_view=True)})
                 elif d.is_confirmed:
                     if q:
                         if d.name.contains(q):
@@ -277,7 +281,7 @@ def export_user(id, isc_user):
     lastName = template.xpath('//webUsers/webUser/lastName')
     lastName[0].text = mftuser.lastname
     organization = template.xpath('//webUsers/webUser/organization')
-    organization[0].text = mftuser.organization.code
+    organization[0].text = mftuser.organization.description
     mobilePhone = template.xpath('//webUsers/webUser/mobilePhone')
     mobilePhone[0].text = str(mftuser.mobilephone)
     name = template.xpath('//webUsers/webUser/name')
@@ -351,7 +355,7 @@ def export_user_with_paths(id, isc_user):
     lastName = template.xpath('//webUsers/webUser/lastName')
     lastName[0].text = mftuser.lastname
     organization = template.xpath('//webUsers/webUser/organization')
-    organization[0].text = mftuser.organization.code
+    organization[0].text = mftuser.organization.description
     mobilePhone = template.xpath('//webUsers/webUser/mobilePhone')
     mobilePhone[0].text = str(mftuser.mobilephone)
     name = template.xpath('//webUsers/webUser/name')
@@ -389,7 +393,6 @@ def export_user_with_paths(id, isc_user):
     webuser_temp_file.flush()
     webuser_file = File(webuser_temp_file, name=f'{mftuser.username}.xml')
     paths_temp_file = ntf(mode='w+', encoding='utf-8', delete=True)
-    bytes_template = ET.tostring(template)
     dir_ids = [d['directory'] for d in all_dirs]
     for d in Directory.objects.filter(pk__in=dir_ids).order_by('relative_path'):
         paths_temp_file.write(f'{d.absolute_path},\n')
@@ -474,6 +477,29 @@ def make_csv_of_all_paths(name='paths'):
             csv_writer.writerow([f'{d.absolute_path}'])
             
     return os.path.join(os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv'))
+
+
+def make_form_from_invoice(invoice, contents):
+    html_path = os.path.join(settings.MEDIA_ROOT, 'form-307.html')
+    html_root = html.parse(html_path).getroot()
+    date = html_root.get_element_by_id("date")
+    date.text = jdt.now().strftime('%Y/%m/%d')
+    serial_number = html_root.get_element_by_id("invoice-holder")
+    serial_number.text = invoice.serial_number
+    counter = html_root.get_element_by_id("counter")
+    counter.text = str(Invoice.objects.filter(mftuser=invoice.mftuser).count())
+    #TODO: correct contents html formatting and write to file
+    invoice_contents = html_root.get_element_by_id("form-contents")
+    invoice_contents.text = html.tostring(html.fromstring(contents))
+    pdf_path = os.path.join(settings.MEDIA_ROOT, 'exports', f'{invoice.get_mftuser().username}.pdf')
+    new_html_path = os.path.join(settings.MEDIA_ROOT, 'exports', f'{invoice.get_mftuser().username}.html')
+    with open(new_html_path, mode='w+') as html_temp_file:
+        bytes_html = html.tostring(html_root, pretty_print=True)
+        html_temp_file.write(bytes_html.decode('utf-8'))
+        #TODO: pdf is empty! make it right
+        pdfkit.from_file(html_temp_file, pdf_path)
+    # os.remove(new_html_path)
+    return pdf_path
 
 
 def insert_into_db():

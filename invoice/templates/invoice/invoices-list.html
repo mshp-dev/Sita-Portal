@@ -20,7 +20,6 @@
         },
         function (response) {
           if (response.result == "success") {
-            console.log(response.type + "inv-" + response.deleted + "-parent");
             document.getElementById(response.type + "inv-" + response.deleted + "-parent").remove();
           } else if (response.result == "error") {
             alert(response.message);

@@ -17,7 +17,8 @@ from django.contrib.auth.hashers import make_password
 
 from invoice.models import Invoice, PreInvoice
 
-from .utils import *
+from mftusers.utils import *
+
 from .models import *
 from .forms import *
 
@@ -392,6 +393,7 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
     deleted_users   = MftUserTemp.objects.filter(description__icontains=f"%deleted%").order_by('username')
     # invoices        = Invoice.objects.filter(processed=False).order_by('created_at')
     invoices        = Invoice.objects.all().order_by('created_at')
+    pre_invoices    = PreInvoice.objects.all().order_by('created_at')
     elements        = []
     new_users       = []
     changed_users   = []
@@ -435,6 +437,7 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
         'admin_view': True,
         'access': access,
         'invoices': invoices,
+        'pre_invoices': pre_invoices,
         'elements': get_users_with_changed_permissions(),
         'users': mftusers,
         'new_users': new_users,
@@ -664,15 +667,17 @@ def directories_list_view(request, *args, **kwargs):
         elif request.method == 'GET':
             response = {"result": "empty"}
             if Directory.objects.filter(created_by=isc_user, is_confirmed=False).exists():
-                dirs = Directory.objects.filter(created_by=isc_user, is_confirmed=False).values('id')
+                dirs = Directory.objects.filter(created_by=isc_user, is_confirmed=False).order_by('-created_at')
                 dirs_str = ''
-                for d in dirs:
+                for d in dirs.values('id'):
                     dirs_str += f'{str(d["id"])},'
                 if PreInvoice.objects.filter(directories_list=dirs_str).exists():
                     response["result"] = "exists"
                 else:
                     response["result"] = "ok"
                     response["dirs_list"] = dirs_str
+                # elif PreInvoice.objects.filter(directories_list__icontains=dirs_str).exists():
+                #     response["result"] = "exists"
             
             return JsonResponse(data=response, safe=False)
         

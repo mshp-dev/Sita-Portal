@@ -1,13 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from django.http.response import JsonResponse
+from django.http.response import JsonResponse, FileResponse
 from django.template.loader import render_to_string
 
 from core.models import IscUser, MftUser, Directory, Permission, DirectoryPermissionCode, BusinessCode, CustomerBank, OperationBusiness
-from .models import *
 
 from jdatetime import datetime as jdt
+
+from mftusers.utils import make_form_from_invoice, export_user_with_paths
+
+from .models import *
 
 import logging
 
@@ -40,7 +43,7 @@ def invoice_create_view(request, *args, **kwargs):
                     mftuser = MftUser.objects.get(pk=request.POST.get('mftuser'))
                     invoice = Invoice(
                         invoice_type=invoice_type,
-                        mftuser=mftuser,
+                        mftuser=mftuser.id,
                         used_business=int(request.POST.get('ubus')) if invoice_type.code == 'INVUBUS' else 0,
                         created_by=isc_user
                     )
@@ -58,6 +61,72 @@ def invoice_create_view(request, *args, **kwargs):
                 response = {'result': 'error'}
             finally:
                 return JsonResponse(data=response, safe=False)
+
+
+@login_required(login_url='/login/')
+def invoice_confirm_view(request, iid, *args, **kwargs):
+    isc_user = IscUser.objects.get(user=request.user)
+
+    if request.is_ajax():
+        if request.method == 'POST':
+            invoice = None
+            invoice_type = InvoiceType.objects.get(code=request.POST.get('itype'))
+            if invoice.created_by == isc_user or isc_user.role.code == 'ADMIN':
+                if invoice_type.code == 'INVDIR':
+                    invoice = PreInvoice.objects.get(pk=iid)
+                    dirs_list = invoice.directories_list.split(',')[:-1]
+                    for d in dirs_list:
+                        Directory.objects.filter(pk=int(d)).update(is_confirmed=True)
+                else:
+                    invoice = Invoice.objects.get(pk=iid)
+                    mftuser = MftUser.objects.get(pk=invoice.mftuser)
+                    mftuser.is_confirmed = True
+                    mftuser.save()
+                    Permission.objects.filter(user=mftuser).update(is_confirmed=True)
+                    export_user_with_paths(invoice.mftuser, isc_user)
+                invoice.confirm_or_reject = 'CONFIRMED'
+                invoice.save()
+                response = {
+                    'result': 'success',
+                    'type': 'pre' if invoice_type.code == 'INVDIR' else '',
+                    'confirmed': invoice.id
+                }
+            else:
+                logger.critical(f'unauthorized trying confirm of invoice with serial number {invoice.serial_number} by {isc_user.user.username}.')
+                response = {
+                    'result': 'error',
+                    'message': 'شما مجاز به انجام این کار نیستید'
+                }
+            return JsonResponse(data=response, safe=False)
+
+
+@login_required(login_url='/login/')
+def invoice_reject_view(request, iid, *args, **kwargs):
+    isc_user = IscUser.objects.get(user=request.user)
+
+    if request.is_ajax():
+        if request.method == 'POST':
+            invoice = None
+            invoice_type = InvoiceType.objects.get(code=request.POST.get('itype'))
+            if invoice_type.code == 'INVDIR':
+                invoice = PreInvoice.objects.get(pk=iid)
+            else:
+                invoice = Invoice.objects.get(pk=iid)
+            if invoice.created_by == isc_user or isc_user.role.code == 'ADMIN':
+                invoice.confirm_or_reject = 'REJECTED'
+                invoice.description = request.POST.get('reason')
+                invoice.save()
+                response = {
+                    'result': 'success',
+                    'rejected': invoice.id
+                }
+            else:
+                logger.critical(f'unauthorized trying reject of invoice with serial number {invoice.serial_number} by {isc_user.user.username}.')
+                response = {
+                    'result': 'error',
+                    'message': 'شما مجاز به انجام این کار نیستید'
+                }
+            return JsonResponse(data=response, safe=False)
 
 
 @login_required(login_url='/login/')
@@ -91,7 +160,7 @@ def invoice_delete_view(request, iid, *args, **kwargs):
 @login_required(login_url='/login/')
 def invoice_details_view(request, iid, *args, **kwargs):
     isc_user = IscUser.objects.get(user=request.user)
-    invoice = Invoice.objects.get(pk=iid)
+    invoice = get_object_or_404(Invoice, pk=iid)
     mftuser = MftUser.objects.get(pk=invoice.mftuser)
     ubus = invoice.get_used_business()
     bus_dirs = []
@@ -103,34 +172,11 @@ def invoice_details_view(request, iid, *args, **kwargs):
 
     if request.is_ajax():
         if request.method == 'POST':
-            invoice_type = InvoicType.objects.get(code=request.POST.get('type'))
-            if invoice_type.code == 'INVDIR':
-                dirs = Directory.objects.filter(created_by=isc_user, is_confirmed=False).values('id')
-                dirs_str = ''
-                for d in dirs:
-                    dirs_str += f'{str(d["id"])},'
-                invoice = PreInvoice(
-                    invoice_type=invoice_type,
-                    directories_list=dirs_str,
-                    created_by=isc_user
-                )
-                invoice.save()
-            else:
-                mftuser = MftUser.objects.get(pk=request.POST.get('mftuser'))
-                invoice = Invoice(
-                    invoice_type=invoice_type,
-                    mftuser=mftuser,
-                    used_business=request.POST.get('ubus') if invoice_type.code == 'INVUBUS' else 0,
-                    created_by=isc_user
-                )
-                invoice.save()
-            
-            logger.info(f'invoice with serial number {invoice.serial_number} generated by {isc_user.user.username}.')
-            response = {
-                'result': 'success',
-                'invoice_number': invoice.serial_number
-            }
-            return JsonResponse(data=response, safe=False)
+            response = FileResponse(open(make_form_from_invoice(invoice, request.POST.get('contents')), 'rb'), as_attachment=True)
+            response['Content-Disposition'] = f"attachment; filename={invoice.get_mftuser().username}.pdf"
+            response['Content-Type'] = "file/pdf"
+            logger.info(f'invoice with serial number {invoice.serial_number} downloaded by {isc_user.user.username}.')
+            return response
 
     if ubus:
         bus_dirs = Directory.objects.filter(business=ubus).order_by('relative_path')
@@ -151,6 +197,9 @@ def invoice_details_view(request, iid, *args, **kwargs):
         'username': str(isc_user.user.username),
         'access': str(isc_user.role.code),
         'invoice': invoice,
+        'jdate': jdt.now().strftime('%Y/%m/%d'),
+        'counter': Invoice.objects.filter(mftuser=mftuser.id).count(),
+        'ubus': ubus,
         'user_accesses': user_accesses
     }
     

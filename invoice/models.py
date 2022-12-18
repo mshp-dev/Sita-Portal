@@ -19,6 +19,7 @@ class BaseInvoice(models.Model):
     invoice_type      = models.ForeignKey(InvoiceType, to_field='code', null=True, on_delete=models.CASCADE)
     serial_number     = models.CharField(max_length=50, blank=False, default=None)
     confirm_or_reject = models.CharField(max_length=10, blank=False, default='UNDEFINED')
+    description       = models.CharField(max_length=1000, blank=True, null=True, default=None)
     created_by        = models.ForeignKey(IscUser, blank=False, on_delete=models.CASCADE)
     created_at        = models.DateTimeField(default=timezone.now)
         
@@ -53,7 +54,7 @@ class Invoice(BaseInvoice):
         return f'{invoice_type.serial_prefix}{"0" * divided}{uid}{"0" * divided}{"0" * remained if remained > 0 else ""}{serial_number}'
 
     def get_used_business(self):
-        if self.used_business != 0:
+        if self.used_business == 0:
             return None
         else:
             return BusinessCode.objects.get(pk=self.used_business)
@@ -71,3 +72,10 @@ class PreInvoice(BaseInvoice):
         dir_ids = [int(d) for d in self.directories_list.split(',')[:-1]]
         all_dirs = Directory.objects.filter(pk__in=dir_ids)
         return all_dirs
+    
+    def get_list_of_directories(self):
+        all_dirs = self.get_all_directories()
+        list_of_dirs = ''
+        for d in all_dirs:
+            list_of_dirs += f'{d.relative_path}\n'
+        return list_of_dirs
