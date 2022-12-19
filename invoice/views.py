@@ -71,32 +71,45 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
         if request.method == 'POST':
             invoice = None
             invoice_type = InvoiceType.objects.get(code=request.POST.get('itype'))
-            if invoice.created_by == isc_user or isc_user.role.code == 'ADMIN':
-                if invoice_type.code == 'INVDIR':
-                    invoice = PreInvoice.objects.get(pk=iid)
-                    dirs_list = invoice.directories_list.split(',')[:-1]
-                    for d in dirs_list:
-                        Directory.objects.filter(pk=int(d)).update(is_confirmed=True)
+            if invoice_type.code == 'INVDIR':
+                invoice = PreInvoice.objects.get(pk=iid)
+                if invoice.created_by == isc_user or isc_user.role.code == 'ADMIN':
+                    dirs_list = [int(d) for d in invoice.directories_list.split(',')[:-1]]
+                    Directory.objects.filter(pk__in=dirs_list).update(is_confirmed=True)
+                    invoice.confirm_or_reject = 'CONFIRMED'
+                    invoice.save()
+                    response = {
+                        'result': 'success',
+                        'type': 'pre',
+                        'confirmed': invoice.id
+                    }
                 else:
-                    invoice = Invoice.objects.get(pk=iid)
+                    logger.critical(f'unauthorized trying confirm of invoice with serial number {invoice.serial_number} by {isc_user.user.username}.')
+                    response = {
+                        'result': 'error',
+                        'message': 'شما مجاز به انجام این کار نیستید'
+                    }
+            else:
+                invoice = Invoice.objects.get(pk=iid)
+                if invoice.created_by == isc_user or isc_user.role.code == 'ADMIN':
                     mftuser = MftUser.objects.get(pk=invoice.mftuser)
                     mftuser.is_confirmed = True
                     mftuser.save()
                     Permission.objects.filter(user=mftuser).update(is_confirmed=True)
                     export_user_with_paths(invoice.mftuser, isc_user)
-                invoice.confirm_or_reject = 'CONFIRMED'
-                invoice.save()
-                response = {
-                    'result': 'success',
-                    'type': 'pre' if invoice_type.code == 'INVDIR' else '',
-                    'confirmed': invoice.id
-                }
-            else:
-                logger.critical(f'unauthorized trying confirm of invoice with serial number {invoice.serial_number} by {isc_user.user.username}.')
-                response = {
-                    'result': 'error',
-                    'message': 'شما مجاز به انجام این کار نیستید'
-                }
+                    invoice.confirm_or_reject = 'CONFIRMED'
+                    invoice.save()
+                    response = {
+                        'result': 'success',
+                        'type': '',
+                        'confirmed': invoice.id
+                    }
+                else:
+                    logger.critical(f'unauthorized trying confirm of invoice with serial number {invoice.serial_number} by {isc_user.user.username}.')
+                    response = {
+                        'result': 'error',
+                        'message': 'شما مجاز به انجام این کار نیستید'
+                    }
             return JsonResponse(data=response, safe=False)
 
 
@@ -118,6 +131,7 @@ def invoice_reject_view(request, iid, *args, **kwargs):
                 invoice.save()
                 response = {
                     'result': 'success',
+                    'type': 'pre' if invoice_type.code == 'INVDIR' else '',
                     'rejected': invoice.id
                 }
             else:

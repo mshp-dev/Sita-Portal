@@ -18,7 +18,7 @@
             class="fas fa-file-alt {% if invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
           ></span>
           <!--prettier-ignore-->
-          <h3 class="display-5 mx-auto" style="direction: rtl">{{ invoice.invoice_type }} - {% if invoice.confirm_or_reject == 'CONFIRMED' %}تأیید شده{% elif invoice.confirm_or_reject == 'REJECTED' %}رد شده{% elif invoice.confirm_or_reject == 'UNDEFINED' %}بررسی نشده{% endif %}</h3>
+          <h3 class="display-5 mx-auto" style="direction: rtl">{{ invoice.invoice_type }} - {% if invoice.confirm_or_reject == 'CONFIRMED' %}تأیید شده{% elif invoice.confirm_or_reject == 'REJECTED' %}به علت {{ invoice.description }} رد شد{% elif invoice.confirm_or_reject == 'UNDEFINED' %}بررسی نشده{% endif %}</h3>
         </button>
       </h2>
       <div
@@ -43,7 +43,6 @@
                 <span
                   >سازمان/بانک: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.organization }}</strong></span></span
                 >
-                <!--prettier-ignore-->
                 {% if invoice.invoice_type.code == 'INVUBUS' %}
                 <span
                   >دسترسی در پروژه/سامانه: <span class="display-6 text-info"><strong>{{ invoice.get_used_business }}</strong></span></span
@@ -106,7 +105,7 @@
             class="fas fa-file-alt {% if pre_invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif pre_invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif pre_invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
           ></span>
           <!--prettier-ignore-->
-          <h3 class="display-5 mx-auto" style="direction: rtl">{{ pre_invoice.invoice_type }} - {% if pre_invoice.confirm_or_reject == 'CONFIRMED' %}تأیید شده{% elif pre_invoice.confirm_or_reject == 'REJECTED' %}رد شده{% elif pre_invoice.confirm_or_reject == 'UNDEFINED' %}بررسی نشده{% endif %}</h3>
+          <h3 class="display-5 mx-auto" style="direction: rtl">{{ pre_invoice.invoice_type }} - {% if pre_invoice.confirm_or_reject == 'CONFIRMED' %}تأیید شده{% elif pre_invoice.confirm_or_reject == 'REJECTED' %}به علت <u>{{ pre_invoice.description }}</u> رد شد{% elif pre_invoice.confirm_or_reject == 'UNDEFINED' %}بررسی نشده{% endif %}</h3>
         </button>
       </h2>
       <div

@@ -17,7 +17,7 @@
             class="fas fa-file-alt {% if invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
           ></span>
           <!--prettier-ignore-->
-          <h3 class="display-5 mx-auto" style="direction: rtl">{{ invoice.invoice_type }} - {{ invoice.created_by }}</h3>
+          <h3 class="display-5 mx-auto" style="direction: rtl">{% if invoice.confirm_or_reject == 'REJECTED' %}به علت <u>{{ invoice.description }}</u> رد شد.{% else %}{{ invoice.invoice_type }}{% endif %} - {{ invoice.created_by }}</h3>
         </button>
       </h2>
       <div
@@ -42,7 +42,6 @@
                 <span
                   >سازمان/بانک: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.organization }}</strong></span></span
                 >
-                <!--prettier-ignore-->
                 {% if invoice.invoice_type.code == 'INVUBUS' %}
                 <span
                   >دسترسی در پروژه/سامانه: <span class="display-6 text-info"><strong>{{ invoice.get_used_business }}</strong></span></span
@@ -59,23 +58,50 @@
                 <span
                   >شماره تلفن محل کار: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.officephone }}</strong></span></span
                 >
+                <p class="h5 mt-4" style="direction: rtl">دسترسی بر روی مسیرها:</p>
+                {% for access in invoice.get_all_permissions %}
+                <span class="display-6 text-tertiary mb-2">({{ access.perms }}) بر روی {{ access.dir }}</span>
+                {% endfor %}
               </div>
-              <div class="col-6">
-                <input
-                  type="button"
-                  role="invoice-delete-btn"
-                  iid="{{ invoice.id }}"
-                  itype="{{ invoice.invoice_type.code }}"
-                  style="width: 100%"
-                  class="btn btn-danger animate-up-1"
-                  value="حذف درخواست"
-                />
-                {% comment %}<a href="{% url 'invoice-delete' invoice.id %}" class="btn btn-danger animate-up-1"></a>{% endcomment %}
-              </div>
-              <div class="col-6">
-                <a href="{% url 'invoice-details' invoice.id %}" style="width: 100%" class="btn btn-warning animate-up-1"
-                  >مشاهده سطح دسترسی درخواست شده</a
-                >
+              <div class="row">
+                <div class="col">
+                  <input
+                    type="button"
+                    role="invoice-delete-btn"
+                    iid="{{ invoice.id }}"
+                    itype="{{ invoice.invoice_type.code }}"
+                    style="width: 100%"
+                    class="btn btn-danger animate-up-1"
+                    value="حذف درخواست"
+                  />
+                </div>
+                {% if invoice.confirm_or_reject != 'REJECTED' %}
+                <div class="col">
+                  <input
+                    type="button"
+                    role="invoice-reject-btn"
+                    iid="{{ invoice.id }}"
+                    itype="{{ invoice.invoice_type.code }}"
+                    style="width: 100%"
+                    class="btn btn-warning animate-up-1 mb-3"
+                    value="رد درخواست"
+                  />
+                </div>
+                <div class="col">
+                  <input
+                    type="button"
+                    role="invoice-confirm-btn"
+                    iid="{{ invoice.id }}"
+                    itype="{{ invoice.invoice_type.code }}"
+                    style="width: 100%"
+                    class="btn btn-info animate-up-1 mb-3"
+                    value="تأیید درخواست"
+                  />
+                </div>
+                {% endif %}
+                <div class="col">
+                  <a href="{% url 'invoice-details' invoice.id %}" style="width: 100%" class="btn btn-success animate-up-1">مشاهده جزئیات</a>
+                </div>
               </div>
             </div>
           </div>
@@ -104,7 +130,7 @@
             class="fas fa-file-alt {% if invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
           ></span>
           <!--prettier-ignore-->
-          <h3 class="display-5 mx-auto" style="direction: rtl">{{ invoice.invoice_type }} - {{ invoice.created_by }}</h3>
+          <h3 class="display-5 mx-auto" style="direction: rtl">{% if invoice.confirm_or_reject == 'REJECTED' %}به علت <u>{{ invoice.description }}</u> رد شد.{% else %}{{ invoice.invoice_type }}{% endif %} - {{ invoice.created_by }}</h3>
         </button>
       </h2>
       <div

@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User
 
-from core.models import BaseCoding, IscUser, MftUser, Directory, BusinessCode
+from core.models import BaseCoding, IscUser, MftUser, Directory, Permission, BusinessCode, DirectoryPermissionCode
 
 from datetime import datetime as dt
 import random
@@ -58,6 +58,25 @@ class Invoice(BaseInvoice):
             return None
         else:
             return BusinessCode.objects.get(pk=self.used_business)
+
+    def get_all_permissions(self):
+        mftuser = self.get_mftuser()
+        ubus = self.get_used_business()
+        bus_dirs = []
+        user_accesses = []
+        if ubus:
+            bus_dirs = Directory.objects.filter(business=ubus).order_by('relative_path')
+        else:
+            bus_dirs = Directory.objects.filter(business__in=mftuser.business.all()).order_by('relative_path')
+        permissions = Permission.objects.filter(user=mftuser, directory__in=bus_dirs, permission__in=[1, 2, 32, 4]).order_by('directory__relative_path')
+        directory_ids = [p['directory'] for p in permissions.values('directory').distinct()]
+        for dir_ in Directory.objects.filter(id__in=directory_ids):
+            perms = permissions.filter(directory=dir_)
+            perms_str = ''
+            for p in perms:
+                perms_str += f'{DirectoryPermissionCode.objects.get(value=p.permission)}، '
+            user_accesses.append({'dir': dir_.relative_path, 'perms': perms_str[:-2]})
+        return user_accesses
 
 
 class PreInvoice(BaseInvoice):

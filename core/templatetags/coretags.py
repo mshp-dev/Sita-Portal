@@ -26,6 +26,16 @@ def filter_invoices(invoices, status='UNDEFINED'):
 
 
 @register.filter
+def add_invoices(invoices, new_list):
+    final_list = []
+    for item in invoices:
+        final_list.append(item)
+    for item in new_list:
+        final_list.append(item)
+    return final_list
+
+
+@register.filter
 def get_businesses(buss):
     buss_str = 'سامانه های'
     if buss.count() > 1:
