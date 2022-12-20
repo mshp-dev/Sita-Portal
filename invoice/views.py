@@ -8,7 +8,7 @@ from core.models import IscUser, MftUser, Directory, Permission, DirectoryPermis
 
 from jdatetime import datetime as jdt
 
-from mftusers.utils import make_form_from_invoice, export_user_with_paths
+from mftusers.utils import make_form_from_invoice, export_user_with_paths, confirm_directory_tree
 
 from .models import *
 
@@ -41,10 +41,20 @@ def invoice_create_view(request, *args, **kwargs):
                     invoice.save()
                 else:
                     mftuser = MftUser.objects.get(pk=request.POST.get('mftuser'))
+                    bus_dirs = []
+                    perms_str = ''
+                    if invoice_type.code == 'INVUBUS':
+                        bus_dirs = Directory.objects.filter(business=BusinessCode.objects.get(pk=int(request.POST.get('ubus')))).order_by('relative_path')
+                    elif invoice_type.code == 'INVOBUS':
+                        bus_dirs = Directory.objects.filter(business__in=mftuser.business.all()).order_by('relative_path')
+                    permissions = Permission.objects.filter(user=mftuser, directory__in=bus_dirs, is_confirmed=False).values('id').distinct()
+                    for p in permissions:
+                        perms_str += f'{p["id"]},'
                     invoice = Invoice(
                         invoice_type=invoice_type,
                         mftuser=mftuser.id,
                         used_business=int(request.POST.get('ubus')) if invoice_type.code == 'INVUBUS' else 0,
+                        permissions_list=perms_str,
                         created_by=isc_user
                     )
                     invoice.save()
@@ -58,7 +68,7 @@ def invoice_create_view(request, *args, **kwargs):
                 logger.info(f'creating invoice encountered error.')
                 logger.error(e)
                 status_code = 400
-                response = {'result': 'error'}
+                response = {'result': 'error', 'message': 'خطایی رخ داده است، با مدیر سیستم تماس بگیرید.'}
             finally:
                 return JsonResponse(data=response, safe=False)
 
@@ -76,6 +86,7 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                 if invoice.created_by == isc_user or isc_user.role.code == 'ADMIN':
                     dirs_list = [int(d) for d in invoice.directories_list.split(',')[:-1]]
                     Directory.objects.filter(pk__in=dirs_list).update(is_confirmed=True)
+                    confirm_directory_tree(dirs_list, survey='BACKWARD')
                     invoice.confirm_or_reject = 'CONFIRMED'
                     invoice.save()
                     response = {
@@ -95,7 +106,8 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                     mftuser = MftUser.objects.get(pk=invoice.mftuser)
                     mftuser.is_confirmed = True
                     mftuser.save()
-                    Permission.objects.filter(user=mftuser).update(is_confirmed=True)
+                    perms_list = [int(p) for p in invoice.permissions_list.split(',')[:-1]]
+                    Permission.objects.filter(pk__in=perms_list).update(is_confirmed=True)
                     export_user_with_paths(invoice.mftuser, isc_user)
                     invoice.confirm_or_reject = 'CONFIRMED'
                     invoice.save()
@@ -177,8 +189,8 @@ def invoice_details_view(request, iid, *args, **kwargs):
     invoice = get_object_or_404(Invoice, pk=iid)
     mftuser = MftUser.objects.get(pk=invoice.mftuser)
     ubus = invoice.get_used_business()
-    bus_dirs = []
-    user_accesses = []
+    # bus_dirs = []
+    # user_accesses = []
 
     if not isc_user.user.is_staff and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=mftuser.business.all()).exists():
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
@@ -192,20 +204,20 @@ def invoice_details_view(request, iid, *args, **kwargs):
             logger.info(f'invoice with serial number {invoice.serial_number} downloaded by {isc_user.user.username}.')
             return response
 
-    if ubus:
-        bus_dirs = Directory.objects.filter(business=ubus).order_by('relative_path')
-    else:
-        bus_dirs = Directory.objects.filter(business__in=mftuser.business.all()).order_by('relative_path')
+    # if ubus:
+    #     bus_dirs = Directory.objects.filter(business=ubus).order_by('relative_path')
+    # else:
+    #     bus_dirs = Directory.objects.filter(business__in=mftuser.business.all()).order_by('relative_path')
     
-    permissions = Permission.objects.filter(user=mftuser, directory__in=bus_dirs, permission__in=[1, 2, 32, 4]).order_by('directory__relative_path')
+    # permissions = Permission.objects.filter(user=mftuser, directory__in=bus_dirs, permission__in=[1, 2, 32, 4], is_confirmed=False).order_by('directory__relative_path')
     
-    directory_ids = [p['directory'] for p in permissions.values('directory').distinct()]
-    for dir_ in Directory.objects.filter(id__in=directory_ids):
-        perms = permissions.filter(directory=dir_)
-        perms_str = ''
-        for p in perms:
-            perms_str += f'{DirectoryPermissionCode.objects.get(value=p.permission)}، '
-        user_accesses.append({'dir': dir_.relative_path, 'perms': perms_str[:-2]})
+    # directory_ids = [p['directory'] for p in permissions.values('directory').distinct()]
+    # for dir_ in Directory.objects.filter(id__in=directory_ids):
+    #     perms = permissions.filter(directory=dir_)
+    #     perms_str = ''
+    #     for p in perms:
+    #         perms_str += f'{DirectoryPermissionCode.objects.get(value=p.permission)}، '
+    #     user_accesses.append({'dir': dir_.relative_path, 'perms': perms_str[:-2]})
 
     context = {
         'username': str(isc_user.user.username),
@@ -213,8 +225,8 @@ def invoice_details_view(request, iid, *args, **kwargs):
         'invoice': invoice,
         'jdate': jdt.now().strftime('%Y/%m/%d'),
         'counter': Invoice.objects.filter(mftuser=mftuser.id).count(),
-        'ubus': ubus,
-        'user_accesses': user_accesses
+        'ubus': ubus
+        # 'user_accesses': invoice.get_list_of_permissions()
     }
     
     return render(request, 'invoice/invoice-details.html', context)

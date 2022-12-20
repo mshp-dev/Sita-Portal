@@ -502,6 +502,23 @@ def make_form_from_invoice(invoice, contents):
     return pdf_path
 
 
+def confirm_directory_tree(ids_list, survey='FORWARD'):
+    dirs = Directory.objects.filter(pk__in=ids_list)
+    for dir_ in dirs:
+        if survey == 'FORWARD':
+            dir_.is_confirmed = True
+            dir_.save()
+            children = Directory.objects.filter(pk__in=[int(id_) for id_ in dir_.children.split(',')[:-1]])
+            children_ids = [ch['id'] for ch in children.values('id')]
+            confirm_directory_tree(children_ids)
+        elif survey == 'BACKWARD':
+            if dir_.parent != 0:
+                parent = Directory.objects.get(pk=dir_.parent)
+                parent.is_confirmed = True
+                parent.save()
+                confirm_directory_tree([parent.parent], survey='BACKWARD')
+
+
 def insert_into_db():
     iscuser = IscUser.objects.get(pk=1)
 

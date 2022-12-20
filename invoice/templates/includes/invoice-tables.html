@@ -66,7 +66,7 @@
             <th class="col-4 text-center" scope="col"><span>سطح دسترسی <span style="font-size: 0.5rem">(4)</span></p><p style="font-size: 0.8rem">دانلود (READ) <span style="font-size: 0.5rem">(5)</span> - آپلود (WRITE) <span style="font-size: 0.5rem">(6)</span> - حذف/تغییر (MODIFY) <span style="font-size: 0.5rem">(7)</span> - ایجاد پوشه <span style="font-size: 0.5rem">(8)</span></p></th>
             <th style="direction: ltr" class="col-4 text-center" scope="col"><span>مسیر/پوشه</span></th>
           </tr>
-          {% for acc in user_accesses %}
+          {% for acc in invoice.get_list_of_permissions %}
           <tr>
             <th class="col-4" scope="col" id="{{ acc.dir }}-perm-label">{{ acc.perms }}</th>
             <td style="direction: ltr" class="col-4" scope="col" id="{{ acc.dir }}-label"><span>{{ acc.dir }}</span></td>

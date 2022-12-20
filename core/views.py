@@ -1224,7 +1224,8 @@ def mftuser_permissions_view(request, uid, did, *args, **kwargs):
                     if op.permission not in splited:
                         if isc_user.role.code != 'ADMIN':
                             if op.permission == 1: #Download (Read)
-                                Permission.objects.filter(user=mftuser, directory=directory, permission=128).delete()   #Checksum
+                                Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete()  #Append
+                                # Permission.objects.filter(user=mftuser, directory=directory, permission=128).delete()   #Checksum
                                 # Permission.objects.filter(user=mftuser, directory=directory, permission=256).delete() #List
                                 splited.remove(128)
                             elif op.permission == 2: #Upload (Write)
@@ -1274,6 +1275,14 @@ def mftuser_permissions_view(request, uid, did, *args, **kwargs):
                                 user=mftuser,
                                 directory=directory,
                                 permission=128, #Checksum
+                                created_by=isc_user
+                            )
+                            perm.save()
+                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=1024).exists():
+                            perm = Permission(
+                                user=mftuser,
+                                directory=directory,
+                                permission=1024, #Append
                                 created_by=isc_user
                             )
                             perm.save()
@@ -1419,7 +1428,7 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                         if Permission.objects.filter(user=mftuser, directory=directory, permission=pv).exists():
                             Permission.objects.filter(user=mftuser, directory=directory, permission=pv).delete()
                         if pv == 1: #Download (Read)
-                            Permission.objects.filter(user=mftuser, directory=directory, permission=128).delete()   #Checksum
+                            Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete()  #Append
                         elif pv == 2: #Upload (Write)
                             Permission.objects.filter(user=mftuser, directory=directory, permission=512).delete()   #Overwrite
                             Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete()  #Append
@@ -1455,6 +1464,14 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                                     user=mftuser,
                                     directory=directory,
                                     permission=128, #Checksum
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=1024).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=1024, #Append
                                     created_by=isc_user
                                 )
                                 perm.save()

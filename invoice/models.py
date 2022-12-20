@@ -37,8 +37,9 @@ class BaseInvoice(models.Model):
 
 
 class Invoice(BaseInvoice):
-    mftuser       = models.IntegerField(blank=False)
-    used_business = models.IntegerField(default=0, blank=True)
+    mftuser          = models.IntegerField(blank=False)
+    used_business    = models.IntegerField(default=0, blank=True)
+    permissions_list = models.CharField(max_length=1000, default='', blank=True)
     
     def get_mftuser(self):
         return MftUser.objects.get(pk=self.mftuser)
@@ -58,20 +59,19 @@ class Invoice(BaseInvoice):
             return None
         else:
             return BusinessCode.objects.get(pk=self.used_business)
-
+    
     def get_all_permissions(self):
-        mftuser = self.get_mftuser()
-        ubus = self.get_used_business()
-        bus_dirs = []
+        perm_ids = [int(d) for d in self.permissions_list.split(',')[:-1]]
+        all_perms = Permission.objects.filter(pk__in=perm_ids)
+        return all_perms
+
+    def get_list_of_permissions(self, values=[1, 2, 32, 4]):
         user_accesses = []
-        if ubus:
-            bus_dirs = Directory.objects.filter(business=ubus).order_by('relative_path')
-        else:
-            bus_dirs = Directory.objects.filter(business__in=mftuser.business.all()).order_by('relative_path')
-        permissions = Permission.objects.filter(user=mftuser, directory__in=bus_dirs, permission__in=[1, 2, 32, 4]).order_by('directory__relative_path')
-        directory_ids = [p['directory'] for p in permissions.values('directory').distinct()]
-        for dir_ in Directory.objects.filter(id__in=directory_ids):
-            perms = permissions.filter(directory=dir_)
+        all_perms = self.get_all_permissions()
+        filtered_perms = all_perms
+        directory_ids = [p['directory'] for p in all_perms.filter(permission__in=values).values('directory').distinct()]
+        for dir_ in Directory.objects.filter(id__in=directory_ids).order_by('relative_path'):
+            perms = all_perms.filter(directory=dir_, permission__in=values)
             perms_str = ''
             for p in perms:
                 perms_str += f'{DirectoryPermissionCode.objects.get(value=p.permission)}، '

@@ -59,7 +59,7 @@
                   >شماره تلفن محل کار: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.officephone }}</strong></span></span
                 >
                 <p class="h5 mt-4" style="direction: rtl">دسترسی بر روی مسیرها:</p>
-                {% for access in invoice.get_all_permissions %}
+                {% for access in invoice.get_list_of_permissions %}
                 <span class="display-6 text-tertiary mb-2">({{ access.perms }}) بر روی {{ access.dir }}</span>
                 {% endfor %}
               </div>
