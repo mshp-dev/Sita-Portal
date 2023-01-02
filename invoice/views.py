@@ -39,6 +39,10 @@ def invoice_create_view(request, *args, **kwargs):
                         created_by=isc_user
                     )
                     invoice.save()
+                    response = {
+                        'result': 'success',
+                        'invoice_id': invoice.id
+                    }
                 else:
                     mftuser = MftUser.objects.get(pk=request.POST.get('mftuser'))
                     bus_dirs = []
@@ -69,7 +73,6 @@ def invoice_create_view(request, *args, **kwargs):
                             'result': 'error',
                             'message': 'برای ایجاد درخواست چارگون، باید حداقل یک دسترسی ایجاد کنید.'
                         }
-                
             except Exception as e:
                 logger.info(f'creating invoice encountered error.')
                 logger.error(e)
@@ -282,11 +285,11 @@ def invoices_list_view(request, *args, **kwargs):
     pre_invoices = []
 
     if str(isc_user.role.code) == 'ADMIN':
-        invoices = Invoice.objects.all().order_by('created_at')
-        pre_invoices = PreInvoice.objects.all().order_by('created_at')
+        invoices = Invoice.objects.all().order_by('-created_at')
+        pre_invoices = PreInvoice.objects.all().order_by('-created_at')
     else:
-        invoices = Invoice.objects.filter(created_by=isc_user).order_by('created_at')
-        pre_invoices = PreInvoice.objects.filter(created_by=isc_user).order_by('created_at')
+        invoices = Invoice.objects.filter(created_by=isc_user).order_by('-created_at')
+        pre_invoices = PreInvoice.objects.filter(created_by=isc_user).order_by('-created_at')
 
     context = {
         'username': str(isc_user.user.username),
