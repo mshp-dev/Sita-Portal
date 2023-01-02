@@ -60,6 +60,7 @@
                   >شماره تلفن محل کار: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.officephone }}</strong></span></span
                 >
               </div>
+              {% if pre_invoice.confirm_or_reject != 'CONFIRMED' %}
               <div class="col-6">
                 <input
                   type="button"
@@ -72,6 +73,7 @@
                 />
                 {% comment %}<a href="{% url 'invoice-delete' invoice.id %}" class="btn btn-danger animate-up-1"></a>{% endcomment %}
               </div>
+              {% endif %}
               <div class="col-6">
                 <a href="{% url 'invoice-details' invoice.id %}" style="width: 100%" class="btn btn-warning animate-up-1"
                   >مشاهده سطح دسترسی درخواست شده</a
@@ -102,7 +104,7 @@
           aria-controls="preinv-{{ pre_invoice.id }}"
         >
           <span
-            class="fas fa-file-alt {% if pre_invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif pre_invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif pre_invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
+            class="fas fa-folder-open {% if pre_invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif pre_invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif pre_invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
           ></span>
           <!--prettier-ignore-->
           <h3 class="display-5 mx-auto" style="direction: rtl">{{ pre_invoice.invoice_type }} - {% if pre_invoice.confirm_or_reject == 'CONFIRMED' %}تأیید شده{% elif pre_invoice.confirm_or_reject == 'REJECTED' %}به علت <u>{{ pre_invoice.description }}</u> رد شد{% elif pre_invoice.confirm_or_reject == 'UNDEFINED' %}بررسی نشده{% endif %}</h3>

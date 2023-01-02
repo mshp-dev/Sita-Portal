@@ -174,19 +174,26 @@ function getPermissions(uid) {
 function cleanInputValue(input, type) {
   if (type == "name") {
     input = input.replace(/[\u0600-\u06FF]/g, "");
+    input = input.replace(/\-/g, "");
+    input = input.replace(/\_/g, "");
+    input = input.replace(/\@/g, "");
+    input = input.replace(/\./g, "");
+  } else if (type == "alias") {
+    input = input.replace(/[\u0600-\u06FF]/g, "");
+    input = input.replace(/\-/g, "");
+    input = input.replace(/\@/g, "");
+    input = input.replace(/\./g, "");
+  } else if (type == "email") {
+    input = input.replace(/[\u0600-\u06FF]/g, "");
+    input = input.replace(/\-/g, "");
   } else if (type == "number") {
     input = input.replace(/[a-z]/g, "");
     input = input.replace(/[A-Z]/g, "");
     input = input.replace(/\_/g, "");
     input = input.replace(/\-/g, "");
-  } else if (type == "alias") {
-    input = input.replace(/[\u0600-\u06FF]/g, "");
+    input = input.replace(/\@/g, "");
+    input = input.replace(/\./g, "");
   }
-  if (type != "alias" && type != "name") {
-    input = input.replace(/\_/g, "");
-    input = input.replace(/\-/g, "");
-  }
-  input = input.replace(/\@/g, "");
   input = input.replace(/\#/g, "");
   input = input.replace(/\!/g, "");
   input = input.replace(/\$/g, "");
@@ -210,7 +217,6 @@ function cleanInputValue(input, type) {
   input = input.replace(/\`/g, "");
   input = input.replace(/\"/g, "");
   input = input.replace(/\,/g, "");
-  input = input.replace(/\./g, "");
   input = input.replace(/\?/g, "");
   input = input.replace(/\;/g, "");
   input = input.replace(/\:/g, "");

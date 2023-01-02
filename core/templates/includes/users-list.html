@@ -216,10 +216,10 @@
           aria-expanded="false"
           aria-controls="{{ eu.mftuser.username|remove_dot }}{{ eu.id }}"
         >
-          <span class="fas fa-user-check me-1"></span>
+          <span class="fas fa-download me-1"></span>
           <h3 class="display-5 ms-2">
             <!--prettier-ignore-->
-            {{ eu.mftuser.username }} {% if eu.mftuser.alias != '' %}({{ eu.mftuser.alias }}) {% endif %}- {{ eu.mftuser.organization }} - {{ eu.mftuser.business.all|get_businesses }} {% if eu.number_of_exports == 0 %}<span
+            {{ eu.mftuser.username }} {% if eu.mftuser.alias != '' %}({{ eu.mftuser.alias }}) {% endif %}- {{ eu.mftuser.organization }} {% if eu.number_of_downloads == 0 %}<span
               class="text-success"
               >(NEW)</span
             >{% endif %}
@@ -236,6 +236,20 @@
           <ul class="list-unstyled mb-4"></ul>
           <div class="container">
             <div class="row">
+              <div style="direction: rtl" class="row mt-5 mb-5">
+                <span
+                  >تعداد تغییرات: <span class="display-6 text-info"><strong> {{ eu.number_of_exports }}</strong></span></span
+                >
+                <span
+                  >دفعات دانلود: <span class="display-6 text-info"><strong> {{ eu.number_of_downloads }}</strong></span></span
+                >
+                {% comment %} <span
+                  >سازمان/بانک: <span class="display-6 text-info"><strong> {{ eu.mftuser.organization }}</strong></span></span
+                > {% endcomment %}
+                <span
+                  >پروژه/سامانه(ها): <span class="display-6 text-info"><strong> {{ eu.mftuser.business.all|get_businesses }}</strong></span></span
+                >
+              </div>
               <div class="col">
                 {% comment %}
                 <input

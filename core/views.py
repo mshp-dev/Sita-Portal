@@ -31,8 +31,9 @@ logger = logging.getLogger(__name__)
 def index_view(request):
     # buck insertion into or correction in db
     # insert_into_db()
-    # clean_up(flag='dir', action=True)
-    # clean_up(flag='perm2', action=True)
+    # clean_up(flag='perm', action=False)
+    # clean_up(flag='perm2', action=False)
+    # clean_up(flag='dir', action=False)
     # clean_up(flag='dir3', action=False, bic_name="FIU")
 
     isc_user = IscUser.objects.get(user=request.user)
@@ -186,7 +187,6 @@ def change_password_view(request, *args, **kwargs):
         form = ChangePasswordForm()
 
     context = {
-        "access"
         "form": form,
         "msg": msg,
         "success": success
@@ -392,7 +392,7 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
     mftusers        = MftUser.objects.filter(is_confirmed=False).order_by('username')
     deleted_users   = MftUserTemp.objects.filter(description__icontains=f"%deleted%").order_by('username')
     # invoices        = Invoice.objects.filter(processed=False).order_by('created_at')
-    invoices        = Invoice.objects.all().order_by('created_at')
+    invoices        = Invoice.objects.all().order_by('-created_at')
     pre_invoices    = PreInvoice.objects.all().order_by('created_at')
     elements        = []
     new_users       = []
@@ -444,6 +444,7 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
         'deleted': deleted_users,
         'changed_users': changed_users,
         'differences': differences,
+        'selected_tab': request.GET.get('tab', '')
     }
 
     return render(request, "core/manage-data.html", context)
@@ -454,7 +455,7 @@ def export_data_view(request, *args, **kwargs):
     isc_user            = IscUser.objects.get(user=request.user)
     username            = str(isc_user.user.username)
     access              = str(isc_user.role.code)
-    exported_mftusers   = ReadyToExport.objects.filter(is_downloaded=False)
+    exported_mftusers   = ReadyToExport.objects.all().order_by('-created_at')
     
     if not isc_user.user.is_staff:
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
@@ -471,7 +472,8 @@ def export_data_view(request, *args, **kwargs):
         if request.method == 'POST':
             exported_user = ReadyToExport.objects.get(pk=int(request.POST.get('eid')))
             # os.remove(exported_user.export.path)
-            exported_user.is_downloaded = True
+            # exported_user.is_downloaded = True
+            exported_user.number_of_downloads += 1
             exported_user.save()
             logger.info(f'mftuser {exported_user.mftuser.username} exported successfully.')
             response = {'result': 'success', 'deleted': exported_user.mftuser.username.replace('.', '')}
@@ -596,15 +598,15 @@ def mftuser_create_view(request, *args, **kwargs):
                     bus_error += f'<p>اختصاص پروژه/سامانه {bus.code} میسر نیست.<p>'
                     logger.warning(f'access on business {bus.code} for {mftuser.username} has been not created.')
             
-            if mftuser.organization.code == 'ISC':
-                mftuser.description = str(isc_user.department)
-            else:
-                # buss = ''
-                # for bus in mftuser.business.all():
-                #     buss += f'{str(bus)}،'
-                # project = "سامانه های" if mftuser.business.all().count() > 1 else "سامانه"
-                # mftuser.description = f'کاربر {project} {buss[:-1]} {mftuser.organization}'
-                mftuser.description = f'{mftuser.organization}'
+            # if mftuser.organization.code == 'ISC':
+                # mftuser.description = str(isc_user.department)
+            # else:
+                # mftuser.description = f'{mftuser.organization}'
+            buss = ''
+            for bus in mftuser.business.all():
+                buss += f'{str(bus)}،'
+            project = "سامانه های" if mftuser.business.all().count() > 1 else "سامانه"
+            mftuser.description = f'{project} {buss[:-1]}'
             mftuser.save()
             msg = f'<p>کاربر {mftuser.username} ایجاد شد.<p><br >{bus_error}'
             success = True
@@ -802,7 +804,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
                 # mftuser_temp.password=mftuser_origin.password,
                 # mftuser_temp.firstname=mftuser_origin.firstname,
                 # mftuser_temp.lastname=mftuser_origin.lastname,
-                # mftuser_temp.email=mftuser_origin.email,
+                mftuser_temp.email=mftuser_origin.email,
                 mftuser_temp.officephone=mftuser_origin.officephone
                 mftuser_temp.mobilephone=mftuser_origin.mobilephone
                 # mftuser_temp.organization=mftuser_origin.organization,
@@ -835,25 +837,27 @@ def mftuser_details_view(request, id, *args, **kwargs):
                         business=bus,
                         home_dir=True
                     )
-                    mftuser_origin.is_confirmed=False
-                    mftuser_origin.description=mftuser.description
-                    mftuser_origin.officephone=mftuser.officephone
-                    mftuser_origin.mobilephone=mftuser.mobilephone
-                    mftuser_origin.alias=mftuser.alias
-                    mftuser_origin.ipaddr=mftuser.ipaddr
+                    mftuser_origin.is_confirmed = False
+                    mftuser_origin.email = mftuser.email
+                    mftuser_origin.description = mftuser.description
+                    mftuser_origin.officephone = mftuser.officephone
+                    mftuser_origin.mobilephone = mftuser.mobilephone
+                    mftuser_origin.alias = mftuser.alias
+                    mftuser_origin.ipaddr = mftuser.ipaddr
                     # mftuser_origin.disk_quota=mftuser.disk_quota
-                    mftuser_origin.modified_at=timezone.now()
+                    mftuser_origin.modified_at = timezone.now()
                     mftuser_origin.save()
                     msg = '<strong>اطلاعات کاربر بروزرسانی شد</strong>'
                     success = True
                 else:
-                    mftuser_origin.description=mftuser_temp.description
-                    mftuser_origin.officephone=mftuser_temp.officephone
-                    mftuser_origin.mobilephone=mftuser_temp.mobilephone
-                    mftuser_origin.alias=mftuser_temp.alias
-                    mftuser_origin.ipaddr=mftuser_temp.ipaddr
+                    mftuser_origin.email = mftuser_temp.email
+                    mftuser_origin.description = mftuser_temp.description
+                    mftuser_origin.officephone = mftuser_temp.officephone
+                    mftuser_origin.mobilephone = mftuser_temp.mobilephone
+                    mftuser_origin.alias = mftuser_temp.alias
+                    mftuser_origin.ipaddr = mftuser_temp.ipaddr
                     # mftuser_origin.disk_quota=mftuser_temp.disk_quota
-                    mftuser_origin.modified_at=mftuser_temp.modified_at
+                    mftuser_origin.modified_at = mftuser_temp.modified_at
                     mftuser_origin.save()
                     mftuser_temp.delete()
                     msg = '<strong>امکان تغییر پروژه/سامانه کاربر نمی باشد</strong>'
@@ -1057,7 +1061,7 @@ def mftuser_dismiss_changes_view(request, id, *args, **kwargs):
                 # mftuser.password = mftuser_orig.password
                 # mftuser.firstname = mftuser_orig.firstname
                 # mftuser.lastname = mftuser_orig.lastname
-                # mftuser.email = mftuser_orig.email
+                mftuser.email = mftuser_orig.email
                 mftuser.officephone = mftuser_orig.officephone
                 mftuser.mobilephone = mftuser_orig.mobilephone
                 # mftuser.organization = mftuser_orig.organization

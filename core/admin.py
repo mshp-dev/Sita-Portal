@@ -96,7 +96,7 @@ class CustomerBankAdmin(admin.ModelAdmin):
 
 
 class ReadyToExportAdmin(admin.ModelAdmin):
-    list_display = ['mftuser', 'created_by', 'created_at', 'is_downloaded', 'number_of_exports']
+    list_display = ['mftuser', 'created_by', 'created_at', 'number_of_exports', 'number_of_downloads']
 
 
 admin.site.register(CodingType, CodingTypeAdmin)

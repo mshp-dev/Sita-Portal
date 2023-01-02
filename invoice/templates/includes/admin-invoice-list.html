@@ -64,6 +64,7 @@
                 {% endfor %}
               </div>
               <div class="row">
+                {% if invoice.confirm_or_reject != 'CONFIRMED' %}
                 <div class="col">
                   <input
                     type="button"
@@ -75,7 +76,19 @@
                     value="حذف درخواست"
                   />
                 </div>
-                {% if invoice.confirm_or_reject != 'REJECTED' %}
+                {% else %}
+                <div class="col">
+                  <input
+                    type="button"
+                    role="invoice-change-to-new-btn"
+                    iid="{{ invoice.id }}"
+                    itype="{{ invoice.invoice_type.code }}"
+                    style="width: 100%"
+                    class="btn btn-warning animate-up-1"
+                    value="تبدیل به جدید"
+                  />
+                </div>
+                {% endif %} {% if invoice.confirm_or_reject == 'UNDEFINED' %}
                 <div class="col">
                   <input
                     type="button"
@@ -127,7 +140,7 @@
           aria-controls="preinv-{{ invoice.id }}"
         >
           <span
-            class="fas fa-file-alt {% if invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
+            class="fas fa-folder-open {% if invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
           ></span>
           <!--prettier-ignore-->
           <h3 class="display-5 mx-auto" style="direction: rtl">{% if invoice.confirm_or_reject == 'REJECTED' %}به علت <u>{{ invoice.description }}</u> رد شد.{% else %}{{ invoice.invoice_type }}{% endif %} - {{ invoice.created_by }}</h3>
@@ -148,6 +161,7 @@
               {% endfor %}
             </div>
             <div class="row">
+              {% if invoice.confirm_or_reject != 'CONFIRMED' %}
               <div class="col">
                 <input
                   type="button"
@@ -159,6 +173,7 @@
                   value="حذف درخواست"
                 />
               </div>
+              {% endif %} {% if invoice.confirm_or_reject == 'UNDEFINED' %}
               <div class="col">
                 <input
                   type="button"
@@ -181,6 +196,7 @@
                   value="تأیید درخواست"
                 />
               </div>
+              {% endif %}
             </div>
           </div>
         </div>

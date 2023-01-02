@@ -225,14 +225,15 @@ class OperationBusiness(models.Model):
 
 
 class ReadyToExport(models.Model):
-    id                = models.AutoField(primary_key=True)
-    mftuser           = models.OneToOneField(MftUser, blank=False, on_delete=models.CASCADE)
-    webuser           = models.FileField(upload_to='exports/', storage=OverwriteStorage(), default='template.xml')
-    paths             = models.FileField(upload_to='exports/', storage=OverwriteStorage(), default='paths.csv')
-    is_downloaded     = models.BooleanField(blank=False, default=False)
-    number_of_exports = models.IntegerField(blank=False, default=0)
-    created_by        = models.ForeignKey(IscUser, blank=False, on_delete=models.CASCADE)
-    created_at        = models.DateTimeField(default=timezone.now)
+    id                  = models.AutoField(primary_key=True)
+    mftuser             = models.OneToOneField(MftUser, blank=False, on_delete=models.CASCADE)
+    webuser             = models.FileField(upload_to='exports/', storage=OverwriteStorage(), default='template.xml')
+    paths               = models.FileField(upload_to='exports/', storage=OverwriteStorage(), default='paths.csv')
+    # is_downloaded       = models.BooleanField(blank=False, default=False)
+    number_of_exports   = models.IntegerField(blank=False, default=1)
+    number_of_downloads = models.IntegerField(blank=False, default=0)
+    created_by          = models.ForeignKey(IscUser, blank=False, on_delete=models.CASCADE)
+    created_at          = models.DateTimeField(default=timezone.now)
 
     def generate_zip_file(self, name='export'):
         path = os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.zip')

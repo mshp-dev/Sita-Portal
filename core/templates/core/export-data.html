@@ -31,7 +31,7 @@
           },
           function (response) {
             if (response.result == "success") {
-              document.getElementById(response.deleted).remove();
+              //document.getElementById(response.deleted).remove();
               alert("فایل ZIP حاوی اطلاعات کاربر و مسیرها با موفقیت دانلود شد.");
             } else if (response.result == "error") {
               alert("مشکلی پیش آمده است!");
@@ -58,7 +58,7 @@
               },
               function (response) {
                 if (response.result == "success") {
-                  document.getElementById(response.deleted).remove();
+                  //document.getElementById(response.deleted).remove();
                   //alert("فایل XML حاوی اطلاعات کاربر با موفقیت دانلود شد.");
                 } else if (response.result == "error") {
                   alert("مشکلی پیش آمده است!");

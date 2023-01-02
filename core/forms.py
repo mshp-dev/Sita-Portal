@@ -30,11 +30,11 @@ class MftUserForm(forms.ModelForm):
     alias        = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={"placeholder": "برای استفاده به صورت سیستمی", "class": "form-control"}))
     firstname    = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "First Name", "class": "form-control", "pattern": "[a-zA-Z].+"}))
     lastname     = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "Last Name", "class": "form-control", "pattern": "[a-zA-Z].+"}))
-    email        = forms.EmailField(max_length=120, required=True, error_messages={'required': 'تمام فیلدهای ستاره دار را تکمیل نمائید'}, widget=forms.EmailInput(attrs={"placeholder": "username@sita.nibn.net", "class": "form-control", "readonly": "readonly"}))
+    email        = forms.EmailField(max_length=120, required=True, error_messages={'required': 'تمام فیلدهای ستاره دار را تکمیل نمائید'}, widget=forms.EmailInput(attrs={"placeholder": "username@mail.com", "class": "form-control"}))
     officephone  = forms.DecimalField(max_digits=8, required=True, widget=forms.TextInput(attrs={"placeholder": "123456798", "maxlength": "8", "class": "form-control"}))
     mobilephone  = forms.DecimalField(max_digits=11, required=True, widget=forms.TextInput(attrs={"placeholder": "09123456798", "maxlength": "11", "class": "form-control"}))
     organization = forms.ChoiceField(required=True, error_messages={'invalid_choice': 'یک سازمان/بانک را انتخاب نمائید'}, widget=forms.Select(attrs={"class": "form-control form-select form-select-bg-left", "parent": "organization"}))
-    business     = forms.MultipleChoiceField(required=True, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "class": "form-control form-select", "size": 3, "parent": "business"}))
+    business     = forms.MultipleChoiceField(required=True, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "class": "form-control form-select", "size": 10, "parent": "business"}))
     # business     = forms.MultipleChoiceField(required=True, widget=forms.CheckboxSelectMultiple(attrs={"class": "form-control form-check", "parent": "business"}))
     ipaddr       = forms.CharField(max_length=15, required=False, widget=forms.TextInput(attrs={"placeholder": "123.123.123.123", "class": "form-control"}))
     # disk_quota   = forms.IntegerField(max_value=100000000, min_value=100, help_text='کمک کمک کمک', required=True, widget=forms.TextInput(attrs={"placeholder": "حجم مورد نیاز در سیتا", "class": "form-control"}))
@@ -66,12 +66,13 @@ class MftUserForm(forms.ModelForm):
     #         raise ValidationError('تکمیل فیلدهای ستاره دار الزامی می باشد.')
     #     return username
     
-    # def clean_email(self):
-    #     email = self.cleaned_data.get('email')
-    #     if email == '':
-    #         print('email is empty')
-    #         raise ValidationError('تکمیل فیلدهای ستاره دار الزامی می باشد.')
-    #     return email
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email == '':
+            raise ValidationError('تکمیل فیلدهای ستاره دار الزامی می باشد.')
+        if '@' not in email:
+            raise ValidationError('آدرس ایمیل وارد شده صحیح نیست.')
+        return email
     
     def clean_alias(self):
         alias = self.cleaned_data.get('alias')

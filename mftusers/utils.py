@@ -281,7 +281,7 @@ def export_user(id, isc_user):
     lastName = template.xpath('//webUsers/webUser/lastName')
     lastName[0].text = mftuser.lastname
     organization = template.xpath('//webUsers/webUser/organization')
-    organization[0].text = mftuser.organization.description
+    organization[0].text = f'{mftuser.organization.description} - {isc_user.department.description}' if mftuser.organization.code == 'ISC' else mftuser.organization.description
     mobilePhone = template.xpath('//webUsers/webUser/mobilePhone')
     mobilePhone[0].text = str(mftuser.mobilephone)
     name = template.xpath('//webUsers/webUser/name')
@@ -320,7 +320,7 @@ def export_user(id, isc_user):
     webuser_file = File(temp_file, name=f'{mftuser.username}.xml')
     if ReadyToExport.objects.filter(mftuser=mftuser).exists():
         rte = ReadyToExport.objects.get(mftuser=mftuser)
-        rte.is_downloaded = False
+        # rte.is_downloaded = False
         rte.number_of_exports = rte.number_of_exports + 1
         # if os.path.isfile(rte.export.path):
         os.remove(rte.export.path)
@@ -335,7 +335,8 @@ def export_user(id, isc_user):
             created_by=isc_user,
             export=webuser_file
             # is_downloaded=False,
-            # number_of_exports=0,
+            # number_of_exports=1,
+            # number_of_downloads=0,
         )
 
 
@@ -355,7 +356,7 @@ def export_user_with_paths(id, isc_user):
     lastName = template.xpath('//webUsers/webUser/lastName')
     lastName[0].text = mftuser.lastname
     organization = template.xpath('//webUsers/webUser/organization')
-    organization[0].text = mftuser.organization.description
+    organization[0].text = f'{mftuser.organization.description} - {mftuser.created_by.department.description}' if mftuser.organization.code == 'ISC' else mftuser.organization.description
     mobilePhone = template.xpath('//webUsers/webUser/mobilePhone')
     mobilePhone[0].text = str(mftuser.mobilephone)
     name = template.xpath('//webUsers/webUser/name')
@@ -401,7 +402,7 @@ def export_user_with_paths(id, isc_user):
     # csv_file_path, csv_file_name = make_csv_of_single_user_paths(all_dirs, name=mftuser.username)
     if ReadyToExport.objects.filter(mftuser=mftuser).exists():
         rte = ReadyToExport.objects.get(mftuser=mftuser)
-        rte.is_downloaded = False
+        # rte.is_downloaded = False
         rte.number_of_exports = rte.number_of_exports + 1
         # if os.path.isfile(rte.export.path):
         # os.remove(rte.webuser.path)
@@ -421,7 +422,8 @@ def export_user_with_paths(id, isc_user):
             webuser=webuser_file,
             paths=paths_file
             # is_downloaded=False,
-            # number_of_exports=0,
+            # number_of_exports=1,
+            # number_of_downloads=0,
         )
 
 
@@ -460,10 +462,16 @@ def make_virtual_file(directory, permissions, virtual_file):
 def zip_all_exported_users(name='export'):
     path = os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.zip')
     with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED) as zf:
-        all_exported = ReadyToExport.objects.filter(is_downloaded=False)
+        all_exported = ReadyToExport.objects.all()
         for ef in all_exported:
-            zf.write(ef.webuser.path, arcname=ef.export.name.split('/')[-1])
-            zf.write(ef.paths.path, arcname=ef.export.name.split('/')[-1])
+            if os.path.exists(ef.webuser.path):
+                zf.write(ef.webuser.path, arcname=ef.webuser.name.split('/')[-1])
+            else:
+                logger.error(f'file in {ef.webuser.path} does not exists, it looks like it belongs to {ef.mftuser.username} mftuser.')
+            if os.path.exists(ef.paths.path):
+                zf.write(ef.paths.path, arcname=ef.paths.name.split('/')[-1])
+            else:
+                logger.error(f'file in {ef.paths.path} does not exists, it looks like it belongs to {ef.mftuser.username} mftuser.')
         # return zf
     return os.path.join(os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.zip'))
 
@@ -522,21 +530,59 @@ def confirm_directory_tree(ids_list, survey='FORWARD'):
 def insert_into_db():
     iscuser = IscUser.objects.get(pk=1)
 
+    bank_dir_names = {
+        'Ansar': 'ANSBIRTHXXX',
+        'Ayandeh': 'AYBKIRTHXXX',
+        'EghtesadNovin': 'BEGNIRTHXXX',
+        'Pasargad': 'BKBPIRTHXXX',
+        'Maskan': 'BKMNIRTHXXX',
+        'Mellat': 'BKMTIRTHXXX',
+        'Parsian': 'BKPAIRTHXXX',
+        'SanatOMadan': 'BOIMIRTHXXX',
+        'Saderat': 'BSIRIRTHXXX',
+        'Tejarat': 'BTEJIRTHXXX',
+        'Tosse': 'BTOSIRTHXXX',
+        'Caspian': 'CASPIRTHXXX',
+        'Shahr': 'CIYBIRTHXXX',
+        'Day': 'DAYBIRTHXXX',
+        'TosseSaderat': 'EDBIIRTHXXX',
+        'IranEuropa': 'EIHBIRTHXXX',
+        'Ghavamin': 'GHVMIRTHXXX',
+        'IranZamin': 'IRZAIRTHXXX',
+        'IranVenezoela': 'IVBBIRTHXXX',
+        'Karafarin': 'KBIDIRTHXXX',
+        'Keshavarzi': 'KESHIRTHXXX',
+        'Khavarmiyaneh': 'KHMIIRTHXXX',
+        'Kosar': 'KSACIRTHXXX',
+        'ISC': 'MACDIRTHXXX',
+        'ISC': 'SIAMIRTHXXX',
+        'ISC': 'ISCOIRTHXXX',
+        'Markazi': 'BMJIIRTHXXX',
+        'Markazi': 'BMJJIRTHXXX',
+        'Mehr': 'MEHRIRTHXXX',
+        'Melli': 'MELIIRTHXXX',
+        'Noor': 'NOORIRTHXXX',
+        'PostBank': 'PBIRIRTHXXX',
+        'Refah': 'REFAIRTHXXX',
+        'Resalat': 'RESAIRTHXXX',
+        'Saman': 'SABCIRTHXXX',
+        'Sepah': 'SEPBIRTHXXX',
+        'Sina': 'SINAIRTHXXX',
+        'Sarmayeh': 'SRMBIRTHXXX',
+        'Gardeshgari': 'TOSMIRTHXXX',
+        'Melal': 'TOUSIRTHXXX',
+        'TosseTaavon': 'TTBIIRTHXXX',
+    }
+
     dir_list = [
-        # 'Markazi',
-        # 'Ayandeh',
-        # 'Saderat',
-        # 'TosseSaderat',
-        # 'Karafarin',
-        # 'Melli',
-        # 'Noor',
-        # 'Tejarat',
-        # 'Keshavarzi',
-        # 'Isun',
-        # 'ISC',
+        {'name': 'Offline_process', 'parent': 'bank'},
+        {'name': 'in', 'parent': 'bic_dir'},
+        {'name': 'accepted', 'parent': 'in'},
+        {'name': 'out', 'parent': 'bic_dir'},
     ]
 
-    # for bus in BusinessCode.objects.all().order_by('code'):
+    #####
+        # for bus in BusinessCode.objects.all().order_by('code'):
         #     dir_ = Directory(
         #         name=bus.code,
         #         relative_path=bus.code,
@@ -561,7 +607,7 @@ def insert_into_db():
         #         dir_.children += f'{ch_dir.id},'
         #     dir_.save()
 
-    # for mftuser in MftUser.objects.all().order_by('username'):
+        # for mftuser in MftUser.objects.all().order_by('username'):
         #     if mftuser.organization.code == 'ISC':
         #         for bus in mftuser.business.all().order_by('code'):
         #             create_default_permission(
@@ -570,9 +616,9 @@ def insert_into_db():
         #                 last_dir=Directory.objects.get(relative_path=f'{bus.code}/{mftuser.organization.directory_name}'),
         #                 business=bus,
         #                 home_dir=True
-        #             )
+        #                 )
 
-    # for d in dir_list:
+        # for d in dir_list:
         #     dir_ = Directory.objects.get(name=d, parent=1028)
         #     chs = [int(dc) for dc in dir_.children.split(',')[:-1]]
         #     i = DirectoryIndexCode.objects.get(code=str(int(dir_.index_code.code) - 1))
@@ -594,6 +640,103 @@ def insert_into_db():
         #         d_.parent = banki.id
         #         lower_directory_index(d_)
         #         d_.save()
+
+    # Nahab dirs
+        # for bd in Directory.objects.filter(parent=758):
+        #     try:
+        #         bic_dir_name = bank_dir_names[f'{bd.name}']
+        #         op = Directory(
+        #             name=dir_list[0]['name'],
+        #             parent=bd.id,
+        #             business=bd.business,
+        #             bic=bd.bic,
+        #             relative_path=f'{bd.relative_path}/{dir_list[0]["name"]}',
+        #             index_code=DirectoryIndexCode.objects.get(code=str(int(bd.index_code.code) - 1)),
+        #             created_by=iscuser
+        #         )
+        #         op.save()
+        #         bd.children = f'{str(op.id)},'
+        #         bd.save()
+        #         bic_dir = Directory(
+        #             name=bic_dir_name,
+        #             parent=op.id,
+        #             business=op.business,
+        #             bic=op.bic,
+        #             relative_path=f'{op.relative_path}/{bic_dir_name}',
+        #             index_code=DirectoryIndexCode.objects.get(code=str(int(op.index_code.code) - 1)),
+        #             created_by=iscuser
+        #         )
+        #         bic_dir.save()
+        #         op.children = f'{str(bic_dir.id)},'
+        #         op.save()
+        #         in_ = Directory(
+        #             name=dir_list[1]['name'],
+        #             parent=bic_dir.id,
+        #             business=bic_dir.business,
+        #             bic=bic_dir.bic,
+        #             relative_path=f'{bic_dir.relative_path}/{dir_list[1]["name"]}',
+        #             index_code=DirectoryIndexCode.objects.get(code=str(int(bic_dir.index_code.code) - 1)),
+        #             created_by=iscuser
+        #         )
+        #         in_.save()
+        #         acc = Directory(
+        #             name=dir_list[2]['name'],
+        #             parent=in_.id,
+        #             business=in_.business,
+        #             bic=in_.bic,
+        #             relative_path=f'{in_.relative_path}/{dir_list[2]["name"]}',
+        #             index_code=DirectoryIndexCode.objects.get(code=str(int(in_.index_code.code) - 1)),
+        #             created_by=iscuser
+        #         )
+        #         acc.save()
+        #         in_.children = f'{str(acc.id)},'
+        #         in_.save()
+        #         out = Directory(
+        #             name=dir_list[3]['name'],
+        #             parent=bic_dir.id,
+        #             business=bic_dir.business,
+        #             bic=bic_dir.bic,
+        #             relative_path=f'{bic_dir.relative_path}/{dir_list[3]["name"]}',
+        #             index_code=DirectoryIndexCode.objects.get(code=str(int(bic_dir.index_code.code) - 1)),
+        #             created_by=iscuser
+        #         )
+        #         out.save()
+        #         bic_dir.children = f'{str(in_.id)},{str(out.id)},'
+        #         bic_dir.save()
+        #         print('|_NAHAB')
+        #         print(f'|___{bd.name}')
+        #         print('|_____Offline_process')
+        #         print(f'|_______{bic_dir_name}')
+        #         print('|_________in')
+        #         print('|___________accepted')
+        #         print('|_________out')
+        #         print('*********************')
+        #     except:
+        #         print(f'{bd.name} does not exist in dict')
+
+    # Nahab user permissions
+        # for user in MftUser.objects.filter(business=BusinessCode.objects.get(code='NAHAB')):
+        #     in_dir = Directory.objects.get(name='in', business=user.business.first(), bic=user.organization)
+        #     out_dir = Directory.objects.get(name='out', business=user.business.first(), bic=user.organization)
+        #     accepted_dir = Directory.objects.get(name='accepted', business=user.business.first(), bic=user.organization)
+            
+        #     create_default_permission(isc_user=iscuser, mftuser=user, last_dir=accepted_dir, home_dir=True)
+            
+        #     Permission.objects.create(user=user, directory=in_dir, permission=1, created_by=iscuser) #Download (Read)
+        #     Permission.objects.create(user=user, directory=in_dir, permission=256, created_by=iscuser) #List
+        #     Permission.objects.create(user=user, directory=in_dir, permission=128, created_by=iscuser) #Checksum
+        #     Permission.objects.create(user=user, directory=in_dir, permission=1024, created_by=iscuser) #Append
+
+        #     Permission.objects.create(user=user, directory=in_dir, permission=2, created_by=iscuser) #Upload (Write)
+        #     #List (has been given) -> Permission.objects.create(user=user, directory=in_dir, permission=256, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=in_dir, permission=128, created_by=iscuser) #Checksum
+        #     Permission.objects.create(user=user, directory=in_dir, permission=1024, created_by=iscuser) #Append
+        #     Permission.objects.create(user=user, directory=in_dir, permission=512, created_by=iscuser) #Overwrite
+            
+        #     Permission.objects.create(user=user, directory=out_dir, permission=1, created_by=iscuser) #Download (Read)
+        #     Permission.objects.create(user=user, directory=out_dir, permission=256, created_by=iscuser) #List
+        #     Permission.objects.create(user=user, directory=out_dir, permission=128, created_by=iscuser) #Checksum
+        #     Permission.objects.create(user=user, directory=out_dir, permission=1024, created_by=iscuser) #Append
 
 
 def lower_directory_index(directory):
@@ -619,13 +762,13 @@ def clean_up(flag='', action=False, *args, **kwargs):
             temp = old_chs.split(',')
             temp.pop()
             for c in temp:
-                id = int(c)
+                id_ = int(c)
                 # print(f'Checking dir with id {id}')
-                if Directory.objects.filter(pk=id).exists():
-                    chs += f'{id},'
-                    recursive_directory_survey(Directory.objects.get(pk=id), action=action)
+                if Directory.objects.filter(pk=id_).exists():
+                    chs += f'{id_},'
+                    recursive_directory_survey(Directory.objects.get(pk=id_), action=action)
                 else:
-                    print(f'dir with id {id} does not exists, Parent id is {d.id}')
+                    print(f'dir with id {id_} does not exists, Parent id is {d.id}')
             d.children = chs
             if action:
                 d.save()

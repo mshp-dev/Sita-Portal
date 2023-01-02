@@ -285,12 +285,47 @@
         },
         function (response) {
           if (response.result == "success") {
-            document.getElementById(response.type + "inv-" + response.deleted + "-parent").remove();
+            //document.getElementById(response.type + "inv-" + response.deleted + "-parent").remove();
+            $("#" + response.type + "inv-" + response.deleted + "-parent")
+              .parent()
+              .appendTo("#tabs-deleted-invoices");
           } else if (response.result == "error") {
             alert(response.message);
           }
         }
       );
+    });
+
+    $("input[role='invoice-change-to-new-btn']").click(function () {
+      var invoice_id = $(this).attr("iid");
+      var invoice_type = $(this).attr("itype");
+      var csrf = "{{ csrf_token }}";
+      $.post(
+        "/invoices/update/" + invoice_id + "/",
+        {
+          csrfmiddlewaretoken: csrf,
+          itype: invoice_type,
+        },
+        function (response) {
+          if (response.result == "success") {
+            //document.getElementById(response.type + "inv-" + response.updated + "-parent").remove();
+            $("#" + response.type + "inv-" + response.updated + "-parent")
+              .parent()
+              .appendTo("#tabs-undefined-invoices");
+          } else if (response.result == "error") {
+            alert(response.message);
+          }
+        }
+      );
+    });
+
+    $("a[role='tab']").click(function () {
+      var tab_name = $(this).attr("href").replace("#", "");
+      //alert(tab_name);
+      //const triggerEl = document.querySelector("#" + tab_name + ' button[data-bs-target="#profile"]');
+      //bootstrap.Tab.getInstance(triggerEl).show();
+      //window.location.reload();
+      window.location = "/manage-data/?tab=" + tab_name;
     });
   });
 </script>
@@ -320,62 +355,62 @@
             <ul class="nav nav-pills nav-fill flex-column flex-md-row" id="tabs-manage-data" role="tablist">
               <li class="col-4 nav-item">
                 <a
-                  class="nav-link mb-sm-3 mb-md-0"
+                  class="nav-link mb-sm-3 mb-md-0 {% if selected_tab == 'tabs-mftusers' %}avtive{% endif %}"
                   id="tabs-mftusers-tab"
                   data-bs-toggle="tab"
                   href="#tabs-mftusers"
                   role="tab"
                   aria-controls="tabs-mftusers"
-                  aria-selected="false"
+                  aria-selected="{% if selected_tab == 'tabs-mftusers' %}false{% endif %}"
                   ><strong>کاربران تأیید نشده</strong> <span class="fas fa-user-alt"></span
                 ></a>
               </li>
               <li class="col-4 nav-item">
                 <a
-                  class="nav-link mb-sm-3 mb-md-0"
+                  class="nav-link mb-sm-3 mb-md-0 {% if selected_tab == 'tabs-undefined-invoices' %}avtive{% endif %}"
                   id="tabs-undefined-invoice-tab"
                   data-bs-toggle="tab"
-                  href="#tabs-undefined-invoice"
+                  href="#tabs-undefined-invoices"
                   role="tab"
-                  aria-controls="tabs-undefined-invoice"
-                  aria-selected="false"
-                  ><strong>درخواست های چارگونی بررسی نشده</strong> <span class="fas fa-file-alt"></span
+                  aria-controls="tabs-undefined-invoices"
+                  aria-selected="{% if selected_tab == 'tabs-undefined-invoices' %}false{% endif %}"
+                  ><strong>درخواست های چارگونی بررسی نشده</strong> <span class="fas fa-file-alt text-warning"></span
                 ></a>
               </li>
               <li class="col-4 nav-item">
                 <a
-                  class="nav-link mb-sm-3 mb-md-0 active"
+                  class="nav-link mb-sm-3 mb-md-0 {% if selected_tab == 'tabs-pre-invoices' or selected_tab == '' %}avtive{% endif %}"
                   id="tabs-pre-invoices-tab"
                   data-bs-toggle="tab"
                   href="#tabs-pre-invoices"
                   role="tab"
                   aria-controls="tabs-pre-invoices"
-                  aria-selected="true"
+                  aria-selected="{% if selected_tab == 'tabs-pre-invoices' or selected_tab == '' %}true{% endif %}"
                   ><strong>درخواست های ایجاد مسیر</strong> <span class="fas fa-folder-open"></span
                 ></a>
               </li>
               <li class="col-4 nav-item">
                 <a
-                  class="nav-link mb-sm-3 mb-md-0"
-                  id="tabs-permissions-tab"
+                  class="nav-link mb-sm-3 mb-md-0 {% if selected_tab == 'tabs-confirmed-invoices' %}avtive{% endif %}"
+                  id="tabs-confirmed-invoices-tab"
                   data-bs-toggle="tab"
-                  href="#tabs-permissions"
+                  href="#tabs-confirmed-invoices"
                   role="tab"
-                  aria-controls="tabs-permissions"
-                  aria-selected="false"
-                  ><strong>دسترسی های تأیید نشده</strong> <span class="fas fa-file-alt"></span
+                  aria-controls="tabs-confirmed-invoices"
+                  aria-selected="{% if selected_tab == 'tabs-confirmed-invoices' %}false{% endif %}"
+                  ><strong>درخواست های تأیید شده</strong> <span class="fas fa-file-alt text-success"></span
                 ></a>
               </li>
               <li class="col-4 nav-item">
                 <a
-                  class="nav-link mb-sm-3 mb-md-0"
+                  class="nav-link mb-sm-3 mb-md-0 {% if selected_tab == 'tabs-rejected-invoices' %}avtive{% endif %}"
                   id="tabs-rejected-invoice-tab"
                   data-bs-toggle="tab"
-                  href="#tabs-rejected-invoice"
+                  href="#tabs-rejected-invoices"
                   role="tab"
-                  aria-controls="tabs-rejected-invoice"
-                  aria-selected="false"
-                  ><strong>درخواست های چارگونی رد شده</strong> <span class="fas fa-file-alt"></span
+                  aria-controls="tabs-rejected-invoices"
+                  aria-selected="{% if selected_tab == 'tabs-rejected-invoices' %}false{% endif %}"
+                  ><strong>درخواست های رد شده</strong> <span class="fas fa-file-alt text-danger"></span
                 ></a>
               </li>
             </ul>
@@ -385,19 +420,34 @@
           <div class="card-body p-0">
             <div class="tab-content" id="tabcontent">
               {% load coretags %}
-              <div class="tab-pane fade active show" id="tabs-pre-invoices" role="tabpanel" aria-labelledby="tabs-pre-invoices">
+              <div
+                class="tab-pane fade {% if selected_tab == 'tabs-pre-invoices' or selected_tab == '' %}active show{% endif %}"
+                id="tabs-pre-invoices"
+                role="tabpanel"
+                aria-labelledby="tabs-pre-invoices"
+              >
                 <br />
                 <br />
                 <br />
                 {% include "includes/admin-invoice-list.html" with invoices=pre_invoices|filter_invoices %}
               </div>
-              <div class="tab-pane fade" id="tabs-undefined-invoice" role="tabpanel" aria-labelledby="tabs-undefined-invoice">
+              <div
+                class="tab-pane fade {% if selected_tab == 'tabs-undefined-invoices' %}active show{% endif %}"
+                id="tabs-undefined-invoices"
+                role="tabpanel"
+                aria-labelledby="tabs-undefined-invoices"
+              >
                 <br />
                 <br />
                 <br />
                 {% include "includes/admin-invoice-list.html" with invoices=invoices|filter_invoices %}
               </div>
-              <div class="tab-pane fade" id="tabs-rejected-invoice" role="tabpanel" aria-labelledby="tabs-rejected-invoice">
+              <div
+                class="tab-pane fade {% if selected_tab == 'tabs-rejected-invoices' %}active show{% endif %}"
+                id="tabs-rejected-invoices"
+                role="tabpanel"
+                aria-labelledby="tabs-rejected-invoices"
+              >
                 <br />
                 <br />
                 <br />
@@ -405,191 +455,29 @@
                 {% include "includes/admin-invoice-list.html" with invoices=invoices|filter_invoices:'REJECTED' %}
                 {% include "includes/admin-invoice-list.html" with invoices=pre_invoices|filter_invoices:'REJECTED' %}
               </div>
-              <div class="tab-pane fade" id="tabs-mftusers" role="tabpanel" aria-labelledby="tabs-mftusers">
+              <div
+                class="tab-pane fade {% if selected_tab == 'tabs-mftusers' %}active show{% endif %}"
+                id="tabs-mftusers"
+                role="tabpanel"
+                aria-labelledby="tabs-mftusers"
+              >
                 <br />
                 <br />
                 <br />
                 {% include "includes/users-list.html" %} {% comment %} with users=new_users {% endcomment %}
               </div>
-              <div class="tab-pane fade" id="tabs-permissions" role="tabpanel" aria-labelledby="tabs-permissions">
-                <div class="row mt-5 mb-5">
-                  <div style="display: none">
-                    <p id="absolute-path-1"></p>
-                    <p id="absolute-path-2"></p>
-                    <p id="current-dir-id"></p>
-                    <p id="current-user-id"></p>
-                    <p id="parent-id"></p>
-                    <p id="index-code"></p>
-                  </div>
-                  <div class="col-4 col-lg-4">
-                    <legend class="h4 mb-3">MftUsers:</legend>
-                    <div id="users-with-permissions" class="p-3">
-                      {% for user in elements %}
-                      <input
-                        id="{{ user.id }}"
-                        class="btn btn-md btn-{% if user.is_confirmed %}success{% else %}warning{% endif %} mt-2"
-                        role="mftuser-get-dirs-btn"
-                        type="button"
-                        style="width: 80%"
-                        uid="{{ user.id }}"
-                        value="{{ user.username }}"
-                      />
-                      {% endfor %}
-                    </div>
-                  </div>
-                  <div class="col-4 col-lg-4">
-                    <legend class="h4 mb-3">Directory Tree:</legend>
-                    <!--Directories-->
-                    <ul id="replaceable-content" role="tree" aria-labelledby="tree_label">
-                      {% comment %} {% include "includes/directory-list.html" %} {% endcomment %}
-                    </ul>
-                    <!--End of Directories-->
-                  </div>
-                  <div class="col-4 col-lg-4 ps-5">
-                    <span class="h4">Permissions: <span id="confirmedByAdmin" style="display: none" class="fa fa-check text-success"></span></span>
-                    <div class="row mt-3">
-                      <legend class="h5">General</legend>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="1" id="readPermCheck" />
-                        <label class="form-check-label" for="readPermCheck"> Read (خواندن) </label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="2" id="writePermCheck" />
-                        <label class="form-check-label" for="writePermCheck"> Write (نوشتن) </label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="32" id="deleteFilesPermCheck" />
-                        <label class="form-check-label" for="deleteFilesPermCheck"> Delete (حذف کردن) </label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="256" id="listPermCheck" />
-                        <label class="form-check-label" for="listPermCheck"> List (مشاهده) </label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="8" id="renameFilesPermCheck" />
-                        <label class="form-check-label" for="renameFilesPermCheck"> Rename Files </label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="512" id="overwritePermCheck" />
-                        <label class="form-check-label" for="overwritePermCheck"> Overwrite </label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="1024" id="appendPermCheck" />
-                        <label class="form-check-label" for="appendPermCheck"> Append </label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="128" id="checksumPermCheck" />
-                        <label class="form-check-label" for="checksumPermCheck"> Checksum </label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="4096" id="shareFilesPermCheck" />
-                        <label class="form-check-label" for="shareFilesPermCheck"> Share Files </label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="0" id="applySubPermCheck" />
-                        <label class="form-check-label" for="applySubPermCheck"> Apply To Subdirectories </label>
-                      </div>
-                      <legend class="h5 mt-3">Subdirectories</legend>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="4" id="createPermCheck" />
-                        <label class="form-check-label" for="createPermCheck"> Create </label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="16" id="renamePermCheck" />
-                        <label class="form-check-label" for="renamePermCheck"> Rename </label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="64" id="deletePermCheck" />
-                        <label class="form-check-label" for="deletePermCheck"> Delete </label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="2048" id="sharePermCheck" />
-                        <label class="form-check-label" for="sharePermCheck"> Share </label>
-                      </div>
-                      <div class="form-check row mt-4">
-                        <button
-                          id="btn-confirm-permission"
-                          aria-label="تأیید دسترسی ها"
-                          title="تأیید دسترسی ها"
-                          class="btn btn-sm btn-warning mt-2"
-                          name="Confirm"
-                        >
-                          تأیید دسترسی ها
-                        </button>
-                        <script>
-                          $(function () {
-                            $(":input[type='checkbox']").change(function () {
-                              var absPath = $("#absolute-path-1").html();
-                              var index = $("#index-code").html();
-                              if (absPath == "") {
-                                alert("یک دایرکتوری را انتخاب نمائید!");
-                              } else {
-                                var did = $("#current-dir-id").html();
-                                var user_id = $("#current-user-id").html();
-                                var csrf = "{{ csrf_token }}";
-                                var permissions = "";
-                                var action = "remove";
-                                permissions += this.value + ",";
-                                if (this.checked) {
-                                  action = "add";
-                                }
-                                $.post(
-                                  "/mftuser/" + user_id + "/permission/" + did + "/",
-                                  {
-                                    permissions: permissions,
-                                    action: action,
-                                    csrfmiddlewaretoken: csrf,
-                                  },
-                                  function (response) {
-                                    if (response.result == "error") {
-                                      console.log(response.result);
-                                    }
-                                  }
-                                );
-                              }
-                              return false;
-                            });
-
-                            $("#btn-confirm-permission").click(function () {
-                              var did = $("#current-dir-id").html();
-                              var uid = $("#current-user-id").html();
-                              var csrf = "{{ csrf_token }}";
-                              if (did == "") {
-                                alert("یک دایرکتوری را انتخاب نمائید!");
-                              } else if (uid == "") {
-                                alert("یک کاربر را انتخاب نمائید!");
-                              } else {
-                                $.post(
-                                  "/entities/" + did + "/confirm/",
-                                  {
-                                    csrfmiddlewaretoken: csrf,
-                                    user: uid,
-                                    entity: "directory",
-                                  },
-                                  function (response) {
-                                    if (response.result == "success") {
-                                      $("#confirmedByAdmin").removeAttr("style");
-                                      if (response.confirmed) {
-                                        var btn = document.getElementById(response.id);
-                                        btn.setAttribute("class", "btn btn-md btn-success mt-2");
-                                        alert("دسترسی های فوق بروزرسانی و تأیید شد.");
-                                      } else {
-                                        alert("دسترسی های فوق بروزرسانی و تأیید شد، لطفاً اطلاعات کاربر را تأیید کنید.");
-                                      }
-                                    } else if (response.result == "error") {
-                                      alert("خطایی رخ داده است، لطفاً با مدیر سیستم تماس بگیرید!");
-                                    }
-                                  }
-                                );
-                              }
-                              return false;
-                            });
-                          });
-                        </script>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div
+                class="tab-pane fade {% if selected_tab == 'tabs-confirmed-invoices' %}active show{% endif %}"
+                id="tabs-confirmed-invoices"
+                role="tabpanel"
+                aria-labelledby="tabs-confirmed-invoices"
+              >
+                <br />
+                <br />
+                <br />
+                <!--prettier-ignore-->
+                {% include "includes/admin-invoice-list.html" with invoices=invoices|filter_invoices:'CONFIRMED' %}
+                {% include "includes/admin-invoice-list.html" with invoices=pre_invoices|filter_invoices:'CONFIRMED' %}
               </div>
             </div>
           </div>
@@ -649,7 +537,10 @@
                             },
                             function (response) {
                               if (response.result == "success") {
-                                document.getElementById(response.type + "inv-" + response.rejected + "-parent").remove();
+                                //document.getElementById(response.type + "inv-" + response.rejected + "-parent").remove();
+                                $("#" + response.type + "inv-" + response.rejected + "-parent")
+                                  .parent()
+                                  .appendTo("#tabs-rejected-invoices");
                                 $("#invoice-reject-modal").modal("show");
                               } else if (response.result == "error") {
                                 alert(response.message);
@@ -698,8 +589,10 @@
                           },
                           function (response) {
                             if (response.result == "success") {
-                              document.getElementById(response.type + "inv-" + response.confirmed + "-parent").remove();
-                              //alert(response.message);
+                              //document.getElementById(response.type + "inv-" + response.confirmed + "-parent").remove();
+                              $("#" + response.type + "inv-" + response.confirmed + "-parent")
+                                .parent()
+                                .appendTo("#tabs-confirmed-invoices");
                             } else if (response.result == "error") {
                               alert(response.message);
                             }
