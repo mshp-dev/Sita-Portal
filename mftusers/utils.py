@@ -281,7 +281,7 @@ def export_user(id, isc_user):
     lastName = template.xpath('//webUsers/webUser/lastName')
     lastName[0].text = mftuser.lastname
     organization = template.xpath('//webUsers/webUser/organization')
-    organization[0].text = f'{mftuser.organization.description} - {isc_user.department.description}' if mftuser.organization.code == 'ISC' else mftuser.organization.description
+    organization[0].text = f'{mftuser.organization.description} - {mftuser.created_by.department.description}' if mftuser.organization.code == 'ISC' else mftuser.organization.description
     mobilePhone = template.xpath('//webUsers/webUser/mobilePhone')
     mobilePhone[0].text = str(mftuser.mobilephone)
     name = template.xpath('//webUsers/webUser/name')
@@ -722,21 +722,61 @@ def insert_into_db():
             
         #     create_default_permission(isc_user=iscuser, mftuser=user, last_dir=accepted_dir, home_dir=True)
             
-        #     Permission.objects.create(user=user, directory=in_dir, permission=1, created_by=iscuser) #Download (Read)
-        #     Permission.objects.create(user=user, directory=in_dir, permission=256, created_by=iscuser) #List
-        #     Permission.objects.create(user=user, directory=in_dir, permission=128, created_by=iscuser) #Checksum
-        #     Permission.objects.create(user=user, directory=in_dir, permission=1024, created_by=iscuser) #Append
+        #     if not Permission.objects.filter(user=user, directory=in_dir, permission=1, created_by=iscuser).exists():
+        #         Permission.objects.create(user=user, directory=in_dir, permission=1, created_by=iscuser) #Download (Read)
+        #     if not Permission.objects.filter(user=user, directory=in_dir, permission=256, created_by=iscuser).exists():
+        #         Permission.objects.create(user=user, directory=in_dir, permission=256, created_by=iscuser) #List
+        #     if not Permission.objects.filter(user=user, directory=in_dir, permission=128, created_by=iscuser).exists():
+        #         Permission.objects.create(user=user, directory=in_dir, permission=128, created_by=iscuser) #Checksum
+        #     if not Permission.objects.filter(user=user, directory=in_dir, permission=1024, created_by=iscuser).exists():
+        #         Permission.objects.create(user=user, directory=in_dir, permission=1024, created_by=iscuser) #Append
 
-        #     Permission.objects.create(user=user, directory=in_dir, permission=2, created_by=iscuser) #Upload (Write)
-        #     #List (has been given) -> Permission.objects.create(user=user, directory=in_dir, permission=256, created_by=iscuser)
-        #     Permission.objects.create(user=user, directory=in_dir, permission=128, created_by=iscuser) #Checksum
-        #     Permission.objects.create(user=user, directory=in_dir, permission=1024, created_by=iscuser) #Append
-        #     Permission.objects.create(user=user, directory=in_dir, permission=512, created_by=iscuser) #Overwrite
+        #     if not Permission.objects.filter(user=user, directory=in_dir, permission=2, created_by=iscuser).exists():
+        #         Permission.objects.create(user=user, directory=in_dir, permission=2, created_by=iscuser) #Upload (Write)
+        #     if not Permission.objects.filter(user=user, directory=in_dir, permission=256, created_by=iscuser).exists():
+        #         Permission.objects.create(user=user, directory=in_dir, permission=256, created_by=iscuser) #List
+        #     if not Permission.objects.filter(user=user, directory=in_dir, permission=128, created_by=iscuser).exists():
+        #         Permission.objects.create(user=user, directory=in_dir, permission=128, created_by=iscuser) #Checksum
+        #     if not Permission.objects.filter(user=user, directory=in_dir, permission=1024, created_by=iscuser).exists():
+        #         Permission.objects.create(user=user, directory=in_dir, permission=1024, created_by=iscuser) #Append
+        #     if not Permission.objects.filter(user=user, directory=in_dir, permission=512, created_by=iscuser).exists():
+        #         Permission.objects.create(user=user, directory=in_dir, permission=512, created_by=iscuser) #Overwrite
             
-        #     Permission.objects.create(user=user, directory=out_dir, permission=1, created_by=iscuser) #Download (Read)
-        #     Permission.objects.create(user=user, directory=out_dir, permission=256, created_by=iscuser) #List
-        #     Permission.objects.create(user=user, directory=out_dir, permission=128, created_by=iscuser) #Checksum
-        #     Permission.objects.create(user=user, directory=out_dir, permission=1024, created_by=iscuser) #Append
+        #     if not Permission.objects.filter(user=user, directory=out_dir, permission=1, created_by=iscuser).exists():
+        #         Permission.objects.create(user=user, directory=out_dir, permission=1, created_by=iscuser) #Download (Read)
+        #     if not Permission.objects.filter(user=user, directory=out_dir, permission=256, created_by=iscuser).exists():
+        #         Permission.objects.create(user=user, directory=out_dir, permission=256, created_by=iscuser) #List
+        #     if not Permission.objects.filter(user=user, directory=out_dir, permission=128, created_by=iscuser).exists():
+        #         Permission.objects.create(user=user, directory=out_dir, permission=128, created_by=iscuser) #Checksum
+        #     if not Permission.objects.filter(user=user, directory=out_dir, permission=1024, created_by=iscuser).exists():
+        #         Permission.objects.create(user=user, directory=out_dir, permission=1024, created_by=iscuser) #Append
+
+    # Nahab user invoices
+        # for mftuser in MftUser.objects.filter(business=BusinessCode.objects.get(code='NAHAB')):
+        #     perms_str = ''
+        #     bus_dirs = Directory.objects.filter(business=BusinessCode.objects.get(code='NAHAB')).order_by('relative_path')
+        #     permissions = Permission.objects.filter(user=mftuser, directory__in=bus_dirs, is_confirmed=False)
+        #     if permissions.filter(permission__in=[1, 2, 32, 4]).exists():
+        #         for p in permissions.values('id').distinct():
+        #             perms_str += f'{p["id"]},'
+        #         Invoice.objects.create(
+        #             invoice_type=InvoiceType.objects.get(code='INVOBUS'),
+        #             mftuser=mftuser.id,
+        #             used_business=0,
+        #             permissions_list=perms_str,
+        #             created_by=iscuser
+        #         )
+
+    # Nahab user export
+        # for invoice in Invoice.objects.filter(created_by=IscUser.objects.get(pk=1)):
+        #     mftuser = MftUser.objects.get(pk=invoice.mftuser)
+        #     mftuser.is_confirmed = True
+        #     mftuser.save()
+        #     perms_list = [int(p) for p in invoice.permissions_list.split(',')[:-1]]
+        #     Permission.objects.filter(pk__in=perms_list).update(is_confirmed=True)
+        #     export_user_with_paths(invoice.mftuser, iscuser)
+        #     invoice.confirm_or_reject = 'CONFIRMED'
+        #     invoice.save()
 
 
 def lower_directory_index(directory):
