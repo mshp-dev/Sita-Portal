@@ -527,6 +527,7 @@
                         var itype = $("#current-invoice-type").html();
                         var reason_text = $("#reason-input").val();
                         var csrf = "{{ csrf_token }}";
+                        $("#invoice-reject-modal").modal("hide");
                         if (reason_text != "") {
                           $.post(
                             "/invoices/reject/" + iid + "/",
@@ -541,7 +542,6 @@
                                 $("#" + response.type + "inv-" + response.rejected + "-parent")
                                   .parent()
                                   .appendTo("#tabs-rejected-invoices");
-                                $("#invoice-reject-modal").modal("show");
                               } else if (response.result == "error") {
                                 alert(response.message);
                               }

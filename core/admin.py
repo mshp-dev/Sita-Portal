@@ -51,14 +51,14 @@ class IscUserAdmin(admin.ModelAdmin):
 
 
 class MftUserAdmin(admin.ModelAdmin):
-    list_display = ['username', 'mobilephone', 'organization', 'get_all_business', 'ipaddr', 'created_by', 'is_confirmed']
+    list_display = ['username', 'email', 'mobilephone', 'organization', 'get_all_business', 'created_by', 'is_confirmed']
     list_filter = ['organization', 'business']
     search_fields = ('username', 'firstname', 'lastname')
     ordering = ['username']
 
 
 class MftUserTempAdmin(admin.ModelAdmin):
-    list_display = ['username', 'mobilephone', 'organization', 'get_all_business', 'ipaddr', 'created_by', 'is_confirmed']
+    list_display = ['username', 'email', 'mobilephone', 'organization', 'get_all_business', 'created_by', 'is_confirmed']
     list_filter = ['organization', 'business']
     search_fields = ('username', 'firstname', 'lastname')
     ordering = ['username']
