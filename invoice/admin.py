@@ -8,13 +8,13 @@ class InvoiceTypeAdmin(admin.ModelAdmin):
 
 
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ['invoice_type', 'get_mftuser', 'serial_number', 'created_by', 'confirm_or_reject']
+    list_display = ['invoice_type', 'get_mftuser', 'serial_number', 'created_by', 'get_jalali_created_at', 'confirm_or_reject']
     list_filter = ['created_by']
     ordering = ['mftuser', 'created_at', 'created_by']
 
 
 class PreInvoiceAdmin(admin.ModelAdmin):
-    list_display = ['invoice_type', 'get_list_of_directories', 'serial_number', 'created_by', 'confirm_or_reject']
+    list_display = ['invoice_type', 'get_list_of_directories', 'serial_number', 'created_by', 'get_jalali_created_at', 'confirm_or_reject']
     list_filter = ['created_by']
     ordering = ['created_at', 'created_by']
 

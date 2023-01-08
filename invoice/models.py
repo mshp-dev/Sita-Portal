@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from core.models import BaseCoding, IscUser, MftUser, Directory, Permission, BusinessCode, DirectoryPermissionCode
 
 from datetime import datetime as dt
+from jdatetime import datetime as jdt
+
 import random
 
 
@@ -34,6 +36,10 @@ class BaseInvoice(models.Model):
     def generate_serial_number(self):
         itype = str(self.invoice_type.id)
         return f'{itype}{dt.now().strftime("%y%m%d%H%M%S")}'
+
+    @property
+    def get_jalali_created_at(self):
+        return jdt.fromgregorian(datetime=self.created_at).strftime('%Y/%m/%d')
 
 
 class Invoice(BaseInvoice):

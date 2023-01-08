@@ -32,7 +32,8 @@
           function (response) {
             if (response.result == "success") {
               //document.getElementById(response.deleted).remove();
-              alert("فایل ZIP حاوی اطلاعات کاربر و مسیرها با موفقیت دانلود شد.");
+              //alert("فایل ZIP حاوی اطلاعات کاربر و مسیرها با موفقیت دانلود شد.");
+              console.log(response.result);
             } else if (response.result == "error") {
               alert("مشکلی پیش آمده است!");
             }
@@ -60,13 +61,14 @@
                 if (response.result == "success") {
                   //document.getElementById(response.deleted).remove();
                   //alert("فایل XML حاوی اطلاعات کاربر با موفقیت دانلود شد.");
+                  console.log(response.result);
                 } else if (response.result == "error") {
                   alert("مشکلی پیش آمده است!");
                 }
               }
             );
           }
-          alert("فایل ZIP حاوی اطلاعات کاربران با موفقیت دانلود شد.");
+          //alert("فایل ZIP حاوی اطلاعات کاربران با موفقیت دانلود شد.");
         });
       } else {
         alert("موردی برای استخراج وجود ندارد!");

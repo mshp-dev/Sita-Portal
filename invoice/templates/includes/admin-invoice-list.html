@@ -17,7 +17,7 @@
             class="fas fa-file-alt {% if invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
           ></span>
           <!--prettier-ignore-->
-          <h3 class="display-5 mx-auto" style="direction: rtl">{% if invoice.confirm_or_reject == 'REJECTED' %}به علت <u>{{ invoice.description }}</u> رد شد.{% else %}{{ invoice.invoice_type }}{% endif %} - {{ invoice.created_by }}</h3>
+          <h3 class="display-5 mx-auto" style="direction: rtl">{% if invoice.confirm_or_reject == 'REJECTED' %}به علت <u>{{ invoice.description }}</u> رد شد.{% else %}{{ invoice.invoice_type }}{% endif %} - {{ invoice.created_by }} - {{ invoice.get_jalali_created_at }}</h3>
         </button>
       </h2>
       <div
@@ -143,7 +143,7 @@
             class="fas fa-folder-open {% if invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
           ></span>
           <!--prettier-ignore-->
-          <h3 class="display-5 mx-auto" style="direction: rtl">{% if invoice.confirm_or_reject == 'REJECTED' %}به علت <u>{{ invoice.description }}</u> رد شد.{% else %}{{ invoice.invoice_type }}{% endif %} - {{ invoice.created_by }}</h3>
+          <h3 class="display-5 mx-auto" style="direction: rtl">{% if invoice.confirm_or_reject == 'REJECTED' %}به علت <u>{{ invoice.description }}</u> رد شد.{% else %}{{ invoice.invoice_type }}{% endif %} - {{ invoice.created_by }} - {{ invoice.get_jalali_created_at }}</h3>
         </button>
       </h2>
       <div
