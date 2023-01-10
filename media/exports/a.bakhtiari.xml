@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<webUsers class="com.linoma.dpa.commandcenter.codec.WebUserVOListCodec">
+	<webUser>
+		<description></description>
+		<createdOn>1645019929857</createdOn>
+		<email></email>
+		<enabled>true</enabled>
+		<firstName></firstName>
+		<forcePasswordChange>false</forcePasswordChange>
+		<certificateKeyLocation>KeyVault</certificateKeyLocation>
+		<certificateKeyVaultName>Default</certificateKeyVaultName>
+		<!-- <ftpesFingerprint>7E:90:D3:3F:B3:A1:5D:47:75:EE:3C:CA:6A:97:0E:4A:48:F0:AC:7B</ftpesFingerprint> -->
+		<!-- <ftpsFingerprint>7E:90:D3:3F:B3:A1:5D:47:75:EE:3C:CA:6A:97:0E:4A:48:F0:AC:7B </ftpsFingerprint> -->
+		<gftpesAuthType>P</gftpesAuthType>
+		<gftpsAuthType>P</gftpsAuthType>
+		<ghttpsAuthType>P</ghttpsAuthType>
+		<ghttpsTwoFactorAuthTypeCode></ghttpsTwoFactorAuthTypeCode>
+		<gas2AuthType>P</gas2AuthType>
+		<gsftpAuthType>P</gsftpAuthType>
+		<goFastAuthType>P</goFastAuthType>
+		<!-- <httpsFingerprint>7E:90:D3:3F:B3:A1:5D:47:75:EE:3C:CA:6A:97:0E:4A:48:F0:AC:7B</httpsFingerprint> -->
+		<phone></phone>
+		<approved>true</approved>
+		<as2DecryptionKeyPasswordIsEncrypted>false</as2DecryptionKeyPasswordIsEncrypted>
+		<as2MdnSignatureKeyPasswordIsEncrypted>false</as2MdnSignatureKeyPasswordIsEncrypted>
+		<personalAddressBook>false</personalAddressBook>
+		<restrictSharingToAddressBookContacts>false</restrictSharingToAddressBookContacts>
+		<gas4AuthType>P</gas4AuthType>
+		<authenticationAlias></authenticationAlias>
+		<as2Id></as2Id>
+		<as2MdnApprovalAutomatic></as2MdnApprovalAutomatic>
+		<as2RequireEncryption></as2RequireEncryption>
+		<as2RequireSignature></as2RequireSignature>
+		<as2RequireAuthentication></as2RequireAuthentication>
+		<as2SignatureKeyLocation>KeyVault</as2SignatureKeyLocation>
+		<as2SignatureAlias></as2SignatureAlias>
+		<as2MDNSignatureAlgorithmFormatCode></as2MDNSignatureAlgorithmFormatCode>
+		<as2WhenFileExist>-1</as2WhenFileExist>
+		<changePasswordPermission>true</changePasswordPermission>
+		<createdBy>sita2admin</createdBy>
+		<userSanDnValidationCode>0</userSanDnValidationCode>
+		<inactiveDays>-1</inactiveDays>
+		<inviteUserPermission>false</inviteUserPermission>
+		<lastLoginDate>1650945194980</lastLoginDate>
+		<ipFilterEnabled>false</ipFilterEnabled>
+		<ipFilterType>A</ipFilterType>
+		<lastName></lastName>
+		<loginAttempts>0</loginAttempts>
+		<loginMethod>0</loginMethod>
+		<loginMethodName>GoAnywhere</loginMethodName>
+		<limitTime>0</limitTime>
+		<limitDays>0</limitDays>
+		<limitDaysOfWeek>0</limitDaysOfWeek>
+		<maxSessions>2</maxSessions>
+		<modifiedBy>sita2admin</modifiedBy>
+		<modifiedOn>1650949125445</modifiedOn>
+		<organization></organization>
+		<passwordIsEncrypted>true</passwordIsEncrypted>
+		<passwordHashAlgorithm>7</passwordHashAlgorithm>
+		<passwordExpirationInterval>-1</passwordExpirationInterval>
+		<servicePermissions>13</servicePermissions>
+		<secureMailPermissions>0</secureMailPermissions>
+		<viewActivityPermission>true</viewActivityPermission>
+		<goDrivePermission>false</goDrivePermission>
+		<goDriveAccess>F</goDriveAccess>
+		<goDriveDiskQuotaOption>B</goDriveDiskQuotaOption>
+		<goDriveDiskSpace>5</goDriveDiskSpace>
+		<goDriveDiskSpaceUnit>G</goDriveDiskSpaceUnit>
+		<secureFolderPermission>true</secureFolderPermission>
+		<secureFormPermission>false</secureFormPermission>
+		<pastExpiration>false</pastExpiration>
+		<domain>SITA</domain>
+		<goDriveLinkPermission>false</goDriveLinkPermission>
+		<smsCountryName>Iran</smsCountryName>
+		<mobilePhone></mobilePhone>
+		<password>$5$2n1V2cKxaJjzXHGmTE2eDw==$V13n4/dUM4WgJaZCsi6PXg1EVeuzCocorLxeV5tUYBY=</password>
+		<name></name>
+		<webGroups />
+		<ipFilterEntries />
+		<virtualFile>
+			<type>D</type>
+			<filePermissions>0</filePermissions>
+			<folderPermissions>256</folderPermissions>
+			<applyToSubfolders>false</applyToSubfolders>
+			<diskQuotaOption>N</diskQuotaOption>
+			<diskQuotaSize>100</diskQuotaSize>
+			<diskQuotaUnit>M</diskQuotaUnit>
+			<description>This is the login directory</description>
+			<virtualFiles>
+			</virtualFiles>
+		</virtualFile>
+		<secureForms />
+	</webUser>
+</webUsers>

@@ -36,6 +36,11 @@ ALLOWED_HOSTS = [
     'sita.iranet.net',
 ]
 
+SFTP_HOST = 'sft.iranet.net'
+SFTP_PORT = 9022
+SFTP_USERNAME = 'sita2'
+SFTP_PASSWORD = 'Sita2@Sita32022'
+SFTP_PATH = 'Sync_Shared_Folder/Recieved_From_IRANET/Imported_Webuser'
 
 # Application definition
 

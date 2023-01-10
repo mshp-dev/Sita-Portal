@@ -10,7 +10,7 @@ from invoice.models import *
 from tempfile import NamedTemporaryFile as ntf
 from lxml import etree as ET
 from lxml import html
-import os, random, zipfile, csv, pdfkit
+import os, random, zipfile, csv, pdfkit, sys, paramiko
 
 from jdatetime import datetime as jdt
 
@@ -487,6 +487,16 @@ def make_csv_of_all_paths(name='paths'):
     return os.path.join(os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv'))
 
 
+def export_users_with_sftp(files_list, dest=settings.SFTP_PATH):
+    tp = paramiko.Transport((settings.SFTP_HOST, settings.SFTP_PORT))
+    tp.connect(username = settings.SFTP_USERNAME, password=settings.SFTP_PASSWORD)
+    sftp_client = paramiko.SFTPClient.from_transport(tp)
+    sftp_client.chdir(dest)
+    for file in files_list:
+        sftp_client.put(file, file.split('\\')[-1])
+    sftp_client.close()
+
+
 def make_form_from_invoice(invoice, contents):
     html_path = os.path.join(settings.MEDIA_ROOT, 'form-307.html')
     html_root = html.parse(html_path).getroot()
@@ -932,6 +942,18 @@ def clean_up(flag='', action=False, *args, **kwargs):
                     d.delete()
                     parent.save()
                     print(f'directory in {d.absolute_path} has been deleted')
+
+
+def refactor_directory(operation='', action=False, *args, **kwargs):
+    if operation == 'rename':
+        dirs = Directory.objects.filter(relative_path__icontains=kwargs['old_name'])
+        for d in dirs:
+            print(d.relative_path)
+            if d.name == kwargs['old_name']:
+                d.name = kwargs['new_name']
+            d.relative_path = d.relative_path.replace(kwargs['old_name'], kwargs['new_name'])
+            if action:
+                d.save()
 
 
 def recursive_directory_survey(directory, action=False):

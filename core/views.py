@@ -35,7 +35,9 @@ def index_view(request):
     # clean_up(flag='perm2', action=False)
     # clean_up(flag='dir', action=False)
     # clean_up(flag='dir3', action=False, bic_name="FIU")
-
+    # dirs = Directory.objects.filter(name='Test')
+    # refactor_directory(operation='rename', action=False, old_name='TRANSACTION', new_name='BANKIRAN')
+    
     isc_user = IscUser.objects.get(user=request.user)
 
     # users_count = len(MftUser.objects.all())
@@ -393,7 +395,7 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
     deleted_users   = MftUserTemp.objects.filter(description__icontains=f"%deleted%").order_by('username')
     # invoices        = Invoice.objects.filter(processed=False).order_by('created_at')
     invoices        = Invoice.objects.all().order_by('-created_at')
-    pre_invoices    = PreInvoice.objects.all().order_by('created_at')
+    pre_invoices    = PreInvoice.objects.all().order_by('-created_at')
     elements        = []
     new_users       = []
     changed_users   = []
@@ -489,6 +491,34 @@ def export_data_view(request, *args, **kwargs):
             return JsonResponse(data=data_dict, safe=False)
 
     return render(request, "core/export-data.html", context)
+
+
+@login_required(login_url="/login/")
+def sftp_user_view(request, id, *args, **kwargs):
+    isc_user = IscUser.objects.get(user=request.user)
+    rtes     = ReadyToExport.objects.all() if id == 0 else ReadyToExport.objects.filter(pk=id)
+    
+    if not isc_user.user.is_staff:
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        return redirect('/error/401/')
+
+    if request.is_ajax():
+        if request.method == 'POST':
+            response = {}
+        files_list = []
+        try:
+            files_list = [re.webuser.path for re in rtes]
+            export_users_with_sftp(files_list=files_list)
+            if len(files_list) > 1:
+                logger.info(f'all mftusers exported with sftp by {isc_user.user.username} successfully.')
+            else:
+                logger.info(f'mftuser with id {rtes.first().id} exported with sftp by {isc_user.user.username} successfully.')
+            response = {'result': 'success'}
+        except Exception as e:
+            logger.error(e)
+            response = {'result': 'error'}
+        finally:
+            return JsonResponse(data=response, safe=False)
 
 
 @login_required(login_url="/login/")

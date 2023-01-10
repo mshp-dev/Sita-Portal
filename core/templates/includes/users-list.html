@@ -262,17 +262,14 @@
                   value="دانلود به صورت XML"
                 />
                 {% endcomment %}
-                <a
-                  href="{% url 'download-mftuser-view' eu.id %}"
-                  role="download-exported-btn"
-                  eid="{{ eu.id }}"
-                  style="width: 100%"
-                  class="btn btn-warning animate-up-1"
-                  >ZIP دانلود به صورت</a
-                >
+                <a role="sftp-exported-btn" eid="{{ eu.id }}" style="width: 100%" class="btn btn-warning animate-up-1">SFTP با XML ارسال فایل</a
+                />
               </div>
               <div class="col">
-                <a href="{% url 'mftuser-details' eu.mftuser.id %}" style="width: 100%" class="btn btn-success animate-up-1">مشاهده جزئیات</a>
+                <a href="{% url 'download-mftuser-view' eu.id %}" role="download-exported-btn" eid="{{ eu.id }}" style="width: 100%" class="btn btn-success animate-up-1" >ZIP دانلود به صورت</a>
+              </div>
+              <div class="col">
+                <a href="{% url 'mftuser-details' eu.mftuser.id %}" style="width: 100%" class="btn btn-info animate-up-1">مشاهده جزئیات</a>
               </div>
             </div>
           </div>
