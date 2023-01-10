@@ -1624,7 +1624,7 @@ def delete_directory_view(request, did, *args, **kwargs):
     if request.is_ajax():
         if request.method == 'POST':
             try:
-                if isc_user.role.code == 'ADMIN' or dir_.created_by.pk == isc_user.pk:
+                if isc_user.role.code == 'ADMIN' or dir_.created_by.department == isc_user.department:
                     if dir_.parent == 0:
                         OperationBusiness.objects.filter(access_on_bus=dir_.business).delete()
                         bc = BusinessCode.objects.get(code=dir_.business.code)
