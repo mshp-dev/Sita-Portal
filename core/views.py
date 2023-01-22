@@ -860,6 +860,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
                 bus = BusinessCode.objects.get(id=int(b))
                 if Directory.objects.filter(relative_path=f'{bus.code}/{mftuser_origin.organization.directory_name}').exists():
                     mftuser_origin.business.add(bus)
+                    logger.info(f'{isc_user.user.username} added business {bus} for mftuser {mftuser_origin.username}.')
                     create_default_permission(
                         isc_user=isc_user,
                         mftuser=mftuser_origin,
@@ -880,6 +881,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
                     msg = '<strong>اطلاعات کاربر بروزرسانی شد</strong>'
                     success = True
                 else:
+                    logger.error(f'directory in {bus.code}/{mftuser_origin.organization.directory_name} does not exists.')
                     mftuser_origin.email = mftuser_temp.email
                     mftuser_origin.description = mftuser_temp.description
                     mftuser_origin.officephone = mftuser_temp.officephone
