@@ -238,7 +238,7 @@ def invoice_details_view(request, iid, *args, **kwargs):
     # bus_dirs = []
     # user_accesses = []
 
-    if not isc_user.user.is_staff and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=mftuser.business.all()).exists():
+    if not isc_user.user.is_staff and not invoice.created_by == isc_user:
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
         return redirect('/error/401/')
 
