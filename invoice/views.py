@@ -53,8 +53,6 @@ def invoice_create_view(request, *args, **kwargs):
                         bus_dirs = Directory.objects.filter(business__in=mftuser.business.all()).order_by('relative_path')
                     permissions = Permission.objects.filter(user=mftuser, directory__in=bus_dirs, is_confirmed=False)
                     if permissions.filter(permission__in=[1, 2, 32, 4]).exists():
-                        mftuser.modified_at = timezone.now()
-                        mftuser.save()
                         for p in permissions.values('id').distinct():
                             perms_str += f'{p["id"]},'
                         invoice = Invoice(
