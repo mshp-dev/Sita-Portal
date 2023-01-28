@@ -53,6 +53,8 @@ def invoice_create_view(request, *args, **kwargs):
                         bus_dirs = Directory.objects.filter(business__in=mftuser.business.all()).order_by('relative_path')
                     permissions = Permission.objects.filter(user=mftuser, directory__in=bus_dirs, is_confirmed=False)
                     if permissions.filter(permission__in=[1, 2, 32, 4]).exists():
+                        mftuser.modified_at = timezone.now()
+                        mftuser.save()
                         for p in permissions.values('id').distinct():
                             perms_str += f'{p["id"]},'
                         invoice = Invoice(
@@ -118,6 +120,7 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                 if invoice.created_by == isc_user or isc_user.role.code == 'ADMIN':
                     mftuser = MftUser.objects.get(pk=invoice.mftuser)
                     mftuser.is_confirmed = True
+                    mftuser.modified_at = timezone.now()
                     mftuser.save()
                     perms_list = [int(p) for p in invoice.permissions_list.split(',')[:-1]]
                     Permission.objects.filter(pk__in=perms_list).update(is_confirmed=True)

@@ -457,7 +457,7 @@ def export_data_view(request, *args, **kwargs):
     isc_user            = IscUser.objects.get(user=request.user)
     username            = str(isc_user.user.username)
     access              = str(isc_user.role.code)
-    exported_mftusers   = ReadyToExport.objects.all().order_by('-created_at')
+    exported_mftusers   = ReadyToExport.objects.all().order_by('-mftuser__modified_at') #-created_at
     
     if not isc_user.user.is_staff:
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
