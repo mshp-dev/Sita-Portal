@@ -18,7 +18,14 @@
             class="fas fa-file-alt {% if invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
           ></span>
           <!--prettier-ignore-->
-          <h3 class="display-5 mx-auto" style="direction: rtl">{{ invoice.invoice_type }} - {% if invoice.confirm_or_reject == 'CONFIRMED' %}تأیید شده{% elif invoice.confirm_or_reject == 'REJECTED' %}به علت {{ invoice.description }} رد شد{% elif invoice.confirm_or_reject == 'UNDEFINED' %}بررسی نشده{% endif %} - {{ invoice.get_jalali_created_at }}</h3>
+          <div class="row">
+            <div class="d-flex justify-content-center">
+              <h5>{{ invoice.invoice_type }} - {% if invoice.confirm_or_reject == 'CONFIRMED' %}تأیید شده{% elif invoice.confirm_or_reject == 'REJECTED' %}به علت {{ invoice.description }} رد شد{% elif invoice.confirm_or_reject == 'UNDEFINED' %}بررسی نشده{% endif %} - {{ invoice.get_jalali_created_at }}</h5>
+            </div>
+            <div class="d-flex justify-content-center">
+              <h5>SN: {{ invoice.serial_number }}</h5>
+            </div>
+          </div>
         </button>
       </h2>
       <div
@@ -111,7 +118,14 @@
             class="fas fa-folder-open {% if pre_invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif pre_invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif pre_invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
           ></span>
           <!--prettier-ignore-->
-          <h3 class="display-5 mx-auto" style="direction: rtl">{{ pre_invoice.invoice_type }} - {% if pre_invoice.confirm_or_reject == 'CONFIRMED' %}تأیید شده{% elif pre_invoice.confirm_or_reject == 'REJECTED' %}به علت <u>{{ pre_invoice.description }}</u> رد شد{% elif pre_invoice.confirm_or_reject == 'UNDEFINED' %}بررسی نشده{% endif %} - {{ pre_invoice.get_jalali_created_at }}</h3>
+          <div class="row">
+            <div class="d-flex justify-content-center">
+              <h5>{{ pre_invoice.invoice_type }} - {% if pre_invoice.confirm_or_reject == 'CONFIRMED' %}تأیید شده{% elif pre_invoice.confirm_or_reject == 'REJECTED' %}به علت <u>{{ pre_invoice.description }}</u> رد شد{% elif pre_invoice.confirm_or_reject == 'UNDEFINED' %}بررسی نشده{% endif %} - {{ pre_invoice.get_jalali_created_at }}</h5>
+            </div>
+            <div class="d-flex justify-content-center">
+              <h5>SN: {{ pre_invoice.serial_number }}</h5>
+            </div>
+          </div>
         </button>
       </h2>
       <div
