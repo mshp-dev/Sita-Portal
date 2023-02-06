@@ -253,7 +253,7 @@
         .then((json) => {
           if (json["username"] != "null") {
             user.value = json["username"];
-            email.value = user.value + "@sita.nibn.net";
+            //email.value = user.value + "@sita.nibn.net";
           } else {
             console.log(json["error"]);
           }
