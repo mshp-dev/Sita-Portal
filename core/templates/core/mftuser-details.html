@@ -218,22 +218,23 @@
           </div> {% endcomment %}
         </div>
       </div>
-      {% comment %} {% if access == 'ADMIN' and not confirmed %}
+      {% if access == 'ADMIN' and not confirmed %}
       <div class="row mb-3">
-        <input
+        {% comment %} <input
           type="button"
           role="confirm-btn"
           uid="{{ mftuser.id }}"
           style="width: 50%"
           class="btn btn-info mx-auto"
           value="تأیید اطلاعات کاربر"
-        />
+        /> {% endcomment %}
+        <a href="{% url 'mftuser-delete' mftuser.id %}" style="width: 50%" class="btn btn-danger mx-auto">حذف موقت کاربر</a>
       </div>
-      {% elif access != 'ADMIN' and not confirmed %}
+      {% comment %} {% elif access != 'ADMIN' and not confirmed %}
       <div class="row mb-3">
         <input type="button" style="width: 50%" class="btn btn-primary mx-auto" value="تبدیل به فرم چارگون" onClick="makeInvoice();" />
-      </div>
-      {% endif %} {% endcomment %}
+      </div> {% endcomment %}
+      {% endif %}
       <div class="row mb-3">
         <a href="{% url 'mftuser-access' mftuser.id %}" style="width: 50%" class="btn btn-warning mx-auto">مشاهده دسترسی های کاربر</a>
       </div>

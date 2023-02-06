@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
@@ -77,10 +78,10 @@ class MftUserForm(forms.ModelForm):
     def clean_alias(self):
         alias = self.cleaned_data.get('alias')
         if alias != '':
-            if MftUser.objects.filter(alias=alias).exists():
-                user = MftUser.objects.get(alias=alias)
-                if user.username != self.cleaned_data.get('username'):
-                    raise ValidationError('نام مستعار انتخاب شده تکراری می باشد.')
+            if MftUser.objects.filter(Q(alias=alias) | Q(username=alias)).exists():
+                raise ValidationError('نام مستعار انتخاب شده تکراری می باشد.')
+            if alias == self.cleaned_data.get('username'):
+                raise ValidationError('نام مستعار نمی تواند برابر نام کاربری باشد.')
         return alias
     
     def clean_organization(self):
