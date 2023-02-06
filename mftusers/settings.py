@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os, json
 from pathlib import Path
 
-# with open('/etc/mftusers-config.json') as config_file:
+# with open('/etc/portal/portal-config.json') as config_file:
 #     configs = json.load(config_file)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

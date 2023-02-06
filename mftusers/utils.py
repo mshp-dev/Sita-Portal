@@ -489,7 +489,7 @@ def make_csv_of_all_paths(name='paths'):
 
 def export_users_with_sftp(files_list, dest=settings.SFTP_PATH):
     tp = paramiko.Transport((settings.SFTP_HOST, settings.SFTP_PORT))
-    tp.connect(username = settings.SFTP_USERNAME, password=settings.SFTP_PASSWORD)
+    tp.connect(username=settings.SFTP_USERNAME, password=settings.SFTP_PASSWORD)
     sftp_client = paramiko.SFTPClient.from_transport(tp)
     sftp_client.chdir(dest)
     for file in files_list:
