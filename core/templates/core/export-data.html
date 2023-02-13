@@ -48,8 +48,8 @@
         },
         function (response) {
           if (response.result == "success") {
-            //alert("فایل XML حاوی اطلاعات کاربر با موفقیت SFTP شد.");
-            console.log(response.result);
+            alert("فایل XML حاوی اطلاعات کاربر با موفقیت SFTP شد.");
+            //console.log(response.result);
           } else if (response.result == "error") {
             alert("مشکلی پیش آمده است!");
           }
@@ -174,9 +174,11 @@
         <div class="d-flex justify-content-center">
           <input id="download-in-zip-format" type="button" style="width: 60%" class="btn btn-tertiary animate-up-1" value="ZIP دانلود همه به صورت" />
         </div>
+        {% comment %}
         <div class="d-flex justify-content-center mt-3">
           <input id="sftp-all-users" disabled type="button" style="width: 60%" class="btn btn-warning animate-up-1" value="SFTP انتقال همه با" />
         </div>
+        {% endcomment %}
         <div class="d-flex justify-content-center mt-3">
           <input id="export-all-paths" type="button" style="width: 60%" class="btn btn-primary animate-up-1" value="CSV دانلود کلیه مسیرها در قالب" />
         </div>
