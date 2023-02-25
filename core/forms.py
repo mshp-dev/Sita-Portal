@@ -73,6 +73,8 @@ class MftUserForm(forms.ModelForm):
             raise ValidationError('تکمیل فیلدهای ستاره دار الزامی می باشد.')
         if '@' not in email:
             raise ValidationError('آدرس ایمیل وارد شده صحیح نیست.')
+        if MftUser.objects.filter(email=email).exists():
+            raise ValidationError('کاربری با این آدرس ایمیل قبلاً ثبت شده است.')
         return email
     
     def clean_alias(self):
