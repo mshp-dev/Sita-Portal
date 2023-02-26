@@ -405,24 +405,24 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
         return redirect('/error/401/')
 
-    if request.is_ajax():
-        if request.method == 'GET':
-            user = MftUser.objects.get(pk=uid)
-            dirs = Permission.objects.filter(user=user).values('directory').distinct()
-            # for perm in permissions:
-            #     dict_dir = model_to_dict(perm.directory)
-            #     dirs.append(dict_dir)
-            # mftusers = [model_to_dict(perm.user) for perm in permissions]
-            context = {
-                'elements': get_dirs_with_changed_permissions(dirs, pretify=False),
-                'filtered': True,
-                'admin_view': True,
-            }
-            html = render_to_string(
-                template_name="includes/directory-list.html", context=context
-            )
-            data_dict = {"html_from_view": html}
-            return JsonResponse(data=data_dict, safe=False)
+    # if request.is_ajax():
+    #     if request.method == 'GET':
+    #         user = MftUser.objects.get(pk=uid)
+    #         dirs = Permission.objects.filter(user=user).values('directory').distinct()
+    #         # for perm in permissions:
+    #         #     dict_dir = model_to_dict(perm.directory)
+    #         #     dirs.append(dict_dir)
+    #         # mftusers = [model_to_dict(perm.user) for perm in permissions]
+    #         context = {
+    #             'elements': get_dirs_with_changed_permissions(dirs, pretify=False),
+    #             'filtered': True,
+    #             'admin_view': True,
+    #         }
+    #         html = render_to_string(
+    #             template_name="includes/directory-list.html", context=context
+    #         )
+    #         data_dict = {"html_from_view": html}
+    #         return JsonResponse(data=data_dict, safe=False)
 
     for user in mftusers:
         if MftUserTemp.objects.filter(username=user.username).exists():
@@ -440,7 +440,7 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
         'access': access,
         'invoices': invoices,
         'pre_invoices': pre_invoices,
-        'elements': get_users_with_changed_permissions(),
+        # 'elements': get_users_with_changed_permissions(),
         'users': mftusers,
         'new_users': new_users,
         'deleted': deleted_users,
