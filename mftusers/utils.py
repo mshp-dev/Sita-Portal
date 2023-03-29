@@ -493,6 +493,9 @@ def export_users_with_sftp(files_list, dest=settings.SFTP_PATH):
     sftp_client = paramiko.SFTPClient.from_transport(tp)
     sftp_client.chdir(dest)
     for file in files_list:
+        # split by '/' in linux
+        # sftp_client.put(file, file.split('/')[-1]) 
+        # split by '\' in windows
         sftp_client.put(file, file.split('\\')[-1])
     sftp_client.close()
 

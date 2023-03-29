@@ -74,14 +74,28 @@ class MftUserForm(forms.ModelForm):
         if '@' not in email:
             raise ValidationError('آدرس ایمیل وارد شده صحیح نیست.')
         if MftUser.objects.filter(email=email).exists():
-            raise ValidationError('کاربری با این آدرس ایمیل قبلاً ثبت شده است.')
+            if 'create' not in self.request.path:
+                id_ = int(self.request.path.split('/')[-2])
+                mftuser = MftUser.objects.get(pk=id_)
+                temp_user = MftUser.objects.get(email=email)
+                if mftuser != temp_user:
+                    raise ValidationError('این آدرس ایمیل قبلاً برای کاربری دیگر استفاده شده است.')
+            else:
+                raise ValidationError('کاربری با این آدرس ایمیل قبلاً ثبت شده است.')
         return email
     
     def clean_alias(self):
         alias = self.cleaned_data.get('alias')
         if alias != '':
             if MftUser.objects.filter(Q(alias=alias) | Q(username=alias)).exists():
-                raise ValidationError('نام مستعار انتخاب شده تکراری می باشد.')
+                if 'create' not in self.request.path:
+                    id_ = int(self.request.path.split('/')[-2])
+                    mftuser = MftUser.objects.get(pk=id_)
+                    temp_user = MftUser.objects.get(alias=alias)
+                    if mftuser != temp_user:
+                        raise ValidationError('این نام مستعار قبلاً برای کاربری دیگر استفاده شده است.')
+                else:
+                    raise ValidationError('نام مستعار انتخاب شده تکراری می باشد.')
             if alias == self.cleaned_data.get('username'):
                 raise ValidationError('نام مستعار نمی تواند برابر نام کاربری باشد.')
         return alias
@@ -100,6 +114,12 @@ class MftUserForm(forms.ModelForm):
             # raise ValidationError
             if 'create' in self.request.path:
                 self.add_error(self.fields['username'].label, 'کاربری با این مشخصات در سامانه موجود می باشد.')
+            else:
+                id_ = int(self.request.path.split('/')[-2])
+                mftuser = MftUser.objects.get(pk=id_)
+                temp_user = MftUser.objects.get(mobilephone=phone_number)
+                if mftuser != temp_user:
+                    raise ValidationError('این شماره همراه قبلاً برای کاربر دیگری استفاده شده است.')
         if not phone_number.startswith('9'):
             raise ValidationError('یک شماره همراه صحیح وارد کنید.')
         if len(phone_number) < 10 or len(phone_number) > 10:
