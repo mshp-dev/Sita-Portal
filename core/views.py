@@ -387,6 +387,39 @@ def add_data_view(request, *args, **kwargs):
 
 
 @login_required(login_url="/login/")
+def generate_report_view(request, *args, **kwargs):
+    isc_user     = IscUser.objects.get(user=request.user)
+    username     = str(isc_user.user.username)
+    access       = str(isc_user.role.code)
+    report_items = []
+    
+    if not isc_user.user.is_staff:
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        return redirect('/error/401/')
+    
+    all_buss = BusinessCode.objects.all().order_by('description')
+    for bus in all_buss:
+        report_items.append(
+            {
+                'bus_code': bus.code,
+                'bus_description': bus.description,
+                'dir_count': Directory.objects.filter(
+                    business=bus,
+                    index_code=DirectoryIndexCode.objects.get(code='-2')
+                ).count(),
+                'user_count': MftUser.objects.filter(business=bus).count()
+            }
+        )
+
+    context = {
+        "username": username,
+        "access": access,
+        "report_items": report_items
+    }
+    return render(request, "core/report.html", context)
+
+
+@login_required(login_url="/login/")
 def manage_data_view(request, uid=-1, *args, **kwargs):
     isc_user        = IscUser.objects.get(user=request.user)
     username        = str(isc_user.user.username)
@@ -563,6 +596,25 @@ def download_dirs_paths_view(request, *args, **kwargs):
     response['Content-Disposition'] = "attachment; filename=sita_all_dirs_paths.csv"
     response['Content-Type'] = "text/csv"
     logger.info(f'sita_all_dirs_paths.csv downloaded by {isc_user.user.username}.')
+    
+    return response
+
+
+@login_required(login_url="/login/")
+def download_report_view(request, *args, **kwargs):
+    isc_user     = IscUser.objects.get(user=request.user)
+    downloadable = None
+    response     = None
+    
+    if not isc_user.user.is_staff:
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        return redirect('/error/401/')
+
+    downloadable_url = make_report_from_current_state_in_csv_format(name="sita_user_dirs_report")
+    response = FileResponse(open(downloadable_url, 'rb'), as_attachment=True)
+    response['Content-Disposition'] = "attachment; filename=sita_user_dirs_report.csv"
+    response['Content-Type'] = "text/csv"
+    logger.info(f'sita_user_dirs_report.csv downloaded by {isc_user.user.username}.')
     
     return response
 

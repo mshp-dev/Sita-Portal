@@ -1,0 +1,32 @@
+<!--Tables-->
+<div id="downloadable" class="container">
+  <div style="display: none">
+    <p id="report"></p>
+  </div>
+  <div class="row justify-content-center">
+    <div class="col-lg-12" style="direction: rtl">
+      {% comment %} <div id="header">
+      </div>
+      <div class="col mt-2 text-center">
+        <span class="h4">اطلاعات پوشه ها و سطح دسترسی</span>
+      </div> {% endcomment %}
+      <div class="col">
+        <table class="table table-bordered" style="direction: rtl">
+          <tr>
+            <th class="col-4 text-center" scope="col"><span>پروژه/سامانه</th>
+            <th class="col-2 text-center" scope="col"><span>تعداد مسیر/پوشه در لایه سوم</span></th>
+            <th class="col-2 text-center" scope="col"><span>تعداد کاربران ایجاد شده</span></th>
+          </tr>
+          {% for item in report_items %}
+          <tr>
+            <td class="col-4" scope="col" id="{{ item.bus_code }}-label">{{ item.bus_description }}</td>
+            <td class="col-2" scope="col" id="dir-count-label"><span>{{ item.dir_count }}</span></td>
+            <td class="col-2" scope="col" id="user-count-label"><span>{{ item.user_count }}</span></td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<!--End of Tables-->

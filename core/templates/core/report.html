@@ -1,0 +1,40 @@
+{% extends "layouts/base.html" %} {% block title %} گزارش پرتال {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %} {% endblock javascripts %} {% block content %}
+<main>
+  <div class="section-header pb-6 bg-primary text-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 text-center" style="direction: rtl">
+          <h1 class="display-3 mb-4">گزارش پرتال سامانه سیتا</h1>
+          {% comment %}
+          <h1 class="display-3 mb-4">{{ invoice.serial_number }}</h1>
+          {% endcomment %}
+          <p class="lead mb-5">لیست سامانه ها با تعداد کاربران و دایرکتوری های فعال در هر کدام در زیر آمده است.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section section-md">{% include "includes/report-tables.html" %}</div>
+  <div class="section section-md">
+    <div class="container">
+      <div class="row mb-4">
+        <input
+          type="button"
+          style="width: 50%"
+          class="btn btn-warning mx-auto"
+          value="CSV دریافت به صورت"
+          onClick="javascript:window.location = '/download/report/';"
+        />
+      </div>
+      <div class="row mb-8">
+        <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="javascript:history.go(-1);" />
+      </div>
+    </div>
+  </div>
+</main>
+{% include "includes/footer.html" %} {% endblock content %}

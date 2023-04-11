@@ -9,6 +9,7 @@ from .views import (
     register_user_view,
     error_view,
     add_data_view,
+    generate_report_view,
     manage_data_view,
     export_data_view,
     sftp_user_view,
@@ -28,6 +29,7 @@ from .views import (
     mftuser_restore_or_delete_view,
     download_mftuser_view,
     download_dirs_paths_view,
+    download_report_view,
 )
 
 
@@ -39,6 +41,7 @@ urlpatterns = [
     path("change-password/", change_password_view, name="change-password"),
     path("profile/", profile_view, name="iscuser-profile"),
     path("add-data/", add_data_view, name="add-data"),
+    path("generate-report/", generate_report_view, name="generate-report"),
     path("manage-data/", manage_data_view, name="manage-data"),
     path("export-data/", export_data_view, name="export-data"),
     path("sftp-user/<int:id>/", sftp_user_view, name="sftp-user"),
@@ -65,5 +68,6 @@ urlpatterns = [
     path('invoices/', include('invoice.urls')),
     path('download/mftuser/<int:id>/', download_mftuser_view, name='download-mftuser-view'),
     path('download/paths/', download_dirs_paths_view, name='download-dirs-paths-view'),
+    path('download/report/', download_report_view, name='download-report-view'),
     re_path(r'^.*\.*', error_view, name='error-view'),
 ]

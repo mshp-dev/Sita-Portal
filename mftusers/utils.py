@@ -487,6 +487,25 @@ def make_csv_of_all_paths(name='paths'):
     return os.path.join(os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv'))
 
 
+def make_report_from_current_state_in_csv_format(name='report'):
+    all_buss = BusinessCode.objects.all().order_by('description')
+    path = os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv')
+    with open(path, mode='w', encoding='utf-8') as csv_file:
+        csv_writer = csv.writer(csv_file, delimiter=',', lineterminator='\n')
+        csv_writer.writerow(['پروژه/سامانه', 'تعداد دایرکتوری های لایه 3', 'تعداد کاربران'])
+        for bus in all_buss:
+            csv_writer.writerow([
+                bus.description,
+                Directory.objects.filter(
+                    business=bus,
+                    index_code=DirectoryIndexCode.objects.get(code='-2')
+                ).count(),
+                MftUser.objects.filter(business=bus).count()
+            ])
+            
+    return os.path.join(os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv'))
+
+
 def export_users_with_sftp(files_list, dest=settings.SFTP_PATH):
     tp = paramiko.Transport((settings.SFTP_HOST, int(settings.SFTP_PORT)))
     tp.connect(username=settings.SFTP_USERNAME, password=settings.SFTP_PASSWORD)
