@@ -388,10 +388,12 @@ def add_data_view(request, *args, **kwargs):
 
 @login_required(login_url="/login/")
 def generate_report_view(request, *args, **kwargs):
-    isc_user     = IscUser.objects.get(user=request.user)
-    username     = str(isc_user.user.username)
-    access       = str(isc_user.role.code)
-    report_items = []
+    isc_user          = IscUser.objects.get(user=request.user)
+    username          = str(isc_user.user.username)
+    access            = str(isc_user.role.code)
+    report_items      = []
+    directory_indexes = []
+    index_code        = request.GET.get('dd', '-2')
     
     if not isc_user.user.is_staff:
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
@@ -405,16 +407,18 @@ def generate_report_view(request, *args, **kwargs):
                 'bus_description': bus.description,
                 'dir_count': Directory.objects.filter(
                     business=bus,
-                    index_code=DirectoryIndexCode.objects.get(code='-2')
+                    index_code=DirectoryIndexCode.objects.get(code=index_code)
                 ).count(),
                 'user_count': MftUser.objects.filter(business=bus).count()
             }
         )
+    # for di in DirectoryIndexCode.objects.all().order_by('id')
 
     context = {
         "username": username,
         "access": access,
-        "report_items": report_items
+        "report_items": report_items,
+        "directory_indexes" : DirectoryIndexCode.objects.all().order_by('id')
     }
     return render(request, "core/report.html", context)
 
@@ -601,7 +605,7 @@ def download_dirs_paths_view(request, *args, **kwargs):
 
 
 @login_required(login_url="/login/")
-def download_report_view(request, *args, **kwargs):
+def download_report_view(request, dd=-2, *args, **kwargs):
     isc_user     = IscUser.objects.get(user=request.user)
     downloadable = None
     response     = None
@@ -610,7 +614,7 @@ def download_report_view(request, *args, **kwargs):
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
         return redirect('/error/401/')
 
-    downloadable_url = make_report_from_current_state_in_csv_format(name="sita_user_dirs_report")
+    downloadable_url = make_report_in_csv_format(dir_default_depth=dd, name="sita_user_dirs_report")
     response = FileResponse(open(downloadable_url, 'rb'), as_attachment=True)
     response['Content-Disposition'] = "attachment; filename=sita_user_dirs_report.csv"
     response['Content-Type'] = "text/csv"

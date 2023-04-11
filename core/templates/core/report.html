@@ -4,7 +4,64 @@
 {% block stylesheets %}{% endblock stylesheets %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %} {% endblock javascripts %} {% block content %}
+{% block javascripts %} {% load static %}
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript">
+  $(function () {
+    window.onload = function () {
+      if (window.location.search == "") {
+        $("#directory-depth-select").val("-2");
+      } else {
+        var depth = window.location.search.split("=");
+        $("#directory-depth-select").val(depth[depth.length - 1]);
+        if (depth[depth.length - 1] == "0") {
+          $("#depth").text("اول");
+          $("#path-example").text("/PROJECT");
+        } else if (depth[depth.length - 1] == "-1") {
+          $("#depth").text("دوم");
+          $("#path-example").text("/PROJECT/Organization");
+        } else if (depth[depth.length - 1] == "-2") {
+          $("#depth").text("سوم");
+          $("#path-example").text("/PROJECT/Organization/BusinessWorkingDir");
+        } else if (depth[depth.length - 1] == "-3") {
+          $("#depth").text("چهارم");
+          $("#path-example").text("/PROJECT/Organization/BusinessWorkingDir/SubDir4");
+        } else if (depth[depth.length - 1] == "-4") {
+          $("#depth").text("پنجم");
+          $("#path-example").text("/PROJECT/Organization/BusinessWorkingDir/SubDir4/SubDir5/");
+        } else if (depth[depth.length - 1] == "-5") {
+          $("#depth").text("ششم");
+          $("#path-example").text("/PROJECT/Organization/BusinessWorkingDir/SubDir4/SubDir5/SubDir6/");
+        } else if (depth[depth.length - 1] == "-6") {
+          $("#depth").text("هفتم");
+          $("#path-example").text("/PROJECT/Organization/BusinessWorkingDir/SubDir4/SubDir5/SubDir6/SubDir7");
+        } else if (depth[depth.length - 1] == "-7") {
+          $("#depth").text("هشتم");
+          $("#path-example").text("/PROJECT/Organization/BusinessWorkingDir/SubDir4/SubDir5/SubDir6/SubDir7/SubDir8");
+        } else if (depth[depth.length - 1] == "-8") {
+          $("#depth").text("نهم");
+          $("#path-example").text("/PROJECT/Organization/BusinessWorkingDir/SubDir4/SubDir5/SubDir6/SubDir7/SubDir8/SubDir9");
+        } else if (depth[depth.length - 1] == "-9") {
+          $("#depth").text("دهم");
+          $("#path-example").text("/PROJECT/Organization/BusinessWorkingDir/SubDir4/SubDir5/SubDir6/SubDir7/SubDir8/SubDir9/SubDir10");
+        } else if (depth[depth.length - 1] == "-10") {
+          $("#depth").text("یازدهم");
+          $("#path-example").text("/PROJECT/Organization/BusinessWorkingDir/SubDir4/SubDir5/SubDir6/SubDir7/SubDir8/SubDir9/SubDir10/SubDir11");
+        }
+      }
+    };
+
+    $("a[role='download-in-csv-format']").click(function () {
+      var depth = $("#directory-depth-select").find(":selected").val();
+      window.location = "/download/report/" + depth + "/";
+    });
+
+    $("#directory-depth-select").change(function () {
+      window.location = "/generate-report/?dd=" + this.value;
+    });
+  });
+</script>
+{% endblock javascripts %} {% block content %}
 <main>
   <div class="section-header pb-6 bg-primary text-white">
     <div class="container">
@@ -19,17 +76,25 @@
       </div>
     </div>
   </div>
-  <div class="section section-md">{% include "includes/report-tables.html" %}</div>
+  <div class="section section-md">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-10 mx-auto" style="direction: rtl">
+          <label class="h4 mb-4 my-1 me-2" for="directory-depth-select">تغییر عمق لایه دایرکتوری در گزارش:</label>
+          <select class="form-control form-select form-select-bg-left" id="directory-depth-select" aria-label="Default select example">
+            {% for di in directory_indexes %}
+            <option value="{{ di.code }}">{{ di.description }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+    {% include "includes/report-tables.html" %}
+  </div>
   <div class="section section-md">
     <div class="container">
       <div class="row mb-4">
-        <input
-          type="button"
-          style="width: 50%"
-          class="btn btn-warning mx-auto"
-          value="CSV دریافت به صورت"
-          onClick="javascript:window.location = '/download/report/';"
-        />
+        <a role="download-in-csv-format" style="width: 50%" class="btn btn-warning mx-auto animate-up-1">CSV دانلود به صورت</a>
       </div>
       <div class="row mb-8">
         <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="javascript:history.go(-1);" />
