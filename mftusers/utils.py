@@ -487,18 +487,18 @@ def make_csv_of_all_paths(name='paths'):
     return os.path.join(os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv'))
 
 
-def make_report_in_csv_format(dir_default_depth='-2', name='report'):
+def make_report_in_csv_format(dir_default_depth, name='report'):
     all_buss = BusinessCode.objects.all().order_by('description')
     path = os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv')
     with open(path, mode='w', encoding='utf-8') as csv_file:
         csv_writer = csv.writer(csv_file, delimiter=',', lineterminator='\n')
-        csv_writer.writerow(['پروژه/سامانه', f"تعداد دایرکتوری های لایه {dir_default_depth.replace('-', '')}", 'تعداد کاربران'])
+        csv_writer.writerow(['پروژه/سامانه', f"تعداد دایرکتوری های لایه {dir_default_depth}", 'تعداد کاربران'])
         for bus in all_buss:
             csv_writer.writerow([
                 bus.description,
                 Directory.objects.filter(
                     business=bus,
-                    index_code=DirectoryIndexCode.objects.get(code=dir_default_depth)
+                    index_code=DirectoryIndexCode.objects.get(code=f'-{str(dir_default_depth)}')
                 ).count(),
                 MftUser.objects.filter(business=bus).count()
             ])

@@ -53,7 +53,7 @@
 
     $("a[role='download-in-csv-format']").click(function () {
       var depth = $("#directory-depth-select").find(":selected").val();
-      window.location = "/download/report/" + depth + "/";
+      window.location = "/download/report/" + depth.replace("-", "") + "/";
     });
 
     $("#directory-depth-select").change(function () {

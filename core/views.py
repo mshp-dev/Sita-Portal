@@ -605,7 +605,7 @@ def download_dirs_paths_view(request, *args, **kwargs):
 
 
 @login_required(login_url="/login/")
-def download_report_view(request, dd=-2, *args, **kwargs):
+def download_report_view(request, dd, *args, **kwargs):
     isc_user     = IscUser.objects.get(user=request.user)
     downloadable = None
     response     = None
