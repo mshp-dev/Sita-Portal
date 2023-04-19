@@ -99,7 +99,9 @@
                         function (response) {
                           console.log(response.result);
                           if (response.result == "error") {
-                            console.log(response.result);
+                            alert("به علت وجود پوشه داخل این دایرکتوری نمی توانید در این مسیر دسترسی خواندن/نوشتن فایل بدهید.");
+                            var uid1 = document.getElementById("current-user-id").innerHTML;
+                            getPermissions(uid1);
                           }
                         }
                       );

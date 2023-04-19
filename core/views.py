@@ -1507,6 +1507,10 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
 
     if request.is_ajax():
         if request.method == 'POST':
+            if directory.children != '':
+                logger.warn(f'{isc_user.user.username} trying to change permission of directory {directory.absolute_path} for mftuser {mftuser.username}.')
+                logger.error(f'permission of directory {directory.absolute_path} could not be more than list.')
+                return JsonResponse(data={'result': 'error'}, safe=False, status=200)
             old_permissions = []
             splited = []
             status_code = 200
