@@ -11,6 +11,7 @@ class InvoiceAdmin(admin.ModelAdmin):
     list_display = ['invoice_type', 'get_mftuser', 'serial_number', 'created_by', 'get_jalali_created_at', 'confirm_or_reject']
     list_filter = ['created_by']
     ordering = ['mftuser', 'created_at', 'created_by']
+    search_fields = ['mftuser', 'serial_number']
 
 
 class PreInvoiceAdmin(admin.ModelAdmin):

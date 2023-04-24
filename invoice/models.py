@@ -47,6 +47,7 @@ class Invoice(BaseInvoice):
     used_business    = models.IntegerField(default=0, blank=True)
     permissions_list = models.CharField(max_length=10000, default='', blank=True)
     
+    @property
     def get_mftuser(self):
         return MftUser.objects.get(pk=self.mftuser)
 

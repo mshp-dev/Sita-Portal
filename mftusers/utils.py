@@ -513,9 +513,9 @@ def export_users_with_sftp(files_list, dest=settings.SFTP_PATH):
     sftp_client.chdir(dest)
     for file in files_list:
         # split by '/' in linux
-        # sftp_client.put(file, file.split('/')[-1]) 
+        sftp_client.put(file, file.split('/')[-1]) 
         # split by '\' in windows
-        sftp_client.put(file, file.split('\\')[-1])
+        # sftp_client.put(file, file.split('\\')[-1])
     sftp_client.close()
 
 
@@ -964,6 +964,11 @@ def clean_up(flag='', action=False, *args, **kwargs):
                     d.delete()
                     parent.save()
                     print(f'directory in {d.absolute_path} has been deleted')
+    elif flag == 'inv':
+        print('Cleanup invoices.')
+        for inv in Invoice.objects.all():
+            if not MftUser.objects.filter(pk=inv.mftuser).exists():
+                print(f'invoice found with serial {inv.serial_number} for none existing mftuser {inv.mftuser}')
 
 
 def refactor_directory(operation='', action=False, *args, **kwargs):

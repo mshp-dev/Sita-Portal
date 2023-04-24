@@ -284,28 +284,54 @@ def invoices_list_view(request, *args, **kwargs):
     isc_user = IscUser.objects.get(user=request.user)
     invoices = []
     pre_invoices = []
+    search_template_name = ""
 
     if str(isc_user.role.code) == 'ADMIN':
-        invoices = Invoice.objects.all().order_by('-created_at')
-        pre_invoices = PreInvoice.objects.all().order_by('-created_at')
+        invoices = Invoice.objects.all()
+        pre_invoices = PreInvoice.objects.all()
+        search_template_name = "includes/admin-invoice-list.html"
     else:
-        invoices = Invoice.objects.filter(created_by=isc_user).order_by('-created_at')
-        pre_invoices = PreInvoice.objects.filter(created_by=isc_user).order_by('-created_at')
+        invoices = Invoice.objects.filter(created_by=isc_user)
+        pre_invoices = PreInvoice.objects.filter(created_by=isc_user)
+        search_template_name = "includes/invoice-list.html"
 
     context = {
         'username': str(isc_user.user.username),
         'access': str(isc_user.role.code),
-        'invoices': invoices,
-        'pre_invoices': pre_invoices
+        'invoices': invoices.order_by('-created_at'),
+        'pre_invoices': pre_invoices.order_by('-created_at')
     }
     
     if request.is_ajax():
         if request.method == 'GET':
-            query = request.GET.get('q')
-            filtered_invoices = list(invoice for invoice in context['invoices'] if query in invoice.get_mftuser.username or query in invoice.get_mftuser.alias or query in invoice.get_mftuser.organization.description) # or query in user.business.description
-            context['users'] = filtered_invoices
+            if request.GET.get('q') != '':
+                field = request.GET.get('q').split(':')[0]
+                query = request.GET.get('q').split(':')[-1]
+                filtered_invoices = []
+                filtered_pre_invoices = []
+                if field == 'usr':
+                    for invoice in context['invoices']:
+                        if query in invoice.get_mftuser.username:
+                            filtered_invoices.append(invoice)
+                elif field == 'als':
+                    for invoice in context['invoices']:
+                        if query in invoice.get_mftuser.username:
+                            filtered_invoices.append(invoice)
+                elif field == 'org':
+                    for invoice in context['invoices']:
+                        if query in invoice.get_mftuser.organization.description:
+                            filtered_invoices.append(invoice)
+                elif field == 'sn':
+                    for invoice in context['invoices']:
+                        if query in invoice.serial_number:
+                            filtered_invoices.append(invoice)
+                    for invoice in context['pre_invoices']:
+                        if query in invoice.serial_number:
+                            filtered_pre_invoices.append(invoice)
+                context['invoices'] = filtered_invoices
+                context['pre_invoices'] = filtered_pre_invoices
             html = render_to_string(
-                template_name="includes/invoice-list.html", context=context
+                template_name=search_template_name, context=context
             )
             data_dict = {"html_from_view": html}
             return JsonResponse(data=data_dict, safe=False)

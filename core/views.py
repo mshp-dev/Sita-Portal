@@ -35,6 +35,7 @@ def index_view(request):
     # clean_up(flag='perm2', action=False)
     # clean_up(flag='dir', action=False)
     # clean_up(flag='dir3', action=False, bic_name="FIU")
+    # clean_up(flag='inv', action=False)
     # dirs = Directory.objects.filter(name='Test')
     # refactor_directory(operation='rename', action=False, old_name='TRANSACTION', new_name='BANKIRAN')
     
@@ -1531,6 +1532,12 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                         elif pv == 32: #Delete (Modify)
                             Permission.objects.filter(user=mftuser, directory=directory, permission=8).delete()      #Rename
                 elif action == 'add':
+                    check_parents_permission(
+                        isc_user=isc_user,
+                        mftuser=mftuser,
+                        parent=directory.parent
+                        # permission=perm.value,
+                    )
                     for pv in splited:
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=pv).exists():
                             perm = Permission(
@@ -1540,12 +1547,6 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                                 created_by=isc_user
                             )
                             perm.save()
-                            check_parents_permission(
-                                isc_user=isc_user,
-                                mftuser=mftuser,
-                                parent=directory.parent
-                                # permission=perm.value,
-                            )
                         if pv == 1: #Download (Read)
                             if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
                                 perm = Permission(
