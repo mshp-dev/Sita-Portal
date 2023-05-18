@@ -429,8 +429,8 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
     isc_user        = IscUser.objects.get(user=request.user)
     username        = str(isc_user.user.username)
     access          = str(isc_user.role.code)
-    mftusers        = MftUser.objects.filter(is_confirmed=False).order_by('username')
-    deleted_users   = MftUserTemp.objects.filter(description__icontains=f"%deleted%").order_by('username')
+    # mftusers        = MftUser.objects.filter(is_confirmed=False).order_by('username')
+    # deleted_users   = MftUserTemp.objects.filter(description__icontains=f"%deleted%").order_by('username')
     # invoices        = Invoice.objects.filter(processed=False).order_by('created_at')
     invoices        = Invoice.objects.all().order_by('-created_at')
     pre_invoices    = PreInvoice.objects.all().order_by('-created_at')
@@ -443,34 +443,37 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
         return redirect('/error/401/')
 
-    # if request.is_ajax():
-    #     if request.method == 'GET':
-    #         user = MftUser.objects.get(pk=uid)
-    #         dirs = Permission.objects.filter(user=user).values('directory').distinct()
-    #         # for perm in permissions:
-    #         #     dict_dir = model_to_dict(perm.directory)
-    #         #     dirs.append(dict_dir)
-    #         # mftusers = [model_to_dict(perm.user) for perm in permissions]
-    #         context = {
-    #             'elements': get_dirs_with_changed_permissions(dirs, pretify=False),
-    #             'filtered': True,
-    #             'admin_view': True,
-    #         }
-    #         html = render_to_string(
-    #             template_name="includes/directory-list.html", context=context
-    #         )
-    #         data_dict = {"html_from_view": html}
-    #         return JsonResponse(data=data_dict, safe=False)
+    if request.is_ajax():
+        if request.method == 'GET':
+            query = request.GET.get('q')
+            filtered_invs = {
+                'invoices': [inv.id for inv in invoices],
+                'pre_invoices': [inv.id for inv in pre_invoices]
+            }
+            if request.GET.get('q') != '':
+                filtered_invs = {
+                    'invoices': [],
+                    'pre_invoices': []
+                }
+                for inv in invoices:
+                    mftuser = inv.get_mftuser()
+                    buss = [bus.description for bus in mftuser.business.all()]
+                    if query in mftuser.username or query in mftuser.alias or query in mftuser.organization.description or query in inv.serial_number or query in inv.created_by.user.username or query in inv.get_jalali_created_at() or query in buss:
+                        filtered_invs['invoices'].append(inv.id)
+                for inv in pre_invoices:
+                    if query in inv.serial_number or query in inv.created_by.user.username or query in inv.get_jalali_created_at():
+                        filtered_invs['pre_invoices'].append(inv.id)
+            return JsonResponse(data={"filtered_invs": filtered_invs}, safe=False)
 
-    for user in mftusers:
-        if MftUserTemp.objects.filter(username=user.username).exists():
-            changed_users.append(user)
-            differences[user.username] = get_user_differences(
-                MftUserTemp.objects.filter(username=user.username).first(),
-                user
-            )
-        else:
-            new_users.append(user)
+    # for user in mftusers:
+    #     if MftUserTemp.objects.filter(username=user.username).exists():
+    #         changed_users.append(user)
+    #         differences[user.username] = get_user_differences(
+    #             MftUserTemp.objects.filter(username=user.username).first(),
+    #             user
+    #         )
+    #     else:
+    #         new_users.append(user)
     
     context = {
         'username': username,
@@ -478,12 +481,18 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
         'access': access,
         'invoices': invoices,
         'pre_invoices': pre_invoices,
+        # 'undefined_invoices': Invoice.objects.filter(status=0).order_by('-created_at'),
+        # 'undefined_pre_invoices': PreInvoice.objects.filter(status=0).order_by('-created_at'),
+        # 'confirmed_invoices': Invoice.objects.filter(status=1).order_by('-created_at'),
+        # 'confirmed_pre_invoices': PreInvoice.objects.filter(status=1).order_by('-created_at'),
+        # 'rejected_invoices': Invoice.objects.filter(status=-1).order_by('-created_at'),
+        # 'rejected_pre_invoices': PreInvoice.objects.filter(status=-1).order_by('-created_at'),
         # 'elements': get_users_with_changed_permissions(),
-        'users': mftusers,
-        'new_users': new_users,
-        'deleted': deleted_users,
-        'changed_users': changed_users,
-        'differences': differences,
+        # 'users': mftusers,
+        # 'new_users': new_users,
+        # 'deleted': deleted_users,
+        # 'changed_users': changed_users,
+        # 'differences': differences,
         'selected_tab': request.GET.get('tab', '')
     }
 
@@ -492,10 +501,10 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
 
 @login_required(login_url="/login/")
 def export_data_view(request, *args, **kwargs):
-    isc_user            = IscUser.objects.get(user=request.user)
-    username            = str(isc_user.user.username)
-    access              = str(isc_user.role.code)
-    exported_mftusers   = ReadyToExport.objects.all().order_by('-mftuser__modified_at') #-created_at
+    isc_user          = IscUser.objects.get(user=request.user)
+    username          = str(isc_user.user.username)
+    access            = str(isc_user.role.code)
+    exported_mftusers = ReadyToExport.objects.all().order_by('-mftuser__modified_at') #-created_at
     
     if not isc_user.user.is_staff:
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
@@ -520,13 +529,16 @@ def export_data_view(request, *args, **kwargs):
             return JsonResponse(data=response, safe=False)
         elif request.method == 'GET':
             query = request.GET.get('q')
-            filtered_mftusers = list(user for user in context['exported'] if query in user.mftuser.username or query in user.mftuser.alias or query in user.mftuser.organization.description)
-            context['exported'] = filtered_mftusers
-            html = render_to_string(
-                template_name="includes/users-list.html", context=context
-            )
-            data_dict = {"html_from_view": html}
-            return JsonResponse(data=data_dict, safe=False)
+            filtered_mftusers = list(user.id for user in context['exported'])
+            if query != '':
+                filtered_mftusers = list(user.id for user in context['exported'] if query in user.mftuser.username or query in user.mftuser.alias or query in user.mftuser.organization.description)
+            return JsonResponse(data={"filtered_mftusers": filtered_mftusers}, safe=False)
+            # context['exported'] = filtered_mftusers
+            # html = render_to_string(
+            #     template_name="includes/users-list.html", context=context
+            # )
+            # data_dict = {"html_from_view": html}
+            # return JsonResponse(data=data_dict, safe=False)
 
     return render(request, "core/export-data.html", context)
 
@@ -754,19 +766,32 @@ def directories_list_view(request, *args, **kwargs):
                 }
             return JsonResponse(data=serialized_data, safe=False)
         elif request.method == 'GET':
-            response = {"result": "empty"}
-            if Directory.objects.filter(created_by=isc_user, is_confirmed=False).exists():
-                dirs = Directory.objects.filter(created_by=isc_user, is_confirmed=False).order_by('-created_at')
-                dirs_str = ''
-                for d in dirs.values('id'):
-                    dirs_str += f'{str(d["id"])},'
-                if PreInvoice.objects.filter(directories_list=dirs_str).exists():
-                    response["result"] = "exists"
+            query = request.GET.get('q')
+            if query:
+                if query != '':
+                    response = {
+                        "filtered_directories": get_parent_dirs(
+                            [elem['dir'].id for elem in get_all_dirs(isc_user, query=query, pretify=False)]
+                        )
+                    }
                 else:
-                    response["result"] = "ok"
-                    response["dirs_list"] = dirs_str
-                # elif PreInvoice.objects.filter(directories_list__icontains=dirs_str).exists():
-                #     response["result"] = "exists"
+                    response = {
+                        "filtered_directories": [elem['dir'].id for elem in get_all_dirs(isc_user)]
+                    }
+            else:
+                response = {"result": "empty"}
+                if Directory.objects.filter(created_by=isc_user, is_confirmed=False).exists():
+                    dirs = Directory.objects.filter(created_by=isc_user, is_confirmed=False).order_by('-created_at')
+                    dirs_str = ''
+                    for d in dirs.values('id'):
+                        dirs_str += f'{str(d["id"])},'
+                    if PreInvoice.objects.filter(directories_list=dirs_str).exists():
+                        response["result"] = "exists"
+                    else:
+                        response["result"] = "ok"
+                        response["dirs_list"] = dirs_str
+                    # elif PreInvoice.objects.filter(directories_list__icontains=dirs_str).exists():
+                    #     response["result"] = "exists"
             
             return JsonResponse(data=response, safe=False)
         
@@ -809,15 +834,19 @@ def mftusers_list_view(request, *args, **kwargs):
     # context['admin_view'] = True if isc_user.user.is_staff else False
 
     if request.is_ajax():
-        # mftusers = MftUser.objects.filter(username__icontains=request.GET.get('q'))
-        query = request.GET.get('q')
-        filtered_mftusers = list(user for user in context['users'].order_by('username') if query in user.username or query in user.alias or query in user.organization.description) # or query in user.business.description
-        context['users'] = filtered_mftusers
-        html = render_to_string(
-            template_name="includes/users-list.html", context=context
-        )
-        data_dict = {"html_from_view": html}
-        return JsonResponse(data=data_dict, safe=False)
+        if request.method == "GET":
+            # mftusers = MftUser.objects.filter(username__icontains=request.GET.get('q'))
+            query = request.GET.get('q')
+            filtered_mftusers = list(user.id for user in context['users'].order_by('username'))
+            if query != '':
+                filtered_mftusers = list(user.id for user in context['users'].order_by('username') if query in user.username or query in user.alias or query in user.organization.description) # or query in user.business.description
+            return JsonResponse(data={"filtered_mftusers": filtered_mftusers}, safe=False)
+            # context['users'] = filtered_mftusers
+            # html = render_to_string(
+            #     template_name="includes/users-list.html", context=context
+            # )
+            # data_dict = {"html_from_view": html}
+            # return JsonResponse(data=data_dict, safe=False)
 
     # paginator = Paginator(non_paginated_users, paginate_by)
     # try:
@@ -993,6 +1022,67 @@ def mftuser_access_view(request, uid, pid=-1, dir_name="", *args, **kwargs):
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
         return redirect('/error/401/')
 
+    if request.is_ajax():
+        # if request.method == 'POST':
+        #     if not Directory.objects.filter(name=dir_name, parent=pid).exists():
+        #         parent = Directory.objects.get(pk=pid)
+        #         new_path = f'{parent.relative_path}/{dir_name}'
+        #         new_index = DirectoryIndexCode.objects.get(code=str(int(parent.index_code.code) - 1))
+        #         new_dir = Directory(
+        #             name=dir_name,
+        #             parent=pid,
+        #             relative_path=new_path,
+        #             bic=parent.bic,
+        #             business=parent.business,
+        #             created_by=isc_user,
+        #             index_code=new_index
+        #         )
+        #         new_dir.save()
+        #         logger.info(f'directory {new_dir.absolute_path} by {isc_user.user.username} has been created.')
+        #         parent.children = f'{parent.children}{new_dir.id},'
+        #         parent.save()
+        #         # CustomerAccess.objects.create(
+        #         #     user=isc_user,
+        #         #     access_on=CustomerAccessCode.objects.get(code='Directory'),
+        #         #     target_id=new_dir.id,
+        #         #     access_type=CustomerAccessType.objects.get(code='MODIFIER'),
+        #         #     created_at=timezone.now()
+        #         # )
+        #         create_default_permission(
+        #             isc_user=isc_user,
+        #             mftuser=mftuser,
+        #             last_dir=new_dir
+        #         )
+        #         # check_parents_permission(
+        #         #     isc_user=isc_user,
+        #         #     mftuser=mftuser,
+        #         #     parent=new_dir.parent
+        #         # )
+        #         # data = {'id': new_dir.id, 'business': 'Name': new_dir.name, 'path': new_dir.relative_path}
+        #         serialized_data = {
+        #             'result': 'success',
+        #             'new_dir': model_to_dict(new_dir)
+        #         }
+        #     else:
+        #         serialized_data = {
+        #             'result': 'error',
+        #             'message': 'دایرکتوری با این نام موجود است!'
+        #         }
+        #     return JsonResponse(data=serialized_data, safe=False)
+        if request.method == 'GET':
+            query = request.GET.get('q')
+            if query != '':
+                response = {
+                    "filtered_directories": get_parent_dirs(
+                        [elem['dir'].id for elem in get_all_dirs(isc_user, query=query, pretify=False)]
+                    )
+                }
+            else:
+                response = {
+                    "filtered_directories": [elem['dir'].id for elem in get_all_dirs(isc_user)]
+                }
+            return JsonResponse(data=response, safe=False)
+
     if isc_user.role.code == 'ADMIN':
         elements = get_all_dirs(isc_user)
     else:
@@ -1006,71 +1096,7 @@ def mftuser_access_view(request, uid, pid=-1, dir_name="", *args, **kwargs):
                     buss.append(bus)
         elif isc_user.role.code == 'CUSTOMER':
             buss = mftuser.business.all()
-            
         elements = get_specific_root_dir(buss, bic)
-    
-    if request.is_ajax():
-        if request.method == 'POST':
-            if not Directory.objects.filter(name=dir_name, parent=pid).exists():
-                parent = Directory.objects.get(pk=pid)
-                new_path = f'{parent.relative_path}/{dir_name}'
-                new_index = DirectoryIndexCode.objects.get(code=str(int(parent.index_code.code) - 1))
-                new_dir = Directory(
-                    name=dir_name,
-                    parent=pid,
-                    relative_path=new_path,
-                    bic=parent.bic,
-                    business=parent.business,
-                    created_by=isc_user,
-                    index_code=new_index
-                )
-                new_dir.save()
-                logger.info(f'directory {new_dir.absolute_path} by {isc_user.user.username} has been created.')
-                parent.children = f'{parent.children}{new_dir.id},'
-                parent.save()
-                # CustomerAccess.objects.create(
-                #     user=isc_user,
-                #     access_on=CustomerAccessCode.objects.get(code='Directory'),
-                #     target_id=new_dir.id,
-                #     access_type=CustomerAccessType.objects.get(code='MODIFIER'),
-                #     created_at=timezone.now()
-                # )
-                create_default_permission(
-                    isc_user=isc_user,
-                    mftuser=mftuser,
-                    last_dir=new_dir
-                )
-                # check_parents_permission(
-                #     isc_user=isc_user,
-                #     mftuser=mftuser,
-                #     parent=new_dir.parent
-                # )
-                # data = {'id': new_dir.id, 'business': 'Name': new_dir.name, 'path': new_dir.relative_path}
-                serialized_data = {
-                    'result': 'success',
-                    'new_dir': model_to_dict(new_dir)
-                }
-            else:
-                serialized_data = {
-                    'result': 'error',
-                    'message': 'دایرکتوری با این نام موجود است!'
-                }
-            return JsonResponse(data=serialized_data, safe=False)
-        elif request.method == 'GET':
-            #TODO: correct js events
-            query = request.GET.get('q')
-            if query != '':
-                context['elements'] = get_all_dirs(isc_user, query, False)
-                filtered_elements = list(el for el in context['elements'] if query in el.get('dir').name)
-                context['elements'] = filtered_elements
-                context['filtered'] = True
-                html = render_to_string(
-                    template_name="includes/directory-list.html", context=context
-                )
-            else:
-                html = ""
-            data_dict = {"html_from_view": html}
-            return JsonResponse(data=data_dict, safe=False)
 
     permissions = Permission.objects.filter(user=mftuser)
     confirmed = False

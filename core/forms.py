@@ -35,9 +35,9 @@ class MftUserForm(forms.ModelForm):
     officephone  = forms.DecimalField(max_digits=8, required=True, widget=forms.TextInput(attrs={"placeholder": "123456798", "maxlength": "8", "class": "form-control"}))
     mobilephone  = forms.DecimalField(max_digits=11, required=True, widget=forms.TextInput(attrs={"placeholder": "09123456798", "maxlength": "11", "class": "form-control"}))
     organization = forms.ChoiceField(required=True, error_messages={'invalid_choice': 'یک سازمان/بانک را انتخاب نمائید'}, widget=forms.Select(attrs={"class": "form-control form-select form-select-bg-left", "parent": "organization"}))
-    business     = forms.MultipleChoiceField(required=True, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "class": "form-control form-select", "size": 10, "parent": "business"}))
-    # business     = forms.MultipleChoiceField(required=True, widget=forms.CheckboxSelectMultiple(attrs={"class": "form-control form-check", "parent": "business"}))
-    ipaddr       = forms.CharField(max_length=15, required=False, widget=forms.TextInput(attrs={"placeholder": "123.123.123.123", "class": "form-control"}))
+    business     = forms.MultipleChoiceField(required=True, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "class": "form-control form-select", "size": 10, "parent": "business", "data-search": "true", "data-silent-initial-value-set": "true"}))
+    # business     = forms.MultipleChoiceField(required=True, widget=forms.CheckboxSelectMultiple(attrs={"style": "direction: rtl", "class": "form-control form-check", "parent": "business", "data-search": "true", "data-silent-initial-value-set": "true"}))
+    # ipaddr       = forms.CharField(max_length=15, required=False, widget=forms.TextInput(attrs={"placeholder": "123.123.123.123", "class": "form-control"}))
     # disk_quota   = forms.IntegerField(max_value=100000000, min_value=100, help_text='کمک کمک کمک', required=True, widget=forms.TextInput(attrs={"placeholder": "حجم مورد نیاز در سیتا", "class": "form-control"}))
     # description  = forms.CharField(max_length=250, required=True, widget=forms.Textarea(attrs={"name": "description", "rows":"5", "placeholder": "نام گروه کاربر در شرکت خدمات یا نام اداره، قسمت و یا ... کاربر در بانک، سازمان و ...", "class": "form-control"}))
     
@@ -53,7 +53,6 @@ class MftUserForm(forms.ModelForm):
             'mobilephone',
             'organization',
             'business',
-            'ipaddr',
         ]
     
     def __init__(self, *args, **kwargs):
@@ -132,19 +131,19 @@ class MftUserForm(forms.ModelForm):
             raise ValidationError('شماره همراه وارد شده صحیح نیست.')
         return phone_number
     
-    def clean_ipaddr(self):
-        ip = str(self.cleaned_data.get('ipaddr'))
-        if ip == '':
-            return ''
-        if len(ip) < 7:
-            raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
-        if len(ip.split('.')) < 4:
-            raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
-        if '..' in ip or '...' in ip:
-            raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
-        if ip.startswith('.') or ip.endswith('.'):
-            raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
-        return ip
+    # def clean_ipaddr(self):
+    #     ip = str(self.cleaned_data.get('ipaddr'))
+    #     if ip == '':
+    #         return ''
+    #     if len(ip) < 7:
+    #         raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
+    #     if len(ip.split('.')) < 4:
+    #         raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
+    #     if '..' in ip or '...' in ip:
+    #         raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
+    #     if ip.startswith('.') or ip.endswith('.'):
+    #         raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
+    #     return ip
 
 
 class LoginForm(forms.Form):

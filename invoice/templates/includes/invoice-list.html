@@ -2,7 +2,7 @@
 <!--Invoices in invoices-list-->
 {% if invoices %} {% for invoice in invoices %}
 <div class="col-10 mx-auto">
-  <div class="accordion mb-2" id="inv-{{ invoice.id }}-parent">
+  <div class="accordion mb-2" id="inv-{{ invoice.id }}-parent" role-in-list="inv-container" invid="{{ invoice.id }}">
     <!--Invoice Node-->
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingOne">
@@ -102,7 +102,7 @@
 <!--PreInvoices in invoices-list-->
 {% if pre_invoices %} {% for pre_invoice in pre_invoices %}
 <div class="col-10 mx-auto">
-  <div class="accordion mb-2" id="preinv-{{ pre_invoice.id }}-parent">
+  <div class="accordion mb-2" id="preinv-{{ pre_invoice.id }}-parent" role-in-list="pinv-container" invid="{{ pre_invoice.id }}">
     <!--Invoice Node-->
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingOne">

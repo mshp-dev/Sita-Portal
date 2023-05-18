@@ -2,7 +2,7 @@
 <!--Users in mftusers-list or manage-view-->
 {% if users %} {% for user in users %}
 <div class="col-10 mx-auto">
-  <div class="accordion mb-2" id="{{ user.username|remove_dot }}">
+  <div class="accordion mb-2" id="{{ user.username|remove_dot }}" role-in-list="container" uid="{{ user.id }}">
     <!--User Node-->
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingOne">
@@ -141,7 +141,7 @@
 <!--Users in manage-view-->
 {% if deleted %} {% for du in deleted %}
 <div class="col-10 mx-auto">
-  <div class="accordion mb-2" id="{{ du.username|remove_dot }}">
+  <div class="accordion mb-2" id="{{ du.username|remove_dot }}" role-in-list="container" uid="{{ du.id }}">
     <!--Deleted User Node-->
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingOne">
@@ -204,7 +204,7 @@
 <!--Users in export-view-->
 {% if exported %} {% for eu in exported %}
 <div class="col-10 mx-auto">
-  <div class="accordion mb-2" id="{{ eu.mftuser.username|remove_dot }}" role="mftuser" eid="{{ eu.id }}">
+  <div class="accordion mb-2" id="{{ eu.mftuser.username|remove_dot }}" role="mftuser" eid="{{ eu.id }}" role-in-list="container" uid="{{ eu.id }}">
     <!--Exported User Node-->
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingOne">

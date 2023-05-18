@@ -100,6 +100,7 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                     Directory.objects.filter(pk__in=dirs_list).update(is_confirmed=True)
                     confirm_directory_tree(dirs_list, survey='BACKWARD')
                     invoice.confirm_or_reject = 'CONFIRMED'
+                    invoice.status = 1
                     invoice.save()
                     response = {
                         'result': 'success',
@@ -124,6 +125,7 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                     Permission.objects.filter(pk__in=perms_list).update(is_confirmed=True)
                     export_user_with_paths(invoice.mftuser, isc_user)
                     invoice.confirm_or_reject = 'CONFIRMED'
+                    invoice.status = 1
                     invoice.save()
                     response = {
                         'result': 'success',
@@ -154,6 +156,7 @@ def invoice_reject_view(request, iid, *args, **kwargs):
                 invoice = Invoice.objects.get(pk=iid)
             if invoice.created_by == isc_user or isc_user.role.code == 'ADMIN':
                 invoice.confirm_or_reject = 'REJECTED'
+                invoice.status = -1
                 invoice.description = request.POST.get('reason')
                 invoice.save()
                 response = {
@@ -185,6 +188,7 @@ def invoice_update_view(request, iid, *args, **kwargs):
                 invoice = Invoice.objects.get(pk=iid)
             if isc_user.role.code == 'ADMIN':
                 invoice.confirm_or_reject = 'UNDEFINED'
+                invoice.status = 0
                 response = {
                     'result': 'success',
                     'type': 'pre' if invoice_type.code == 'INVDIR' else '',
@@ -303,38 +307,56 @@ def invoices_list_view(request, *args, **kwargs):
     }
     
     if request.is_ajax():
+        # if request.method == 'GET':
+        #     if request.GET.get('q') != '':
+        #         field = request.GET.get('q').split(':')[0]
+        #         query = request.GET.get('q').split(':')[-1]
+        #         filtered_invoices = []
+        #         filtered_pre_invoices = []
+        #         if field == 'usr':
+        #             for invoice in context['invoices']:
+        #                 if query in invoice.get_mftuser.username:
+        #                     filtered_invoices.append(invoice)
+        #         elif field == 'als':
+        #             for invoice in context['invoices']:
+        #                 if query in invoice.get_mftuser.username:
+        #                     filtered_invoices.append(invoice)
+        #         elif field == 'org':
+        #             for invoice in context['invoices']:
+        #                 if query in invoice.get_mftuser.organization.description:
+        #                     filtered_invoices.append(invoice)
+        #         elif field == 'sn':
+        #             for invoice in context['invoices']:
+        #                 if query in invoice.serial_number:
+        #                     filtered_invoices.append(invoice)
+        #             for invoice in context['pre_invoices']:
+        #                 if query in invoice.serial_number:
+        #                     filtered_pre_invoices.append(invoice)
+        #         context['invoices'] = filtered_invoices
+        #         context['pre_invoices'] = filtered_pre_invoices
+        #     html = render_to_string(
+        #         template_name=search_template_name, context=context
+        #     )
+        #     data_dict = {"html_from_view": html}
+        #     return JsonResponse(data=data_dict, safe=False)
         if request.method == 'GET':
+            query = request.GET.get('q')
+            filtered_invs = {
+                'invoices': [inv.id for inv in invoices],
+                'pre_invoices': [inv.id for inv in pre_invoices]
+            }
             if request.GET.get('q') != '':
-                field = request.GET.get('q').split(':')[0]
-                query = request.GET.get('q').split(':')[-1]
-                filtered_invoices = []
-                filtered_pre_invoices = []
-                if field == 'usr':
-                    for invoice in context['invoices']:
-                        if query in invoice.get_mftuser.username:
-                            filtered_invoices.append(invoice)
-                elif field == 'als':
-                    for invoice in context['invoices']:
-                        if query in invoice.get_mftuser.username:
-                            filtered_invoices.append(invoice)
-                elif field == 'org':
-                    for invoice in context['invoices']:
-                        if query in invoice.get_mftuser.organization.description:
-                            filtered_invoices.append(invoice)
-                elif field == 'sn':
-                    for invoice in context['invoices']:
-                        if query in invoice.serial_number:
-                            filtered_invoices.append(invoice)
-                    for invoice in context['pre_invoices']:
-                        if query in invoice.serial_number:
-                            filtered_pre_invoices.append(invoice)
-                context['invoices'] = filtered_invoices
-                context['pre_invoices'] = filtered_pre_invoices
-            html = render_to_string(
-                template_name=search_template_name, context=context
-            )
-            data_dict = {"html_from_view": html}
-            return JsonResponse(data=data_dict, safe=False)
+                filtered_invs = {
+                    'invoices': [],
+                    'pre_invoices': []
+                }
+                for inv in invoices:
+                    mftuser = inv.get_mftuser()
+                    if query in mftuser.username or query in mftuser.alias or query in mftuser.organization.description or query in inv.serial_number or query in inv.created_by.user.username or query in inv.get_jalali_created_at():
+                        filtered_invs['invoices'].append(inv.id)
+                for inv in pre_invoices:
+                    if query in inv.serial_number or query in inv.created_by.user.username or query in inv.get_jalali_created_at():
+                        filtered_invs['pre_invoices'].append(inv.id)
+            return JsonResponse(data={"filtered_invs": filtered_invs}, safe=False)
     
     return render(request, "invoice/invoices-list.html", context)
-

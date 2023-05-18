@@ -79,7 +79,15 @@
           .promise()
           .then(() => {
             // replace the HTML contents
-            contents_list.html(response["html_from_view"]);
+            // contents_list.html(response["html_from_view"]);
+            var filtered = response["filtered_mftusers"];
+            $("div[role-in-list='container']").each(function () {
+              if (filtered.indexOf(parseInt($(this).attr("uid"))) == -1) {
+                $(this).hide();
+              } else {
+                $(this).show();
+              }
+            });
             // fade-in the div with new contents
             contents_list.fadeTo("slow", 1);
             // stop animating search icon

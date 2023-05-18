@@ -91,7 +91,7 @@
               class="form-control"
               style="text-align: right; direction: rtl"
               id="search-input"
-              placeholder="برای جستجو از یکی از حالت های روبرو استفاده کنید: usr:m_shokri als:nahab org:isc sn:123"
+              placeholder="سریال یا تاریخ ایجاد یا کاربر ایجاد کننده یا کاربر مدنظر"
               aria-label="Search"
               aria-describedby="basic-addon"
             /><span class="input-group-text" id="basic-addon"><span id="search-icon" class="fas fa-search"></span></span>
@@ -245,7 +245,22 @@
           .promise()
           .then(() => {
             // replace the HTML contents
-            contents_list.html(response["html_from_view"]);
+            // contents_list.html(response["html_from_view"]);
+            var filtered = response["filtered_invs"];
+            $("div[role-in-list='inv-container']").each(function () {
+              if (filtered["invoices"].indexOf(parseInt($(this).attr("invid"))) == -1) {
+                $(this).hide();
+              } else {
+                $(this).show();
+              }
+            });
+            $("div[role-in-list='pinv-container']").each(function () {
+              if (filtered["pre_invoices"].indexOf(parseInt($(this).attr("invid"))) == -1) {
+                $(this).hide();
+              } else {
+                $(this).show();
+              }
+            });
             // fade-in the div with new contents
             contents_list.fadeTo("slow", 1);
             // stop animating search icon
@@ -253,20 +268,16 @@
           });
       });
     };
-
     search_input.on("keyup", function () {
       const request_parameters = {
         q: $(this).val(), // value of search_input: the HTML element with ID search-input
       };
-
       // start animating the search icon with the CSS class
       search_icon.addClass("blink");
-
       // if scheduled_function is NOT false, cancel the execution of the function
       if (scheduled_function) {
         clearTimeout(scheduled_function);
       }
-
       // setTimeout returns the ID of the function to be executed
       scheduled_function = setTimeout(ajax_call, delay_by_in_ms, endpoint, request_parameters);
     });

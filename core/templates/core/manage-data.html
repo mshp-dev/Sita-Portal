@@ -319,14 +319,14 @@
       );
     });
 
-    $("a[role='tab']").click(function () {
+    /*$("a[role='tab']").click(function () {
       var tab_name = $(this).attr("href").replace("#", "");
       //alert(tab_name);
       //const triggerEl = document.querySelector("#" + tab_name + ' button[data-bs-target="#profile"]');
       //bootstrap.Tab.getInstance(triggerEl).show();
       //window.location.reload();
       window.location = "/manage-data/?tab=" + tab_name;
-    });
+    });*/
   });
 </script>
 {% endblock javascripts %} {% block content %}
@@ -353,6 +353,7 @@
         <div class="col-12 mx-auto">
           <div class="nav-wrapper position-relative mb-2">
             <ul class="nav nav-pills nav-fill flex-column flex-md-row" id="tabs-manage-data" role="tablist">
+              {% comment %}
               <li class="col-4 nav-item">
                 <a
                   class="nav-link mb-sm-3 mb-md-0 {% if selected_tab == 'tabs-mftusers' %}avtive{% endif %}"
@@ -363,6 +364,31 @@
                   aria-controls="tabs-mftusers"
                   aria-selected="{% if selected_tab == 'tabs-mftusers' %}false{% endif %}"
                   ><strong>کاربران تأیید نشده</strong> <span class="fas fa-user-alt"></span
+                ></a>
+              </li>
+              <li class="col-4 nav-item">
+                <a
+                  class="nav-link mb-sm-3 mb-md-0 {% if selected_tab == 'tabs-rejected-invoices' %}avtive{% endif %}"
+                  id="tabs-rejected-invoice-tab"
+                  data-bs-toggle="tab"
+                  href="#tabs-rejected-invoices"
+                  role="tab"
+                  aria-controls="tabs-rejected-invoices"
+                  aria-selected="{% if selected_tab == 'tabs-rejected-invoices' %}false{% endif %}"
+                  ><strong>درخواست های رد شده</strong> <span class="fas fa-file-alt text-danger"></span
+                ></a>
+              </li>
+              {% endcomment %}
+              <li class="col-4 nav-item">
+                <a
+                  class="nav-link mb-sm-3 mb-md-0 {% if selected_tab == 'tabs-rejected-invoices' %}avtive{% endif %}"
+                  id="tabs-rejected-invoices-tab"
+                  data-bs-toggle="tab"
+                  href="#tabs-rejected-invoices"
+                  role="tab"
+                  aria-controls="tabs-rejected-invoices"
+                  aria-selected="{% if selected_tab == 'tabs-rejected-invoices' %}false{% endif %}"
+                  ><strong>درخواست های رد شده</strong> <span class="fas fa-file-alt text-danger"></span
                 ></a>
               </li>
               <li class="col-4 nav-item">
@@ -389,31 +415,23 @@
                   ><strong>درخواست های ایجاد مسیر</strong> <span class="fas fa-folder-open"></span
                 ></a>
               </li>
-              <li class="col-4 nav-item">
-                <a
-                  class="nav-link mb-sm-3 mb-md-0 {% if selected_tab == 'tabs-confirmed-invoices' %}avtive{% endif %}"
-                  id="tabs-confirmed-invoices-tab"
-                  data-bs-toggle="tab"
-                  href="#tabs-confirmed-invoices"
-                  role="tab"
-                  aria-controls="tabs-confirmed-invoices"
-                  aria-selected="{% if selected_tab == 'tabs-confirmed-invoices' %}false{% endif %}"
-                  ><strong>درخواست های تأیید شده</strong> <span class="fas fa-file-alt text-success"></span
-                ></a>
-              </li>
-              <li class="col-4 nav-item">
-                <a
-                  class="nav-link mb-sm-3 mb-md-0 {% if selected_tab == 'tabs-rejected-invoices' %}avtive{% endif %}"
-                  id="tabs-rejected-invoice-tab"
-                  data-bs-toggle="tab"
-                  href="#tabs-rejected-invoices"
-                  role="tab"
-                  aria-controls="tabs-rejected-invoices"
-                  aria-selected="{% if selected_tab == 'tabs-rejected-invoices' %}false{% endif %}"
-                  ><strong>درخواست های رد شده</strong> <span class="fas fa-file-alt text-danger"></span
-                ></a>
-              </li>
             </ul>
+          </div>
+        </div>
+        <div class="row mb-5">
+          <div class="mb-3">
+            <h4 class="display-6" style="direction: rtl" for="search">جستجو در بین فرم های چارگون</h4>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                style="text-align: right; direction: rtl"
+                id="search-input"
+                placeholder="سریال یا تاریخ ایجاد یا کاربر ایجاد کننده یا کاربر مدنظر"
+                aria-label="Search"
+                aria-describedby="basic-addon"
+              /><span class="input-group-text" id="basic-addon"><span id="search-icon" class="fas fa-search"></span></span>
+            </div>
           </div>
         </div>
         <div class="card border-0">
@@ -429,6 +447,8 @@
                 <br />
                 <br />
                 <br />
+                <!--prettier-ignore-->
+                {% comment %} {% include "includes/admin-invoice-list.html" with invoices=undefined_pre_invoices %} {% endcomment %}
                 {% include "includes/admin-invoice-list.html" with invoices=pre_invoices|filter_invoices %}
               </div>
               <div
@@ -440,6 +460,8 @@
                 <br />
                 <br />
                 <br />
+                <!--prettier-ignore-->
+                {% comment %} {% include "includes/admin-invoice-list.html" with invoices=undefined_invoices %} {% endcomment %}
                 {% include "includes/admin-invoice-list.html" with invoices=invoices|filter_invoices %}
               </div>
               <div
@@ -452,32 +474,10 @@
                 <br />
                 <br />
                 <!--prettier-ignore-->
+                {% comment %} {% include "includes/admin-invoice-list.html" with invoices=rejected_invoices %}
+                {% include "includes/admin-invoice-list.html" with invoices=rejected_pre_invoices %} {% endcomment %}
                 {% include "includes/admin-invoice-list.html" with invoices=invoices|filter_invoices:'REJECTED' %}
                 {% include "includes/admin-invoice-list.html" with invoices=pre_invoices|filter_invoices:'REJECTED' %}
-              </div>
-              <div
-                class="tab-pane fade {% if selected_tab == 'tabs-mftusers' %}active show{% endif %}"
-                id="tabs-mftusers"
-                role="tabpanel"
-                aria-labelledby="tabs-mftusers"
-              >
-                <br />
-                <br />
-                <br />
-                {% include "includes/users-list.html" %} {% comment %} with users=new_users{% endcomment %}
-              </div>
-              <div
-                class="tab-pane fade {% if selected_tab == 'tabs-confirmed-invoices' %}active show{% endif %}"
-                id="tabs-confirmed-invoices"
-                role="tabpanel"
-                aria-labelledby="tabs-confirmed-invoices"
-              >
-                <br />
-                <br />
-                <br />
-                <!--prettier-ignore-->
-                {% include "includes/admin-invoice-list.html" with invoices=invoices|filter_invoices:'CONFIRMED' %}
-                {% include "includes/admin-invoice-list.html" with invoices=pre_invoices|filter_invoices:'CONFIRMED' %}
               </div>
             </div>
           </div>
@@ -592,7 +592,8 @@
                               //document.getElementById(response.type + "inv-" + response.confirmed + "-parent").remove();
                               $("#" + response.type + "inv-" + response.confirmed + "-parent")
                                 .parent()
-                                .appendTo("#tabs-confirmed-invoices");
+                                .remove();
+                              //.appendTo("#tabs-confirmed-invoices");
                             } else if (response.result == "error") {
                               alert(response.message);
                             }
@@ -610,6 +611,59 @@
       </div>
     </div>
   </div>
+  <script type="text/javascript">
+    const search_input = $("#search-input");
+    const search_icon = $("#search-icon");
+    const contents_list = $("#replaceable-content");
+    const endpoint = window.location.pathname;
+    const delay_by_in_ms = 700;
+    var scheduled_function = false;
+
+    var ajax_call = function (endpoint, request_parameters) {
+      $.getJSON(endpoint, request_parameters).done((response) => {
+        // fade out the users_list, then:
+        contents_list
+          .fadeTo("slow", 0)
+          .promise()
+          .then(() => {
+            // replace the HTML contents
+            // contents_list.html(response["html_from_view"]);
+            var filtered = response["filtered_invs"];
+            $("div[role-in-list='inv-container']").each(function () {
+              if (filtered["invoices"].indexOf(parseInt($(this).attr("invid"))) == -1) {
+                $(this).hide();
+              } else {
+                $(this).show();
+              }
+            });
+            $("div[role-in-list='pinv-container']").each(function () {
+              if (filtered["pre_invoices"].indexOf(parseInt($(this).attr("invid"))) == -1) {
+                $(this).hide();
+              } else {
+                $(this).show();
+              }
+            });
+            // fade-in the div with new contents
+            contents_list.fadeTo("slow", 1);
+            // stop animating search icon
+            search_icon.removeClass("blink");
+          });
+      });
+    };
+    search_input.on("keyup", function () {
+      const request_parameters = {
+        q: $(this).val(), // value of search_input: the HTML element with ID search-input
+      };
+      // start animating the search icon with the CSS class
+      search_icon.addClass("blink");
+      // if scheduled_function is NOT false, cancel the execution of the function
+      if (scheduled_function) {
+        clearTimeout(scheduled_function);
+      }
+      // setTimeout returns the ID of the function to be executed
+      scheduled_function = setTimeout(ajax_call, delay_by_in_ms, endpoint, request_parameters);
+    });
+  </script>
 </main>
 
 {% include "includes/footer.html" %} {% endblock content %}

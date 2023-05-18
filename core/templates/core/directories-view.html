@@ -117,340 +117,332 @@
   </div>
 
   <div class="section section-md">
-    {% comment %}
     <div class="container">
-      <div class="row">
-        <div class="mb-3">
-          <h4 class="display-4" style="direction: rtl" for="search">جستجو در بین دایرکتوری ها</h4>
-          <div class="input-group">
-            <input
-              type="text"
-              class="form-control"
-              style="text-align: right"
-              id="search-input"
-              placeholder="...چیزی بنویسید"
-              aria-label="Search"
-              aria-describedby="basic-addon"
-            /><span class="input-group-text" id="basic-addon"><span id="search-icon" class="fas fa-search"></span></span>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endcomment %}
-    <div class="section section-md">
-      <div class="container">
-        <div class="row justify-content-center">
-          {% comment %}
-          <div class="col-6 col-lg-6">
-            {% endcomment %}
-            <div class="row mb-5">
-              <div>
-                <button
-                  id="btn-add-new-dir"
-                  style="font-size: 0.8rem"
-                  aria-label="افزودن دایرکتوری"
-                  title="افزودن دایرکتوری"
-                  type="button"
-                  class="btn btn-outline-primary col-2 mb-4"
-                >
-                  افزودن
-                  <div aria-hidden="true" class="fas fa-plus" style="width: 1.2em"></div>
-                </button>
-                {% comment %} {% if access == 'ADMIN' %} {% endcomment %}
-                <button
-                  id="btn-delete-dir"
-                  style="font-size: 0.8rem"
-                  aria-label="حذف دایرکتوری"
-                  title="حذف دایرکتوری"
-                  type="button"
-                  class="btn btn-outline-danger col-2 ms-2 mb-4"
-                >
-                  حذف
-                  <div aria-hidden="true" class="fas fa-times" style="width: 1.2em"></div>
-                </button>
-                <button
-                  id="btn-invoice-dir"
-                  style="font-size: 1rem; width: 25%; height: 5rem"
-                  aria-label="درخواست تأیید"
-                  title="درخواست تأیید"
-                  type="button"
-                  class="btn btn-outline-success ms-2 mb-4 float-end"
-                >
-                  ارسال درخواست تأیید
-                  <div aria-hidden="true" class="fas fa-check" style="width: 1.2em"></div>
-                </button>
-              </div>
-              {% comment %} {% endif %} {% endcomment %}
-              <script>
-                $(function () {
-                  $("#btn-add-new-dir").click(function () {
-                    //var modal = $("#new-dir-modal").html();
-                    var absPath = $("#absolute-path-1").html();
-                    //var parent = $("#parent-id").html();
-                    var index = $("#index-code").html();
-                    if (absPath == "") {
-                      alert("یک دایرکتوری را انتخاب نمائید!");
-                    } else if (parseInt(index) > -1) {
-                      alert("دسترسی ایجاد دایرکتوری در این مسیر را ندارید!");
-                    } /*else if (parseInt(index) <= -2) {
+      <div class="row justify-content-center">
+        {% comment %}
+        <div class="col-6 col-lg-6">
+          {% endcomment %}
+          <div class="row mb-5">
+            <div>
+              <button
+                id="btn-add-new-dir"
+                style="font-size: 0.8rem"
+                aria-label="افزودن دایرکتوری"
+                title="افزودن دایرکتوری"
+                type="button"
+                class="btn btn-outline-primary col-2 mb-4"
+              >
+                افزودن
+                <div aria-hidden="true" class="fas fa-plus" style="width: 1.2em"></div>
+              </button>
+              {% comment %} {% if access == 'ADMIN' %} {% endcomment %}
+              <button
+                id="btn-delete-dir"
+                style="font-size: 0.8rem"
+                aria-label="حذف دایرکتوری"
+                title="حذف دایرکتوری"
+                type="button"
+                class="btn btn-outline-danger col-2 ms-2 mb-4"
+              >
+                حذف
+                <div aria-hidden="true" class="fas fa-times" style="width: 1.2em"></div>
+              </button>
+              <button
+                id="btn-invoice-dir"
+                style="font-size: 1rem; width: 25%; height: 5rem"
+                aria-label="درخواست تأیید"
+                title="درخواست تأیید"
+                type="button"
+                class="btn btn-outline-success ms-2 mb-4 float-end"
+              >
+                ارسال درخواست تأیید
+                <div aria-hidden="true" class="fas fa-check" style="width: 1.2em"></div>
+              </button>
+            </div>
+            {% comment %} {% endif %} {% endcomment %}
+            <script>
+              $(function () {
+                $("#btn-add-new-dir").click(function () {
+                  //var modal = $("#new-dir-modal").html();
+                  var absPath = $("#absolute-path-1").html();
+                  //var parent = $("#parent-id").html();
+                  var index = $("#index-code").html();
+                  if (absPath == "") {
+                    alert("یک دایرکتوری را انتخاب نمائید!");
+                  } else if (parseInt(index) > -1) {
+                    alert("دسترسی ایجاد دایرکتوری در این مسیر را ندارید!");
+                  } /*else if (parseInt(index) <= -2) {
                       alert("در حال حاضر امکان ایجاد دایرکتوری در این مسیر را ندارید!\nلطفاً با مدیر سیستم (29985700) تماس بگیرید.");
                     }*/ else {
-                      $("#new-dir-modal").modal("show");
-                    }
-                  });
+                    $("#new-dir-modal").modal("show");
+                  }
+                });
 
-                  $("#btn-delete-dir").click(function () {
-                    var access = "{{ access }}";
-                    var absPath = $("#absolute-path-2").html();
-                    var index = $("#index-code").html();
-                    if (absPath == "") {
-                      alert("یک دایرکتوری را انتخاب نمائید!");
-                    } else if (access != "ADMIN") {
-                      if (parseInt(index) > -2) {
-                        alert("دسترسی حذف این دایرکتوری را ندارید!");
-                      } else {
-                        $("#delete-modal").modal("show");
-                      }
+                $("#btn-delete-dir").click(function () {
+                  var access = "{{ access }}";
+                  var absPath = $("#absolute-path-2").html();
+                  var index = $("#index-code").html();
+                  if (absPath == "") {
+                    alert("یک دایرکتوری را انتخاب نمائید!");
+                  } else if (access != "ADMIN") {
+                    if (parseInt(index) > -2) {
+                      alert("دسترسی حذف این دایرکتوری را ندارید!");
                     } else {
                       $("#delete-modal").modal("show");
                     }
-                  });
+                  } else {
+                    $("#delete-modal").modal("show");
+                  }
+                });
 
-                  $("#btn-invoice-dir").click(function () {
-                    $.get("/directories/", function (response) {
-                      if (response.result == "empty") {
-                        alert("دایرکتوری جدیدی برای تأیید وجود ندارد.");
-                      } else if (response.result == "exists") {
-                        alert("یک درخواست با لیست دایرکتوری های فعلی موجود است.");
-                      } else {
-                        //console.log(response.dirs_list);
-                        var csrf = "{{ csrf_token }}";
-                        $.post(
-                          "/invoices/create/",
-                          {
-                            csrfmiddlewaretoken: csrf,
-                            type: "INVDIR",
-                            dirs: response.dirs_list,
-                          },
-                          function (response) {
-                            if (response.result == "success") {
-                              alert("درخواست تأیید با موفقیت ارسال شد.");
-                              //window.location = "/invoices/details/" + response.invoice_id + "/";
-                            } else if (response.result == "error") {
-                              alert("خطایی رخ داده است، با مدیر سیستم تماس بگیرید.");
-                            }
+                $("#btn-invoice-dir").click(function () {
+                  $.get("/directories/", function (response) {
+                    if (response.result == "empty") {
+                      alert("دایرکتوری جدیدی برای تأیید وجود ندارد.");
+                    } else if (response.result == "exists") {
+                      alert("یک درخواست با لیست دایرکتوری های فعلی موجود است.");
+                    } else {
+                      //console.log(response.dirs_list);
+                      var csrf = "{{ csrf_token }}";
+                      $.post(
+                        "/invoices/create/",
+                        {
+                          csrfmiddlewaretoken: csrf,
+                          type: "INVDIR",
+                          dirs: response.dirs_list,
+                        },
+                        function (response) {
+                          if (response.result == "success") {
+                            alert("درخواست تأیید با موفقیت ارسال شد.");
+                            //window.location = "/invoices/details/" + response.invoice_id + "/";
+                          } else if (response.result == "error") {
+                            alert("خطایی رخ داده است، با مدیر سیستم تماس بگیرید.");
                           }
-                        );
-                      }
-                    });
+                        }
+                      );
+                    }
                   });
                 });
-              </script>
-              <p><span class="h5 text-danger" style="font-weight: 400" id="current-dir-name"></span> : دایرکتوری انتخاب شده</p>
-              <div style="display: none">
-                <p id="current-dir-id"></p>
-                <p id="parent-id"></p>
-                <p id="index-code"></p>
-              </div>
-              <!--Directories-->
-              <div style="overflow-y: scroll; height: 600px">
-                <ul id="replaceable-content" role="tree" aria-labelledby="tree_label">
-                  {% include "includes/directory-list.html" %}
-                </ul>
-                <!--End of Directories-->
+              });
+            </script>
+            <div class="mt-3 mb-5">
+              <h4 class="display-5" style="direction: rtl" for="search">جستجو در بین دایرکتوری ها</h4>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  style="text-align: right"
+                  id="search-input"
+                  placeholder="...چیزی بنویسید"
+                  aria-label="Search"
+                  aria-describedby="basic-addon"
+                /><span class="input-group-text" id="basic-addon"><span id="search-icon" class="fas fa-search"></span></span>
               </div>
             </div>
+            <p><span class="h5 text-danger" style="font-weight: 400" id="current-dir-name"></span> : دایرکتوری انتخاب شده</p>
+            <div style="display: none">
+              <p id="current-dir-id"></p>
+              <p id="parent-id"></p>
+              <p id="index-code"></p>
+            </div>
+            <!--Directories-->
+            <div style="overflow-y: scroll; height: 600px">
+              <ul id="replaceable-content" role="tree" aria-labelledby="tree_label">
+                {% include "includes/directory-list.html" %}
+              </ul>
+              <!--End of Directories-->
+            </div>
           </div>
-          {% comment %}
-          <div class="col-6 col-lg-6">
-            {% endcomment %}
-            <div class="row">
-              <div class="col md-2">
-                <div class="modal fade" id="new-dir-modal" role="dialog" aria-labelledby="dir-modal" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content" style="direction: rtl">
-                      <div class="modal-header">
-                        <h2 class="h6 modal-title">افزودن دایرکتوری جدید در این مسیر</h2>
-                        <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <div class="modal-body" style="direction: ltr">
-                        <p id="absolute-path-1"></p>
-                        <div class="input-group mb-3">
-                          <input
-                            id="name-input"
-                            type="text"
-                            class="form-control"
-                            placeholder="Directory"
-                            aria-label="Directory"
-                            aria-describedby="dir-name-input"
-                          />
-                        </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button id="add-new-dir" type="button" class="btn btn-secondary ms-auto">افزودن</button>
-                        <button type="button" class="btn btn-link ms-0" data-bs-dismiss="modal">انصراف</button>
-                        <script type="text/javascript">
-                          var nameInput = document.getElementById("name-input");
-                          nameInput.addEventListener("change", function (event) {
-                            var n = cleanInputValue(event.currentTarget.value, "name");
-                            event.currentTarget.value = n;
-                          });
-
-                          $(function () {
-                            $("#add-new-dir").click(function () {
-                              var new_dir = $("#name-input").val();
-                              var dname = $.trim(new_dir);
-                              var parent_id = $("#parent-id").html();
-                              var did = $("#current-dir-id").html();
-                              var csrf = "{{ csrf_token }}";
-                              if ($.trim(new_dir) != "") {
-                                $.post(
-                                  "/directories/",
-                                  {
-                                    csrfmiddlewaretoken: csrf,
-                                    parent: did,
-                                    name: dname,
-                                  },
-                                  function (response) {
-                                    var pid = $("#parent-id").html();
-                                    if (response.result == "success") {
-                                      $("#new-dir-modal").modal("hide");
-                                      var parent = document.getElementById("group-" + response.new_dir.parent);
-                                      var ps = parent.getElementsByTagName("p");
-                                      if (ps[0] != null) {
-                                        ps[0].remove();
-                                      }
-                                      //if (parent.lastChild.tagName != "li") {
-                                      var currentDirName = document.getElementById("current-dir-name");
-                                      currentDirName.innerHTML = "";
-                                      var new_dir_li = document.createElement("li");
-                                      new_dir_li.setAttribute("id", "treeitem-" + response.new_dir.id);
-                                      new_dir_li.setAttribute("function", "user-view");
-                                      new_dir_li.setAttribute("role", "treeitem");
-                                      new_dir_li.setAttribute("aria-expanded", "false");
-                                      new_dir_li.setAttribute("indexcode", response.new_dir.index_code);
-                                      new_dir_li.setAttribute("absolute-path", response.new_dir.relative_path);
-                                      new_dir_li.setAttribute("parent-id", response.new_dir.parent);
-                                      new_dir_li.setAttribute("current-dir-id", response.new_dir.id);
-                                      new_dir_li.setAttribute("current-dir-name", response.new_dir.name);
-
-                                      var new_dir_span = document.createElement("span");
-                                      new_dir_span.innerHTML = response.new_dir.name;
-
-                                      var new_dir_ul = document.createElement("ul");
-                                      new_dir_ul.setAttribute("id", "group-" + response.new_dir.id);
-                                      new_dir_ul.setAttribute("role", "group");
-
-                                      var new_dir_p = document.createElement("p");
-                                      new_dir_p.setAttribute("style", "width: 200px");
-                                      new_dir_p.innerHTML = "No directory found";
-
-                                      new_dir_li.appendChild(new_dir_span);
-                                      new_dir_li.appendChild(new_dir_ul);
-                                      new_dir_ul.appendChild(new_dir_p);
-                                      //parent.innerHTML = "";
-                                      parent.appendChild(new_dir_li);
-
-                                      var t = new Tree(new_dir_li);
-                                      //t.init();
-                                      //t.addNewTreeitem();
-                                      ti = new Treeitem(new_dir_li, t, false);
-                                      ti.init();
-                                      t.treeitems.push(ti);
-                                      t.firstChars.push(ti.label.substring(0, 1).toLowerCase());
-
-                                      new_dir_li.addEventListener("click", function (event) {
-                                        var absolutePath1 = document.getElementById("absolute-path-1");
-                                        var absolutePath2 = document.getElementById("absolute-path-2");
-                                        var parentId = document.getElementById("parent-id");
-                                        var currentDirId = document.getElementById("current-dir-id");
-                                        var currentDirName = document.getElementById("current-dir-name");
-                                        var indexCode = document.getElementById("index-code");
-
-                                        var treeitem = event.currentTarget;
-                                        //var uid = document.getElementById("current-user-id").innerHTML;
-                                        var did = treeitem.getAttribute("current-dir-id");
-                                        var dname = treeitem.getAttribute("current-dir-name");
-                                        var path = treeitem.getAttribute("absolute-path");
-                                        var pid = treeitem.getAttribute("parent-id");
-                                        var index = treeitem.getAttribute("indexcode");
-                                        currentDirId.innerHTML = did;
-                                        currentDirName.innerHTML = dname;
-                                        parentId.innerHTML = pid;
-                                        indexCode.innerHTML = index;
-                                        absolutePath1.innerHTML = path + '/{<span class="text-danger">NEW</span>}';
-                                        absolutePath2.innerHTML = path;
-                                        //getPermissions(uid);
-
-                                        event.stopPropagation();
-                                        event.preventDefault();
-                                      });
-                                      /*} else {
-                                        location.reload();
-                                      }*/
-                                    } else if (response.result == "error") {
-                                      alert(response.message);
-                                    }
-                                  }
-                                );
-                              } else {
-                                alert("نام دایرکتوری را وارد کنید!");
-                              }
-                              return false;
-                            });
-                          });
-                        </script>
+        </div>
+        {% comment %}
+        <div class="col-6 col-lg-6">
+          {% endcomment %}
+          <div class="row">
+            <div class="col md-2">
+              <div class="modal fade" id="new-dir-modal" role="dialog" aria-labelledby="dir-modal" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                  <div class="modal-content" style="direction: rtl">
+                    <div class="modal-header">
+                      <h2 class="h6 modal-title">افزودن دایرکتوری جدید در این مسیر</h2>
+                      <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="direction: ltr">
+                      <p id="absolute-path-1"></p>
+                      <div class="input-group mb-3">
+                        <input
+                          id="name-input"
+                          type="text"
+                          class="form-control"
+                          placeholder="Directory"
+                          aria-label="Directory"
+                          aria-describedby="dir-name-input"
+                        />
                       </div>
                     </div>
-                  </div>
-                </div>
-                <div class="modal fade" id="delete-modal" role="dialog" aria-labelledby="del-modal" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content" style="direction: rtl">
-                      <div class="modal-header">
-                        <h2 class="h6 modal-title">حذف دایرکتوری</h2>
-                        <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <div class="modal-body" style="direction: rtl">
-                        <p id="absolute-path-2" style="direction: ltr"></p>
-                        <p>آیا از حذف این دایرکتوری اطمینان دارید؟</p>
-                      </div>
-                      <div class="modal-footer">
-                        <button id="confirm-delete" type="button" class="btn btn-secondary ms-auto">بله</button>
-                        <button type="button" class="btn btn-link ms-0" data-bs-dismiss="modal">خیر</button>
-                        <script type="text/javascript">
-                          $(function () {
-                            $("#confirm-delete").click(function () {
-                              var did = $("#current-dir-id").html();
-                              var user_id = $("#current-user-id").html();
-                              var csrf = "{{ csrf_token }}";
+                    <div class="modal-footer">
+                      <button id="add-new-dir" type="button" class="btn btn-secondary ms-auto">افزودن</button>
+                      <button type="button" class="btn btn-link ms-0" data-bs-dismiss="modal">انصراف</button>
+                      <script type="text/javascript">
+                        var nameInput = document.getElementById("name-input");
+                        nameInput.addEventListener("change", function (event) {
+                          var n = cleanInputValue(event.currentTarget.value, "name");
+                          event.currentTarget.value = n;
+                        });
+
+                        $(function () {
+                          $("#add-new-dir").click(function () {
+                            var new_dir = $("#name-input").val();
+                            var dname = $.trim(new_dir);
+                            var parent_id = $("#parent-id").html();
+                            var did = $("#current-dir-id").html();
+                            var csrf = "{{ csrf_token }}";
+                            if ($.trim(new_dir) != "") {
                               $.post(
-                                "/directory/" + did + "/delete/",
+                                "/directories/",
                                 {
                                   csrfmiddlewaretoken: csrf,
+                                  parent: did,
+                                  name: dname,
                                 },
                                 function (response) {
-                                  $("#delete-modal").modal("hide");
-                                  if (response.result == "error") {
-                                    alert("خطایی رخ داده است، با مدیر سیستم تماس بگیرید.");
-                                  } else if (response.result == "success") {
-                                    //TODO: remove deleted dir from tree without reload
-                                    //location.reload();
+                                  var pid = $("#parent-id").html();
+                                  if (response.result == "success") {
+                                    $("#new-dir-modal").modal("hide");
+                                    var parent = document.getElementById("group-" + response.new_dir.parent);
+                                    var ps = parent.getElementsByTagName("p");
+                                    if (ps[0] != null) {
+                                      ps[0].remove();
+                                    }
+                                    //if (parent.lastChild.tagName != "li") {
                                     var currentDirName = document.getElementById("current-dir-name");
                                     currentDirName.innerHTML = "";
-                                    var deleted = document.getElementById("treeitem-" + response.deleted_dir);
-                                    deleted.remove();
-                                    alert("دایرکتوری حذف شد.");
-                                  } else if (response.result == "failed") {
-                                    alert("دسترسی پاک کردن این دایرکتوری را ندارید!");
+                                    var new_dir_li = document.createElement("li");
+                                    new_dir_li.setAttribute("id", "treeitem-" + response.new_dir.id);
+                                    new_dir_li.setAttribute("function", "user-view");
+                                    new_dir_li.setAttribute("role", "treeitem");
+                                    new_dir_li.setAttribute("aria-expanded", "false");
+                                    new_dir_li.setAttribute("indexcode", response.new_dir.index_code);
+                                    new_dir_li.setAttribute("absolute-path", response.new_dir.relative_path);
+                                    new_dir_li.setAttribute("parent-id", response.new_dir.parent);
+                                    new_dir_li.setAttribute("current-dir-id", response.new_dir.id);
+                                    new_dir_li.setAttribute("current-dir-name", response.new_dir.name);
+
+                                    var new_dir_span = document.createElement("span");
+                                    new_dir_span.innerHTML = response.new_dir.name;
+
+                                    var new_dir_ul = document.createElement("ul");
+                                    new_dir_ul.setAttribute("id", "group-" + response.new_dir.id);
+                                    new_dir_ul.setAttribute("role", "group");
+
+                                    var new_dir_p = document.createElement("p");
+                                    new_dir_p.setAttribute("style", "width: 200px");
+                                    new_dir_p.innerHTML = "No directory found";
+
+                                    new_dir_li.appendChild(new_dir_span);
+                                    new_dir_li.appendChild(new_dir_ul);
+                                    new_dir_ul.appendChild(new_dir_p);
+                                    //parent.innerHTML = "";
+                                    parent.appendChild(new_dir_li);
+
+                                    var t = new Tree(new_dir_li);
+                                    //t.init();
+                                    //t.addNewTreeitem();
+                                    ti = new Treeitem(new_dir_li, t, false);
+                                    ti.init();
+                                    t.treeitems.push(ti);
+                                    t.firstChars.push(ti.label.substring(0, 1).toLowerCase());
+
+                                    new_dir_li.addEventListener("click", function (event) {
+                                      var absolutePath1 = document.getElementById("absolute-path-1");
+                                      var absolutePath2 = document.getElementById("absolute-path-2");
+                                      var parentId = document.getElementById("parent-id");
+                                      var currentDirId = document.getElementById("current-dir-id");
+                                      var currentDirName = document.getElementById("current-dir-name");
+                                      var indexCode = document.getElementById("index-code");
+
+                                      var treeitem = event.currentTarget;
+                                      //var uid = document.getElementById("current-user-id").innerHTML;
+                                      var did = treeitem.getAttribute("current-dir-id");
+                                      var dname = treeitem.getAttribute("current-dir-name");
+                                      var path = treeitem.getAttribute("absolute-path");
+                                      var pid = treeitem.getAttribute("parent-id");
+                                      var index = treeitem.getAttribute("indexcode");
+                                      currentDirId.innerHTML = did;
+                                      currentDirName.innerHTML = dname;
+                                      parentId.innerHTML = pid;
+                                      indexCode.innerHTML = index;
+                                      absolutePath1.innerHTML = path + '/{<span class="text-danger">NEW</span>}';
+                                      absolutePath2.innerHTML = path;
+                                      //getPermissions(uid);
+
+                                      event.stopPropagation();
+                                      event.preventDefault();
+                                    });
+                                    /*} else {
+                                        location.reload();
+                                      }*/
+                                  } else if (response.result == "error") {
+                                    alert(response.message);
                                   }
                                 }
                               );
-                              return false;
-                            });
+                            } else {
+                              alert("نام دایرکتوری را وارد کنید!");
+                            }
+                            return false;
                           });
-                        </script>
-                      </div>
+                        });
+                      </script>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal fade" id="delete-modal" role="dialog" aria-labelledby="del-modal" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                  <div class="modal-content" style="direction: rtl">
+                    <div class="modal-header">
+                      <h2 class="h6 modal-title">حذف دایرکتوری</h2>
+                      <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="direction: rtl">
+                      <p id="absolute-path-2" style="direction: ltr"></p>
+                      <p>آیا از حذف این دایرکتوری اطمینان دارید؟</p>
+                    </div>
+                    <div class="modal-footer">
+                      <button id="confirm-delete" type="button" class="btn btn-secondary ms-auto">بله</button>
+                      <button type="button" class="btn btn-link ms-0" data-bs-dismiss="modal">خیر</button>
+                      <script type="text/javascript">
+                        $(function () {
+                          $("#confirm-delete").click(function () {
+                            var did = $("#current-dir-id").html();
+                            var user_id = $("#current-user-id").html();
+                            var csrf = "{{ csrf_token }}";
+                            $.post(
+                              "/directory/" + did + "/delete/",
+                              {
+                                csrfmiddlewaretoken: csrf,
+                              },
+                              function (response) {
+                                $("#delete-modal").modal("hide");
+                                if (response.result == "error") {
+                                  alert("خطایی رخ داده است، با مدیر سیستم تماس بگیرید.");
+                                } else if (response.result == "success") {
+                                  //TODO: remove deleted dir from tree without reload
+                                  //location.reload();
+                                  var currentDirName = document.getElementById("current-dir-name");
+                                  currentDirName.innerHTML = "";
+                                  var deleted = document.getElementById("treeitem-" + response.deleted_dir);
+                                  deleted.remove();
+                                  alert("دایرکتوری حذف شد.");
+                                } else if (response.result == "failed") {
+                                  alert("دسترسی پاک کردن این دایرکتوری را ندارید!");
+                                }
+                              }
+                            );
+                            return false;
+                          });
+                        });
+                      </script>
                     </div>
                   </div>
                 </div>
@@ -461,7 +453,7 @@
       </div>
     </div>
   </div>
-  {% comment %}
+
   <script type="text/javascript">
     const search_input = $("#search-input");
     const search_icon = $("#search-icon");
@@ -478,7 +470,15 @@
           .promise()
           .then(() => {
             // replace the HTML contents
-            contents_list.html(response["html_from_view"]);
+            // contents_list.html(response["html_from_view"]);
+            var filtered = response["filtered_directories"];
+            $("li[role-in-list='container']").each(function () {
+              if (filtered.indexOf(parseInt($(this).attr("current-dir-id"))) == -1) {
+                $(this).hide();
+              } else {
+                $(this).show();
+              }
+            });
             // fade-in the div with new contents
             contents_list.fadeTo("slow", 1);
             // stop animating search icon
@@ -486,12 +486,10 @@
           });
       });
     };
-
     search_input.on("keyup", function () {
       const request_parameters = {
         q: $(this).val(), // value of search_input: the HTML element with ID search-input
       };
-
       // start animating the search icon with the CSS class
       search_icon.addClass("blink");
 
@@ -499,12 +497,10 @@
       if (scheduled_function) {
         clearTimeout(scheduled_function);
       }
-
       // setTimeout returns the ID of the function to be executed
       scheduled_function = setTimeout(ajax_call, delay_by_in_ms, endpoint, request_parameters);
     });
   </script>
-  {% endcomment %}
 </main>
 
 {% include "includes/footer.html" %} {% endblock content %}

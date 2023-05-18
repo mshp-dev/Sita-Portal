@@ -1,4 +1,4 @@
-{% extends "layouts/base-fullscreen.html" %} {% block title %} ایجاد کاربر {% endblock %}
+{% extends "layouts/base-fullscreen.html" %} {% block title %} ایجاد کاربر {% endblock %} {% load static %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %} {% block content %}
@@ -103,6 +103,17 @@
                 <label for="business"
                   >سامانه/پروژه های تحت اختیار <sup class="text-danger"><strong>*</strong></sup></label
                 >
+                <div class="input-group mb-2">
+                  <input
+                    type="text"
+                    class="form-control"
+                    style="text-align: right; direction: rtl"
+                    id="search-input"
+                    placeholder="جستجو در بین پروژه/سامانه ها"
+                    aria-label="Search"
+                    aria-describedby="basic-addon"
+                  />
+                </div>
                 <div class="input-group" style="direction: ltr">
                   <span class="input-group-text" id="business"><span class="fas fa-sitemap"></span></span>
                   {{ form.business }}
@@ -143,7 +154,26 @@
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
 <script>
+  $("#search-input").on("keyup", function () {
+    var inp = $(this).val();
+    if (inp !== "") {
+      $("option").each(function () {
+        var opt = $(this).html();
+        if (opt.includes(inp)) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    } else {
+      $("option").each(function () {
+        $(this).show();
+      });
+    }
+  });
+
   function goBack() {
     var url = "/";
     window.location = url;

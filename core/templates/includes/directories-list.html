@@ -127,6 +127,19 @@
             });
           </script>
           <p><span class="h5 text-danger" style="font-weight: 400" id="current-dir-name"></span> : دایرکتوری انتخاب شده</p>
+          <div class="mb-3">
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                style="text-align: right"
+                id="search-input"
+                placeholder="...نام دایرکتوری"
+                aria-label="Search"
+                aria-describedby="basic-addon"
+              /><span class="input-group-text" id="basic-addon"><span id="search-icon" class="fas fa-search"></span></span>
+            </div>
+          </div>
           <div style="display: none">
             <p id="current-dir-id"></p>
             <p id="parent-id"></p>
@@ -151,7 +164,7 @@
           دسترسی های <strong class="h5 text-info">{{ mftuser.username }}</strong> در این مسیر
           <span id="confirmedByAdmin" style="display: none" class="h5 text-success"> <span class="fa fa-check"></span> تأیید شده</span>
         </div>
-        <div class="row mt-3">
+        <div class="row ms-4 mt-7">
           <div class="col">
             {% if access == 'ADMIN' %}
             <legend class="h6">General</legend>
@@ -665,7 +678,7 @@
         </div>
       </div>
     </div>
-    {% comment %}
+
     <script type="text/javascript">
       const search_input = $("#search-input");
       const search_icon = $("#search-icon");
@@ -681,12 +694,16 @@
             .fadeTo("slow", 0)
             .promise()
             .then(() => {
-              if (response["html_from_view"] != "") {
-                // replace the HTML contents
-                contents_list.html(response["html_from_view"]);
-              } else {
-                location.reload();
-              }
+              // replace the HTML contents
+              // contents_list.html(response["html_from_view"]);
+              var filtered = response["filtered_directories"];
+              $("li[role-in-list='container']").each(function () {
+                if (filtered.indexOf(parseInt($(this).attr("current-dir-id"))) == -1) {
+                  $(this).hide();
+                } else {
+                  $(this).show();
+                }
+              });
               // fade-in the div with new contents
               contents_list.fadeTo("slow", 1);
               // stop animating search icon
@@ -694,24 +711,19 @@
             });
         });
       };
-
       search_input.on("keyup", function () {
         const request_parameters = {
           q: $(this).val(), // value of search_input: the HTML element with ID search-input
         };
-
         // start animating the search icon with the CSS class
         search_icon.addClass("blink");
-
         // if scheduled_function is NOT false, cancel the execution of the function
         if (scheduled_function) {
           clearTimeout(scheduled_function);
         }
-
         // setTimeout returns the ID of the function to be executed
         scheduled_function = setTimeout(ajax_call, delay_by_in_ms, endpoint, request_parameters);
       });
     </script>
-    {% endcomment %}
   </div>
 </div>

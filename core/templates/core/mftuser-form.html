@@ -1,10 +1,12 @@
 {% extends "layouts/base-fullscreen.html" %}
 
 <!-- prettier-ignore -->
-{% block title %} فرم ایجاد کاربر {% endblock %}
+{% block title %} فرم ایجاد کاربر {% endblock %} {% load static %}
 
 <!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %} {% endblock stylesheets %} {% block content %}
+{% block stylesheets %}
+<link type="text/css" href="css/virtual-select.min.css" rel="stylesheet" />
+{% endblock stylesheets %} {% block content %}
 
 <main>
   {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
@@ -54,6 +56,17 @@
               <div class="form-group mb-4" style="direction: rtl">
                 <!-- prettier-ignore -->
                 <label for="business">سامانه/پروژه تحت اختیار <span style="font-size: 0.7rem">(با نگهداشتن کلید CTRL می توانید چند سامانه را انتخاب نمایید)</span> <sup class="text-danger"><strong>*</strong></sup></label>
+                <div class="input-group mb-2">
+                  <input
+                    type="text"
+                    class="form-control"
+                    style="text-align: right; direction: rtl"
+                    id="search-input"
+                    placeholder="جستجو در بین پروژه/سامانه ها"
+                    aria-label="Search"
+                    aria-describedby="basic-addon"
+                  />
+                </div>
                 <div class="input-group" style="direction: ltr">
                   {{ form.business }}
                   <span class="input-group-text" id="business"><span class="fas fa-sitemap"></span></span>
@@ -213,7 +226,27 @@
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript" src="js/virtual-select.min.js"></script>
 <script>
+  $("#search-input").on("keyup", function () {
+    var inp = $(this).val();
+    if (inp !== "") {
+      $("option").each(function () {
+        var opt = $(this).html();
+        if (opt.includes(inp)) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    } else {
+      $("option").each(function () {
+        $(this).show();
+      });
+    }
+  });
+
   function scroll() {
     $("html, body").animate(
       {
@@ -279,6 +312,10 @@
     } else if (opt.getAttribute("parent") == "business") {
       bus.appendChild(opt);
     }
+  });
+
+  VirtualSelect.init({
+    ele: "#id_business",
   });
 
   var username = document.getElementById("id_username");

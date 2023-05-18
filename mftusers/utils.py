@@ -48,7 +48,7 @@ def get_all_dirs(isc_user, owned=True, query=None, pretify=True):
         d_bics = [a.access_on_bic for a in accesses]
         if query:
             all_dirs = Directory.objects.all().order_by('name')
-            root_dirs = all_dirs.filter(name=query, bic__in=d_bics).order_by('name')
+            root_dirs = all_dirs.filter(relative_path__icontains=query, bic__in=d_bics).order_by('name')
         else:
             root_dirs = Directory.objects.filter(parent=0).order_by('name')
             return [{'dir': d, 'children': [{'dir': b, 'children': get_sub_dirs(b, query, dir_create_view=True)} for b in (Directory.objects.filter(parent=d.id, bic__in=d_bics).order_by('name') if pretify else Directory.objects.filter(bic__in=d_bics).order_by('name'))]} for d in root_dirs]
@@ -57,13 +57,13 @@ def get_all_dirs(isc_user, owned=True, query=None, pretify=True):
         d_buss = [a.access_on_bus for a in accesses]
         if query:
             all_dirs = Directory.objects.all().order_by('name')
-            root_dirs = all_dirs.filter(name=query, business__in=d_buss).order_by('name')
+            root_dirs = all_dirs.filter(relative_path__icontains=query, business__in=d_buss).order_by('name')
         else:
             root_dirs = Directory.objects.filter(parent=0, business__in=d_buss).order_by('name') if pretify else Directory.objects.filter(business__in=d_buss).order_by('name')
     else:
         if query:
             all_dirs = Directory.objects.all().order_by('name')
-            root_dirs = all_dirs.filter(name=query).order_by('name')
+            root_dirs = all_dirs.filter(relative_path__icontains=query).order_by('name')
         else:
             root_dirs = Directory.objects.filter(parent=0).order_by('name')
         
@@ -112,6 +112,151 @@ def get_sub_dirs(dir_, q=None, dir_create_view=False):
                 logger.error(f'directory with id {id_} does not exists, parent id is {dir_.parent}.')
     
     return children
+
+
+def get_parent_dirs(element_ids):
+    new_elements = []
+    for id_ in element_ids:
+        try:
+            dir_ = Directory.objects.get(pk=id_)
+            if int(dir_.index_code.code) == -10:
+                if dir_.parent not in element_ids:
+                    dir10 = Directory.objects.get(pk=dir_.parent)
+                    dir9 = Directory.objects.get(pk=dir10.parent)
+                    dir8 = Directory.objects.get(pk=dir9.parent)
+                    dir7 = Directory.objects.get(pk=dir8.parent)
+                    dir6 = Directory.objects.get(pk=dir7.parent)
+                    dir5 = Directory.objects.get(pk=dir6.parent)
+                    dir4 = Directory.objects.get(pk=dir5.parent)
+                    dir3 = Directory.objects.get(pk=dir4.parent)
+                    bus = Directory.objects.get(name=dir_.business.code, parent=0)
+                    bic = Directory.objects.get(name=dir_.bic.directory_name, business=dir_.business.code, parent=bus.id)
+                    new_elements.append(dir10.id)
+                    new_elements.append(dir9.id)
+                    new_elements.append(dir8.id)
+                    new_elements.append(dir7.id)
+                    new_elements.append(dir6.id)
+                    new_elements.append(dir5.id)
+                    new_elements.append(dir4.id)
+                    new_elements.append(dir3.id)
+                    new_elements.append(bic.id)
+                    new_elements.append(bus.id)
+            elif int(dir_.index_code.code) == -9:
+                if dir_.parent not in element_ids:
+                    dir9 = Directory.objects.get(pk=dir_.parent)
+                    dir8 = Directory.objects.get(pk=dir9.parent)
+                    dir7 = Directory.objects.get(pk=dir8.parent)
+                    dir6 = Directory.objects.get(pk=dir7.parent)
+                    dir5 = Directory.objects.get(pk=dir6.parent)
+                    dir4 = Directory.objects.get(pk=dir5.parent)
+                    dir3 = Directory.objects.get(pk=dir4.parent)
+                    bus = Directory.objects.get(name=dir_.business.code, parent=0)
+                    bic = Directory.objects.get(name=dir_.bic.directory_name, business=dir_.business.code, parent=bus.id)
+                    new_elements.append(dir9.id)
+                    new_elements.append(dir8.id)
+                    new_elements.append(dir7.id)
+                    new_elements.append(dir6.id)
+                    new_elements.append(dir5.id)
+                    new_elements.append(dir4.id)
+                    new_elements.append(dir3.id)
+                    new_elements.append(bic.id)
+                    new_elements.append(bus.id)
+            elif int(dir_.index_code.code) == -8:
+                if dir_.parent not in element_ids:
+                    dir8 = Directory.objects.get(pk=dir_.parent)
+                    dir7 = Directory.objects.get(pk=dir8.parent)
+                    dir6 = Directory.objects.get(pk=dir7.parent)
+                    dir5 = Directory.objects.get(pk=dir6.parent)
+                    dir4 = Directory.objects.get(pk=dir5.parent)
+                    dir3 = Directory.objects.get(pk=dir4.parent)
+                    bus = Directory.objects.get(name=dir_.business.code, parent=0)
+                    bic = Directory.objects.get(name=dir_.bic.directory_name, business=dir_.business.code, parent=bus.id)
+                    new_elements.append(dir8.id)
+                    new_elements.append(dir7.id)
+                    new_elements.append(dir6.id)
+                    new_elements.append(dir5.id)
+                    new_elements.append(dir4.id)
+                    new_elements.append(dir3.id)
+                    new_elements.append(bic.id)
+                    new_elements.append(bus.id)
+            elif int(dir_.index_code.code) == -7:
+                if dir_.parent not in element_ids:
+                    dir7 = Directory.objects.get(pk=dir_.parent)
+                    dir6 = Directory.objects.get(pk=dir7.parent)
+                    dir5 = Directory.objects.get(pk=dir6.parent)
+                    dir4 = Directory.objects.get(pk=dir5.parent)
+                    dir3 = Directory.objects.get(pk=dir4.parent)
+                    bus = Directory.objects.get(name=dir_.business.code, parent=0)
+                    bic = Directory.objects.get(name=dir_.bic.directory_name, business=dir_.business.code, parent=bus.id)
+                    new_elements.append(dir7.id)
+                    new_elements.append(dir6.id)
+                    new_elements.append(dir5.id)
+                    new_elements.append(dir4.id)
+                    new_elements.append(dir3.id)
+                    new_elements.append(bic.id)
+                    new_elements.append(bus.id)
+            elif int(dir_.index_code.code) == -6:
+                if dir_.parent not in element_ids:
+                    dir6 = Directory.objects.get(pk=dir_.parent)
+                    dir5 = Directory.objects.get(pk=dir6.parent)
+                    dir4 = Directory.objects.get(pk=dir5.parent)
+                    dir3 = Directory.objects.get(pk=dir4.parent)
+                    bus = Directory.objects.get(name=dir_.business.code, parent=0)
+                    bic = Directory.objects.get(name=dir_.bic.directory_name, business=dir_.business.code, parent=bus.id)
+                    new_elements.append(dir6.id)
+                    new_elements.append(dir5.id)
+                    new_elements.append(dir4.id)
+                    new_elements.append(dir3.id)
+                    new_elements.append(bic.id)
+                    new_elements.append(bus.id)
+            elif int(dir_.index_code.code) == -5:
+                if dir_.parent not in element_ids:
+                    dir5 = Directory.objects.get(pk=dir_.parent)
+                    dir4 = Directory.objects.get(pk=dir5.parent)
+                    dir3 = Directory.objects.get(pk=dir4.parent)
+                    bus = Directory.objects.get(name=dir_.business.code, parent=0)
+                    bic = Directory.objects.get(name=dir_.bic.directory_name, business=dir_.business.code, parent=bus.id)
+                    new_elements.append(dir5.id)
+                    new_elements.append(dir4.id)
+                    new_elements.append(dir3.id)
+                    new_elements.append(bic.id)
+                    new_elements.append(bus.id)
+            elif int(dir_.index_code.code) == -4:
+                if dir_.parent not in element_ids:
+                    dir4 = Directory.objects.get(pk=dir_.parent)
+                    dir3 = Directory.objects.get(pk=dir4.parent)
+                    bus = Directory.objects.get(name=dir_.business.code, parent=0)
+                    bic = Directory.objects.get(name=dir_.bic.directory_name, business=dir_.business.code, parent=bus.id)
+                    new_elements.append(dir4.id)
+                    new_elements.append(dir3.id)
+                    new_elements.append(bic.id)
+                    new_elements.append(bus.id)
+            elif int(dir_.index_code.code) == -3:
+                if dir_.parent not in element_ids:
+                    dir3 = Directory.objects.get(pk=dir_.parent)
+                    bus = Directory.objects.get(name=dir_.business.code, parent=0)
+                    bic = Directory.objects.get(name=dir_.bic.directory_name, business=dir_.business.code, parent=bus.id)
+                    new_elements.append(dir3.id)
+                    new_elements.append(bic.id)
+                    new_elements.append(bus.id)
+            elif int(dir_.index_code.code) == -2:
+                bus = Directory.objects.get(name=dir_.business.code, parent=0)
+                bic = Directory.objects.get(name=dir_.bic.directory_name, business=dir_.business.code, parent=bus.id)
+                if bic.id not in element_ids:
+                    new_elements.append(bic.id)
+                if bus.id not in element_ids:
+                    new_elements.append(bus.id)
+            elif int(dir_.index_code.code) == -1:
+                bus = Directory.objects.get(name=dir_.business.code, parent=0)
+                if bus.id not in element_ids:
+                    new_elements.append(bus.id)
+        except Exception as e:
+            logger.error(e)
+            logger.error(f'or it looks like some directories are missing.')
+    final_elements = element_ids
+    for ne in new_elements:
+        final_elements.append(ne)
+    return final_elements
 
 
 def get_user_differences(first_user, second_user):
@@ -513,7 +658,7 @@ def export_users_with_sftp(files_list, dest=settings.SFTP_PATH):
     sftp_client.chdir(dest)
     for file in files_list:
         # split by '/' in linux
-        sftp_client.put(file, file.split('/')[-1]) 
+        sftp_client.put(file, file.split('/')[-1])
         # split by '\' in windows
         # sftp_client.put(file, file.split('\\')[-1])
     sftp_client.close()

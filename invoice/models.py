@@ -21,6 +21,7 @@ class BaseInvoice(models.Model):
     invoice_type      = models.ForeignKey(InvoiceType, to_field='code', null=True, on_delete=models.CASCADE)
     serial_number     = models.CharField(max_length=50, blank=False, default=None)
     confirm_or_reject = models.CharField(max_length=10, blank=False, default='UNDEFINED')
+    status            = models.IntegerField(blank=False, default=0)
     description       = models.CharField(max_length=1000, blank=True, null=True, default=None)
     created_by        = models.ForeignKey(IscUser, blank=False, on_delete=models.CASCADE)
     created_at        = models.DateTimeField(default=timezone.now)
@@ -37,7 +38,6 @@ class BaseInvoice(models.Model):
         itype = str(self.invoice_type.id)
         return f'{itype}{dt.now().strftime("%y%m%d%H%M%S")}'
 
-    @property
     def get_jalali_created_at(self):
         return jdt.fromgregorian(datetime=self.created_at).strftime('%Y/%m/%d')
 
@@ -47,7 +47,6 @@ class Invoice(BaseInvoice):
     used_business    = models.IntegerField(default=0, blank=True)
     permissions_list = models.CharField(max_length=10000, default='', blank=True)
     
-    @property
     def get_mftuser(self):
         return MftUser.objects.get(pk=self.mftuser)
 

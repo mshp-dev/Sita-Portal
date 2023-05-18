@@ -1,7 +1,7 @@
 {% load coretags %} {% if invoices %} {% for invoice in invoices %} {% if invoice.invoice_type.code != 'INVDIR' %}
 <!--Invoices in manage-view-->
 <div class="col-10 mx-auto">
-  <div class="accordion mb-2" id="inv-{{ invoice.id }}-parent">
+  <div class="accordion mb-2" id="inv-{{ invoice.id }}-parent" role-in-list="inv-container" invid="{{ invoice.id }}">
     <!--Invoice Node-->
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingOne">
@@ -134,7 +134,7 @@
 <!--PreInvoices in manage-view-->
 {% elif invoice.invoice_type.code == 'INVDIR' %}
 <div class="col-10 mx-auto">
-  <div class="accordion mb-2" id="preinv-{{ invoice.id }}-parent">
+  <div class="accordion mb-2" id="preinv-{{ invoice.id }}-parent" role-in-list="pinv-container" invid="{{ invoice.id }}">
     <!--Invoice Node-->
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingOne">
