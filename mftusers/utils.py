@@ -515,7 +515,7 @@ def export_user_with_paths(id, isc_user):
     # ip[0].text = mftuser.ipaddr
     virtualFile = template.xpath('//webUsers/webUser/virtualFile')
     virtual_files = template.xpath('//webUsers/webUser/virtualFile/virtualFiles')
-    permissions = Permission.objects.filter(user=mftuser, is_confirmed=True)
+    permissions = Permission.objects.filter(user=mftuser, is_confirmed=True).exclude(directory__in=Directory.objects.filter(index_code='-1', children=''))
     all_dirs = permissions.values('directory').distinct()
     # bus_codes = [ub.code for ub in mftuser.business.all()]
     # bus_dirs = Directory.objects.filter(name__in=bus_codes)
