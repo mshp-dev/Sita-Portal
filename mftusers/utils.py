@@ -515,7 +515,7 @@ def export_user_with_paths(id, isc_user):
     # ip[0].text = mftuser.ipaddr
     virtualFile = template.xpath('//webUsers/webUser/virtualFile')
     virtual_files = template.xpath('//webUsers/webUser/virtualFile/virtualFiles')
-    permissions = Permission.objects.filter(user=mftuser, is_confirmed=True).exclude(directory__in=Directory.objects.filter(index_code='-1', children=''))
+    permissions = Permission.objects.filter(user=mftuser, is_confirmed=True).exclude(directory__index_code__code='-1', directory__children='')
     all_dirs = permissions.values('directory').distinct()
     # bus_codes = [ub.code for ub in mftuser.business.all()]
     # bus_dirs = Directory.objects.filter(name__in=bus_codes)
@@ -569,6 +569,63 @@ def export_user_with_paths(id, isc_user):
             # is_downloaded=False,
             # number_of_exports=1,
             # number_of_downloads=0,
+        )
+
+
+def export_user_with_paths_v2(id, isc_user):
+    mftuser = MftUser.objects.get(pk=id)
+    template = ET.parse(os.path.join(settings.MEDIA_ROOT, 'template.xml'))
+    description = template.xpath('//webUsers/webUser/description')
+    description[0].text = mftuser.description
+    email = template.xpath('//webUsers/webUser/email')
+    email[0].text = mftuser.email
+    firstName = template.xpath('//webUsers/webUser/firstName')
+    firstName[0].text = mftuser.firstname
+    phone = template.xpath('//webUsers/webUser/phone')
+    phone[0].text = str(mftuser.officephone)
+    authenticationAlias = template.xpath('//webUsers/webUser/authenticationAlias')
+    authenticationAlias[0].text = mftuser.alias
+    lastName = template.xpath('//webUsers/webUser/lastName')
+    lastName[0].text = mftuser.lastname
+    organization = template.xpath('//webUsers/webUser/organization')
+    organization[0].text = f'{mftuser.organization.description} - {mftuser.created_by.department.description}' if mftuser.organization.code == 'ISC' else mftuser.organization.description
+    mobilePhone = template.xpath('//webUsers/webUser/mobilePhone')
+    mobilePhone[0].text = str(mftuser.mobilephone)
+    name = template.xpath('//webUsers/webUser/name')
+    name[0].text = mftuser.username
+    # <ipFilterEntries>
+    #     <ipFilterEntry>
+    #         <address></address>
+    #     </ipFilterEntry>
+    # </ipFilterEntries>
+    # ip = template.xpath('//webUsers/webUser/ipFilterEntries/ipFilterEntry/address')
+    # ip[0].text = mftuser.ipaddr
+    virtualFile = template.xpath('//webUsers/webUser/virtualFile')
+    virtual_files = template.xpath('//webUsers/webUser/virtualFile/virtualFiles')
+    permissions = Permission.objects.filter(user=mftuser, is_confirmed=True).exclude(directory__index_code__code='-1', directory__children='')
+    for item in permissions.filter(directory__index_code__code='-1'):
+        if not permissions.filter(directory__id__in=[int(i) for i in item.directory.children.split(',')[:-1]]).exists():
+            permissions = permissions.exclude(directory__id=item.directory.id)
+    for bus_dir in list(permissions.filter(directory__parent=0).values('directory').distinct()):
+        virtual_file = ET.SubElement(virtual_files[0], 'virtualFile')
+        make_virtual_file(Directory.objects.get(pk=bus_dir['directory']), permissions, virtual_file)
+    webuser_temp_file = ntf(mode='w+', encoding='utf-8', delete=True)
+    bytes_template = ET.tostring(template, pretty_print=True)
+    webuser_temp_file.write(bytes_template.decode('utf-8'))
+    webuser_temp_file.flush()
+    webuser_file = File(webuser_temp_file, name=f'{mftuser.username}.xml')
+    if ReadyToExport.objects.filter(mftuser=mftuser).exists():
+        rte = ReadyToExport.objects.get(mftuser=mftuser)
+        rte.number_of_exports = rte.number_of_exports + 1
+        rte.webuser = webuser_file
+        rte.save()
+    else:
+        if os.path.exists(os.path.join(settings.MEDIA_ROOT, 'exports', f'{mftuser.username}.xml')):
+            os.remove(os.path.join(settings.MEDIA_ROOT, 'exports', f'{mftuser.username}.xml'))
+        ReadyToExport.objects.create(
+            mftuser=mftuser,
+            created_by=isc_user,
+            webuser=webuser_file
         )
 
 
@@ -756,6 +813,30 @@ def insert_into_db():
         {'name': 'in', 'parent': 'bic_dir'},
         {'name': 'accepted', 'parent': 'in'},
         {'name': 'out', 'parent': 'bic_dir'},
+    ]
+
+    mftusers_list = [
+        'a_ansari',
+        'a_bakhtiari',
+        'a_rezvanpour',
+        'a_sedighi',
+        'b_hafezi',
+        'h_enayati',
+        'h_ravanshad',
+        'k_ghorbani',
+        'k_zabeti',
+        'm_babakhanian',
+        'm_babanejad',
+        'm_eini',
+        'm_haghighat',
+        'm_omidi',
+        'm_taheri',
+        'o_rouein',
+        'p_bahrami',
+        'p_norouzimanesh',
+        'p_vahebzadeh',
+        'r_kazemi',
+        's_jamshidi'
     ]
 
     #####
@@ -954,6 +1035,35 @@ def insert_into_db():
         #     export_user_with_paths(invoice.mftuser, iscuser)
         #     invoice.confirm_or_reject = 'CONFIRMED'
         #     invoice.save()
+    
+    # mftusers = MftUser.objects.filter(username__in=mftusers_list)
+        # BNKIRN_dir_id = 56
+        # BNKIRN_bus_id = 13
+        # RFM_dir_id = 1028
+        # RFM_ISC_dir_id = 1048
+        # RFM_bus_id = 19
+        # for inv in Invoice.objects.filter(mftuser__in=[user.id for user in mftusers], used_business=BNKIRN_bus_id, confirm_or_reject='CONFIRMED', invoice_type__code='INVUBUS'):
+        # print(inv.permissions_list)
+        # user = mftusers.filter(pk=inv.mftuser).first()
+        # perm = Permission.objects.get(directory__id=BNKIRN_dir_id, user=user, permission=256)
+        # print(f'{perm.user} - {perm.permission} on {perm.directory.relative_path}')
+        # deleted_perms = []
+        # for i in inv.permissions_list.split(',')[:-1]:
+        #     try:
+        #         perm = Permission.objects.get(pk=i)
+        #         if perm.permission != 256:
+        #         print(perm)
+        #     except Exception as e:
+        #         print(f'permission with id {i} not found')
+        #         deleted_perms.append(i)
+        # print(f'deleted permissions {deleted_perms}')
+        # temp = inv.permissions_list
+        # for i in inv.permissions_list.split(',')[:-1]:
+        #     if i in deleted_perms:
+        #         temp = temp.replace(f'{i},', '')
+        # inv.permissions_list += f'{perm.id},'
+        # inv.permissions_list = temp
+        # inv.save()
 
 
 def lower_directory_index(directory):

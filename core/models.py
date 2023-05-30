@@ -182,7 +182,7 @@ class Permission(models.Model):
     def __str__(self):
         # user = MftUser.objects.get(id=self.user_id)
         perm = DirectoryPermissionCode.objects.get(value=self.permission)
-        return f'{perm.code} access on {self.directory.absolute_path}'
+        return f'{self.user} has {perm.code} access on {self.directory.absolute_path}'
 
     @property
     def directory_path(self):
@@ -239,5 +239,5 @@ class ReadyToExport(models.Model):
         path = os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.zip')
         with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED) as zf:
             zf.write(self.webuser.path, arcname=self.webuser.name.split('/')[-1])
-            zf.write(self.paths.path, arcname=self.paths.name.split('/')[-1])
+            # zf.write(self.paths.path, arcname=self.paths.name.split('/')[-1])
         return os.path.join(os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.zip'))

@@ -38,7 +38,16 @@ def index_view(request):
     # clean_up(flag='inv', action=False)
     # dirs = Directory.objects.filter(name='Test')
     # refactor_directory(operation='rename', action=False, old_name='TRANSACTION', new_name='BANKIRAN')
-    
+
+    # invs = Invoice.objects.filter(id__in=[277, 278, 279, 280])
+    # for inv in invs:
+    #     ids = [int(i) for i in inv.permissions_list.split(',')[:-1]]
+    #     for p in Permission.objects.filter(id__in=ids):
+    #         print(p)
+    #         if p.directory.name == 'accepted':
+    #             p.directory = Directory.objects.get(pk=p.directory.parent)
+    #             p.save()
+
     isc_user = IscUser.objects.get(user=request.user)
 
     # users_count = len(MftUser.objects.all())
@@ -450,19 +459,24 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
                 'invoices': [inv.id for inv in invoices],
                 'pre_invoices': [inv.id for inv in pre_invoices]
             }
-            if request.GET.get('q') != '':
+            if query != '':
                 filtered_invs = {
                     'invoices': [],
                     'pre_invoices': []
                 }
-                for inv in invoices:
-                    mftuser = inv.get_mftuser()
-                    buss = [bus.description for bus in mftuser.business.all()]
-                    if query in mftuser.username or query in mftuser.alias or query in mftuser.organization.description or query in inv.serial_number or query in inv.created_by.user.username or query in inv.get_jalali_created_at() or query in buss:
-                        filtered_invs['invoices'].append(inv.id)
-                for inv in pre_invoices:
-                    if query in inv.serial_number or query in inv.created_by.user.username or query in inv.get_jalali_created_at():
-                        filtered_invs['pre_invoices'].append(inv.id)
+                if ',' in query:
+                    for inv in query.split(','):
+                        filtered_invs['invoices'].append(int(inv))
+                        filtered_invs['pre_invoices'].append(int(inv))
+                else:
+                    for inv in invoices:
+                        mftuser = inv.get_mftuser()
+                        buss = [bus.description for bus in mftuser.business.all()]
+                        if query in mftuser.username or query in mftuser.alias or query in mftuser.organization.description or query in inv.serial_number or query in inv.created_by.user.username or query in inv.get_jalali_created_at() or query in buss:
+                            filtered_invs['invoices'].append(inv.id)
+                    for inv in pre_invoices:
+                        if query in inv.serial_number or query in inv.created_by.user.username or query in inv.get_jalali_created_at():
+                            filtered_invs['pre_invoices'].append(inv.id)
             return JsonResponse(data={"filtered_invs": filtered_invs}, safe=False)
 
     # for user in mftusers:

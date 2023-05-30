@@ -171,6 +171,17 @@
                 <label for="business"
                   >سامانه/پروژه هایی که سرویس می دهید <sup class="text-danger"><strong>*</strong></sup></label
                 >
+                <div class="input-group mb-2">
+                  <input
+                    type="text"
+                    class="form-control"
+                    style="text-align: right; direction: rtl"
+                    id="search-input-o"
+                    placeholder="جستجو در بین پروژه/سامانه ها"
+                    aria-label="Search"
+                    aria-describedby="basic-addon"
+                  />
+                </div>
                 <div class="input-group" style="direction: ltr">
                   <span class="input-group-text" id="owned-business" o-bus-id="{{ owned_business|get_business_ids }}"><span class="fas fa-sitemap"></span></span>
                   {{ business_form.owned_business }}
@@ -180,6 +191,17 @@
                 <label for="business"
                   >سامانه/پروژه ای که سرویس می گیرید</label
                 >
+                <div class="input-group mb-2">
+                  <input
+                    type="text"
+                    class="form-control"
+                    style="text-align: right; direction: rtl"
+                    id="search-input-u"
+                    placeholder="جستجو در بین پروژه/سامانه ها"
+                    aria-label="Search"
+                    aria-describedby="basic-addon"
+                  />
+                </div>
                 <div class="input-group" style="direction: ltr">
                   <span class="input-group-text" id="used-business" u-bus-id="{{ used_business|get_business_ids }}"><span class="fas fa-sitemap"></span></span>
                   {{ business_form.used_business }}
@@ -207,6 +229,42 @@
 </main>
 
 <script type="text/javascript">
+  $("#search-input-o").on("keyup", function () {
+    var inp = $(this).val();
+    if (inp !== "") {
+      $("#id_owned_business option").each(function () {
+        var opt = $(this).html();
+        if (opt.includes(inp)) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    } else {
+      $("#id_owned_business option").each(function () {
+        $(this).show();
+      });
+    }
+  });
+
+  $("#search-input-u").on("keyup", function () {
+    var inp = $(this).val();
+    if (inp !== "") {
+      $("#id_used_business option").each(function () {
+        var opt = $(this).html();
+        if (opt.includes(inp)) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    } else {
+      $("#id_used_business option").each(function () {
+        $(this).show();
+      });
+    }
+  });
+
   function goBack() {
     var url = "/";
     window.location = url;

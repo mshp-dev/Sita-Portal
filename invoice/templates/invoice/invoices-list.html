@@ -55,7 +55,8 @@
             //document.getElementById(response.type + "inv-" + response.updated + "-parent").remove();
             $("#" + response.type + "inv-" + response.updated + "-parent")
               .parent()
-              .appendTo("#tabs-undefined-invoices");
+              .remove();
+            //.appendTo("#tabs-undefined-invoices");
           } else if (response.result == "error") {
             alert(response.message);
           }
