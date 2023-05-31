@@ -7,9 +7,12 @@
 {% block javascripts %} {% load static %}
 <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
 <script type="text/javascript">
+  function alertToUser() {
+    $("#alert-modal").modal("show");
+  }
+
   function downloadPdf() {
     //$("#invoice").html(response.invoice_number);
-
     var invoice = document.getElementById("invoice");
     var element = document.getElementById("downloadable");
     /*var header = document.getElementById("header");
@@ -115,9 +118,24 @@
     );
     printWindow.document.write('<td class="col-3 text-center" scope="col">صفحه 1</td></tr>');
     printWindow.document.write("</table></div></body></html>");
+    /*printWindow.document.write('<div class="row">');
+    printWindow.document.write('<div class="col md-2">');
+    printWindow.document.write('<div class="modal fade" id="alert-modal" role="dialog" aria-labelledby="alert-modal" aria-hidden="true">');
+    printWindow.document.write('<div class="modal-dialog modal-dialog-centered" role="document">');
+    printWindow.document.write('<div class="modal-content" style="direction: rtl">');
+    printWindow.document.write('<div class="modal-header">');
+    printWindow.document.write('<h2 class="h6 modal-title">نحوه ارسال درخواست چارگون</h2>');
+    printWindow.document.write('<button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>');
+    printWindow.document.write('</div><div class="modal-body">');
+    printWindow.document.write('<p>لطفاً PDF دریافتی را پیوست فرم چارگونی شماره 307 و حتماً به صورت """پیشنویس""" ارسال فرمائید.</p>');
+    printWindow.document.write("<p>شایان ذکر است نامه درخواست سازمان/بانک می بایست ضمیمه فرم چارگون ارسال گردد.</p>");
+    printWindow.document.write('</div><div class="modal-footer">');
+    printWindow.document.write('<button type="button" class="btn btn-link ms-0" data-bs-dismiss="modal">تأیید</button>');
+    printWindow.document.write("</div></div></div></div></div>");
+    printWindow.document.write("</div>");*/
     printWindow.document.close();
     printWindow.alert("برای ذخیره به عنوان PDF کلیدهای Ctrl+P را بزنید");
-    printWindow.alert('لطفاً PDF دریافتی را پیوست فرم چارگونی شماره 307 و حتماً به صورت """پیشنویس""" ارسال فرمائید.');
+    //printWindow.alert('');
     //header.innerHTML = "";
     //console.log(element.innerHTML);
     /*var opt = { margin: 1,
@@ -181,12 +199,42 @@
           style="width: 50%"
           class="btn btn-warning mx-auto"
           value="PDF دریافت به صورت"
-          onClick="downloadPdf()"
+          onClick="alertToUser()"
           {% comment %} onClick="downloadPdfAjax()" {% endcomment %}
         />
       </div>
       <div class="row mb-8">
         <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="javascript:history.go(-1);" />
+      </div>
+    </div>
+    <div class="row">
+      <div class="col md-2">
+        <div class="modal fade" id="alert-modal" role="dialog" aria-labelledby="alert-modal" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" style="direction: rtl">
+              <div class="modal-header">
+                <h2 class="h6 modal-title">نحوه ارسال درخواست چارگون</h2>
+                <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p>لطفاً PDF دریافتی را پیوست فرم چارگونی شماره 307 و حتماً به صورت """پیشنویس""" ارسال فرمائید.</p>
+                <p>
+                  در خصوص درخواست های خارج از شرکت خدمات انفورماتیک، نامه """سازمان/بانک درخواست دهنده""" نیز می بایست ضمیمه فرم چارگون ارسال گردد.
+                </p>
+              </div>
+              <div class="modal-footer">
+                <button id="submit-button" type="button" class="btn btn-secondary ms-auto" data-bs-dismiss="modal">تأیید</button>
+                <script>
+                  $(function () {
+                    $("#submit-button").click(function () {
+                      downloadPdf();
+                    });
+                  });
+                </script>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -86,7 +86,7 @@ class Invoice(BaseInvoice):
 
 
 class PreInvoice(BaseInvoice):
-    directories_list  = models.CharField(max_length=1000, default='', blank=False)
+    directories_list  = models.CharField(max_length=5000, default='', blank=False)
 
     def generate_serial_number(self):
         serial_number = super(PreInvoice, self).generate_serial_number()
