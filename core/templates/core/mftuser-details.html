@@ -173,10 +173,32 @@
                       </div>
                     </div>
                     <div class="form-group mb-4" style="direction: rtl">
-                      <label for="business">سامانه/پروژه</label>
+                      <label for="business">سامانه/پروژه های تحت اختیار</label>
+                      <p class="text-danger" style="font-size: 0.7rem">* با نگهداشتن کلید CTRL می توانید چند سامانه را انتخاب نمایید</p>
+                      <div class="input-group mb-2">
+                        <input
+                          type="text"
+                          class="form-control"
+                          style="text-align: right; direction: rtl"
+                          id="search-input"
+                          placeholder="جستجو در بین پروژه/سامانه ها"
+                          aria-label="Search"
+                          aria-describedby="basic-addon"
+                        />
+                      </div>
                       <div class="input-group" style="direction: ltr">
                         <span class="input-group-text" id="business" bus-id="{{ mftuser.business.all|get_business_ids }}"><span class="fas fa-sitemap"></span></span>
                         {{ form.business }}
+                      </div>
+                    </div>
+                    <div class="form-group mb-4" style="direction: rtl">
+                      <label for="business">سامانه/پروژه های تحت اختیار سایر گروه ها</label>
+                      <div class="input-group">
+                        <ul class="mt-2">
+                          {% for item in used_buss %}
+                          <li class="h6 fw-bold">{{ item.directory__business__description }}</li>
+                          {% endfor %}
+                        </ul>
                       </div>
                     </div>
                     <div class="form-group mb-4" style="direction: rtl">
@@ -254,6 +276,24 @@
     //var busParent = document.getElementById("business");
     //bus.value = parseInt(busParent.getAttribute("bus-id"));
   };
+
+  $("#search-input").on("keyup", function () {
+    var inp = $(this).val();
+    if (inp !== "") {
+      $("option").each(function () {
+        var opt = $(this).html();
+        if (opt.includes(inp)) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    } else {
+      $("option").each(function () {
+        $(this).show();
+      });
+    }
+  });
 
   $(function () {
     var bus_ids = $("#business").attr("bus-id");

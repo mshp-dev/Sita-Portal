@@ -1014,6 +1014,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
         'username': str(isc_user.user.username),
         'access': str(isc_user.role.code),
         'mftuser': mftuser,
+        'used_buss': mftuser.get_used_business(obj=True),
         'confirmed': confirmed,
         'form': form
     }

@@ -105,12 +105,24 @@ class MftUser(models.Model):
     modified_at      = models.DateTimeField(default=timezone.now)
     is_confirmed     = models.BooleanField(blank=False, default=False)
 
-    def get_all_business(self):
+    def get_owned_business(self):
         bus_list = [bus for bus in self.business.all()]
         buss = ""
         for b in bus_list:
             buss += f'{b.code},'
         return buss[:-1]
+
+    def get_used_business(self, obj=False):
+        bus_list = BusinessCode.objects.all().exclude(code__in=self.business.all().values('code')).values('code')
+        bus_dirs = Directory.objects.filter(parent=0, business__code__in=bus_list)
+        if obj:
+            return Permission.objects.filter(user=self.id, directory__parent=0, directory__business__code__in=bus_list).values('directory__business__description')
+        else:
+            buss = ""
+            for bus_dir in bus_dirs:
+                if Permission.objects.filter(user=self.id, directory=bus_dir.id).exists():
+                    buss += f'{bus_dir.business.code},'
+            return buss[:-1]
 
     def __str__(self):
         return f'{self.username} ({self.organization})'
@@ -137,12 +149,24 @@ class MftUserTemp(models.Model):
     modified_at      = models.DateTimeField(default=timezone.now)
     is_confirmed     = models.BooleanField(blank=False, default=False)
 
-    def get_all_business(self):
+    def get_owned_business(self):
         bus_list = [bus for bus in self.business.all()]
         buss = ""
         for b in bus_list:
             buss += f'{b.code},'
         return buss[:-1]
+
+    def get_used_business(self, obj=False):
+        bus_list = BusinessCode.objects.all().exclude(code__in=self.business.all().values('code')).values('code')
+        bus_dirs = Directory.objects.filter(parent=0, business__code__in=bus_list)
+        if obj:
+            return Permission.objects.filter(user=self.id, directory__parent=0, directory__business__code__in=bus_list).values('directory__business__description')
+        else:
+            buss = ""
+            for bus_dir in bus_dirs:
+                if Permission.objects.filter(user=self.id, directory=bus_dir.id).exists():
+                    buss += f'{bus_dir.business.code},'
+            return buss[:-1]
 
     def __str__(self):
         return f'{self.username} ({self.organization})'

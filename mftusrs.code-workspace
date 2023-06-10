@@ -1,0 +1,21 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "sqltools.connections": [
+      {
+        "previewLimit": 50,
+        "server": "sita.iranet.net",
+        "port": 5432,
+        "driver": "PostgreSQL",
+        "name": "Sita2-Portal",
+        "database": "mftusers",
+        "username": "postgres",
+        "password": "Admin@postgres#110"
+      }
+    ]
+  }
+}
