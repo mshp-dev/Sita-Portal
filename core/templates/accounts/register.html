@@ -33,6 +33,7 @@
                 <strong>* تلفن همراه </strong> در ده رقم بدون صفر و یا به طور کامل (یازده رقم) وارد شود
               </p>
               <p class="text-danger" style="font-size: 0.7rem"><strong>* سامانه</strong> همان نام پروژه یا بیزینس که به تبادل فایل نیاز دارد</p>
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* سازمان</strong> همان نام بانک یا سازمانی که به تبادل فایل نیاز دارد</p>
             </div>
             <form class="mt-5" method="POST" action="" id="iscuser-form">
               {% csrf_token %}
@@ -100,15 +101,27 @@
                 </div>
               </div>
               <div class="form-group mb-4" style="direction: rtl">
+                <label for="department"
+                  >گروه/دپارتمان <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="department"><span class="fas fa-building"></span></span>
+                  {{ form.department }}
+                </div>
+              </div>
+              <div id="business-parent" class="form-group mb-4" style="display: none; direction: rtl">
                 <label for="business"
                   >سامانه/پروژه های تحت اختیار <sup class="text-danger"><strong>*</strong></sup></label
                 >
+                <p>
+                  <span style="font-size: 0.7rem">با نگهداشتن کلید CTRL می توانید چند سامانه را انتخاب نمایید</span>
+                </p>
                 <div class="input-group mb-2">
                   <input
                     type="text"
                     class="form-control"
                     style="text-align: right; direction: rtl"
-                    id="search-input"
+                    id="business-search-input"
                     placeholder="جستجو در بین پروژه/سامانه ها"
                     aria-label="Search"
                     aria-describedby="basic-addon"
@@ -119,13 +132,27 @@
                   {{ form.business }}
                 </div>
               </div>
-              <div class="form-group mb-4" style="direction: rtl">
-                <label for="department"
-                  >گروه/دپارتمان <sup class="text-danger"><strong>*</strong></sup></label
+              <div id="organization-parent" class="form-group mb-4" style="direction: rtl">
+                <label for="organization"
+                  >سازمان/بانک های تحت اختیار <sup class="text-danger"><strong>*</strong></sup></label
                 >
+                <p>
+                  <span style="font-size: 0.7rem">با نگهداشتن کلید CTRL می توانید چند سازمان را انتخاب نمایید</span>
+                </p>
+                <div class="input-group mb-2">
+                  <input
+                    type="text"
+                    class="form-control"
+                    style="text-align: right; direction: rtl"
+                    id="organization-search-input"
+                    placeholder="جستجو در بین سازمان/بانک ها"
+                    aria-label="Search"
+                    aria-describedby="basic-addon"
+                  />
+                </div>
                 <div class="input-group" style="direction: ltr">
-                  <span class="input-group-text" id="department"><span class="fas fa-building"></span></span>
-                  {{ form.department }}
+                  <span class="input-group-text" id="organization"><span class="fas fa-university"></span></span>
+                  {{ form.organization }}
                 </div>
               </div>
               <br />
@@ -156,10 +183,10 @@
 {% block javascripts %}
 <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
 <script>
-  $("#search-input").on("keyup", function () {
+  $("#business-search-input").on("keyup", function () {
     var inp = $(this).val();
     if (inp !== "") {
-      $("option").each(function () {
+      $("#id_business option").each(function () {
         var opt = $(this).html();
         if (opt.includes(inp)) {
           $(this).show();
@@ -168,7 +195,25 @@
         }
       });
     } else {
-      $("option").each(function () {
+      $("#id_business option").each(function () {
+        $(this).show();
+      });
+    }
+  });
+
+  $("#organization-search-input").on("keyup", function () {
+    var inp = $(this).val();
+    if (inp !== "") {
+      $("#id_organization option").each(function () {
+        var opt = $(this).html();
+        if (opt.includes(inp)) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    } else {
+      $("#id_organization option").each(function () {
         $(this).show();
       });
     }
@@ -179,14 +224,44 @@
     window.location = url;
   }
 
-  var options = document.querySelectorAll("option");
+  var dept = document.getElementById("id_department");
+  dept.addEventListener("change", function (event) {
+    var url = `/register/?dept=${event.currentTarget.options[event.currentTarget.selectedIndex].value}`;
+    fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+    })
+      .then((Result) => Result.json())
+      .then((json) => {
+        if (json["result"] == "success") {
+          var access_type = json["type"];
+          if (access_type == "OPERATION") {
+            $("#organization-parent").hide();
+            $("#business-parent").show();
+          } else if (access_type == "CUSTOMER") {
+            $("#business-parent").hide();
+            $("#organization-parent").show();
+          }
+        } else if (json["result"] == "error") {
+          console.log(json["message"]);
+        }
+      })
+      .catch((errorMsg) => {
+        console.log(errorMsg);
+      });
+  });
+
+  /*var options = document.querySelectorAll("option");
   options.forEach((opt) => {
     if (opt.getAttribute("parent") == "department") {
       bic.appendChild(opt);
     } else if (opt.getAttribute("parent") == "business") {
       bus.appendChild(opt);
     }
-  });
+  });*/
 
   var username = document.getElementById("id_username");
   username.addEventListener("change", function (event) {

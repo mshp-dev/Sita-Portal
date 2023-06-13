@@ -71,8 +71,28 @@ def register_user_view(request):
     msg = None
     success = False
     form = IscUserForm(request.POST or None)
+
+    if request.is_ajax():
+        if request.method == "GET":
+            try:
+                dept_id = request.GET.get('dept')
+                department = IscDepartmentCode.objects.get(pk=int(dept_id))
+                response = {
+                    "result": "success",
+                    "type": department.access_type.code
+                }
+            except Exception as e:
+                print(e)
+                logger.info(f'{e}.')
+                response = {
+                    "result": "error",
+                    "message": "مشکلی پیش آمده است، با مدیر سیستم تماس بگیرید."
+                }
+        return JsonResponse(data=response, safe=False)
+    
     form.fields['department'].choices = [(dept.id, dept) for dept in IscDepartmentCode.objects.all().order_by('description')]
     form.fields['business'].choices = [(bus.id, bus) for bus in BusinessCode.objects.all().order_by('description')]
+    form.fields['organization'].choices = [(org.id, org) for org in BankIdentifierCode.objects.all().order_by('description')]
 
     if request.method == "POST":
         # form = SignUpForm(request.POST)
@@ -90,6 +110,7 @@ def register_user_view(request):
             user.save()
             user_role = form.cleaned_data.get("department").access_type
             businesses = form.cleaned_data.get("business")
+            organizations = form.cleaned_data.get("organization")
             isc_user = IscUser(
                 user=user,
                 role=user_role,
@@ -112,14 +133,17 @@ def register_user_view(request):
                     else:
                         logger.warning(f'access on {bus_code.code} for {isc_user.user.username} has beeen given.')
                         bus_msg += f'دسترسی به سامانه/پروژه {bus_code.code} ایجاد نشد. متعلق به گروه دیگری می باشد.\n'
-            # elif user_role.code == 'CUSTOMER':
-            #     pass
-
+            elif user_role.code == 'CUSTOMER':
+                for org in organizations:
+                    organization = BankIdentifierCode.objects.get(id=int(org))
+                    CustomerBank.objects.create(
+                        user=isc_user,
+                        access_on_bic=organization
+                    )
+                    logger.info(f'access on {organization.code} for {isc_user.user.username} has beeen given.')
             msg = f'<p>کاربری {user.username} ایجاد گردید،<br />برای فعالسازی آن لطفاً با 29985700 تماس بگیرید.</p><br ><p>{bus_msg}</p>'
             success = True
-
             # return redirect("/login/")
-
         else:
             # 'اطلاعات ورودی صحیح نیست!'
             msg = form.errors

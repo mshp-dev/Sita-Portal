@@ -166,8 +166,9 @@ class IscUserForm(forms.ModelForm):
     officephone  = forms.DecimalField(max_digits=8, required=True, widget=forms.TextInput(attrs={"placeholder": "123456798", "maxlength": "8", "class": "form-control"}))
     mobilephone  = forms.DecimalField(max_digits=11, required=True, widget=forms.TextInput(attrs={"placeholder": "09123456798", "maxlength": "11", "class": "form-control"}))
     department   = forms.ChoiceField(required=True, widget=forms.Select(attrs={"class": "form-control form-select", "parent": "department"}))
-    business     = forms.MultipleChoiceField(required=True, widget=forms.SelectMultiple(attrs={"class": "form-control form-select", "parent": "business"}))
-    
+    business     = forms.MultipleChoiceField(required=True, widget=forms.SelectMultiple(attrs={"class": "form-control form-select", "size": 10, "parent": "business"}))
+    organization = forms.MultipleChoiceField(required=True, widget=forms.SelectMultiple(attrs={"class": "form-control form-select", "size": 10, "parent": "organization"}))
+
     class Meta:
         model = IscUser
         fields = [
@@ -180,6 +181,7 @@ class IscUserForm(forms.ModelForm):
             'mobilephone',
             'department',
             'business',
+            'organization'
         ]
     
     def clean_department(self):
@@ -189,6 +191,10 @@ class IscUserForm(forms.ModelForm):
     # def clean_business(self):
     #     business = BusinessCode.objects.get(id=self.cleaned_data.get('business'))
     #     return business
+    
+    # def clean_organizations(self):
+    #     organizations = BankIdentifierCode.objects.get(id=self.cleaned_data.get('organizations'))
+    #     return organizations
     
     def clean_mobilephone(self):
         phone_number = str(self.cleaned_data.get('mobilephone'))
