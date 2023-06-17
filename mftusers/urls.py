@@ -20,8 +20,12 @@ from django.conf import settings
 
 from .views import issue_view, change_issue_mode
 
+admin.site.site_header = 'Sita Portal Admin Panel'
+admin.site.site_title = 'Sita Portal Admin Panel'
+admin.site.index_title = 'Users and Directories Administration'
+
 urlpatterns = [
-    path('admin/', admin.site.urls, name='admin'),
+    path('sita-admin/', admin.site.urls, name='admin'),
     path('', include('core.urls')),
     # path('command/', change_issue_mode, name='change_issue_mode'),
     # re_path(r'^.*\.*', issue_view, name='issue-view'),

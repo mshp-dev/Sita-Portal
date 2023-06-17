@@ -35,6 +35,9 @@
               <p class="text-danger" style="font-size: 0.7rem"><strong>* سامانه</strong> همان نام پروژه یا بیزینس که به تبادل فایل نیاز دارد</p>
               <p class="text-danger" style="font-size: 0.7rem"><strong>* سازمان</strong> همان نام بانک یا سازمانی که به تبادل فایل نیاز دارد</p>
             </div>
+            <div style="display: none">
+              <p id="current-access-type">{{ access_type }}</p>
+            </div>
             <form class="mt-5" method="POST" action="" id="iscuser-form">
               {% csrf_token %}
               <div class="form-group mb-4" style="direction: rtl">
@@ -183,6 +186,38 @@
 {% block javascripts %}
 <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
 <script>
+  $(window).on("load", function () {
+    $("#id_organization option[value=1]").prop("selected", true);
+    $("#id_business option[value=1]").prop("selected", true);
+
+    var access_type = $("#current-access-type").html();
+    check_access_type(access_type);
+  });
+
+  function check_access_type(access_type) {
+    if (access_type == "OPERATION") {
+      $("#organization-parent").hide();
+      $("#id_organization option").each(function () {
+        $(this).prop("selected", false);
+      });
+      $("#id_organization option[value=1]").prop("selected", true);
+      $("#business-parent").show();
+      $("#id_business option").each(function () {
+        $(this).prop("selected", false);
+      });
+    } else if (access_type == "CUSTOMER") {
+      $("#business-parent").hide();
+      $("#id_business option").each(function () {
+        $(this).prop("selected", false);
+      });
+      $("#id_business option[value=1]").prop("selected", true);
+      $("#organization-parent").show();
+      $("#id_organization option").each(function () {
+        $(this).prop("selected", false);
+      });
+    }
+  }
+
   $("#business-search-input").on("keyup", function () {
     var inp = $(this).val();
     if (inp !== "") {
@@ -193,6 +228,9 @@
         } else {
           $(this).hide();
         }
+      });
+      $("#id_business :selected").each(function () {
+        $(this).show();
       });
     } else {
       $("#id_business option").each(function () {
@@ -211,6 +249,9 @@
         } else {
           $(this).hide();
         }
+      });
+      $("#id_organization :selected").each(function () {
+        $(this).show();
       });
     } else {
       $("#id_organization option").each(function () {
@@ -238,13 +279,7 @@
       .then((json) => {
         if (json["result"] == "success") {
           var access_type = json["type"];
-          if (access_type == "OPERATION") {
-            $("#organization-parent").hide();
-            $("#business-parent").show();
-          } else if (access_type == "CUSTOMER") {
-            $("#business-parent").hide();
-            $("#organization-parent").show();
-          }
+          check_access_type(access_type);
         } else if (json["result"] == "error") {
           console.log(json["message"]);
         }

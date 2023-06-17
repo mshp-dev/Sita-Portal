@@ -70,6 +70,7 @@ def index_view(request):
 def register_user_view(request):
     msg = None
     success = False
+    access_type = 'CUSTOMER'
     form = IscUserForm(request.POST or None)
 
     if request.is_ajax():
@@ -147,11 +148,13 @@ def register_user_view(request):
         else:
             # 'اطلاعات ورودی صحیح نیست!'
             msg = form.errors
+            access_type = form.cleaned_data.get("department").access_type.code
 
     context = {
         "form": form,
         "msg": msg,
-        "success": success
+        "success": success,
+        "access_type": access_type
     }
     return render(request, "accounts/register.html", context)
 
