@@ -19,13 +19,16 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 from .views import issue_view, change_issue_mode
+from core.views import logout_view
 
 admin.site.site_header = 'Sita Portal Admin Panel'
 admin.site.site_title = 'Sita Portal Admin Panel'
 admin.site.index_title = 'Users and Directories Administration'
+admin.site.site_url = '/dashboard/'
 
 urlpatterns = [
     path('sita-admin/', admin.site.urls, name='admin'),
+    path('sita-admin/logout/', logout_view, name='home'),
     path('', include('core.urls')),
     # path('command/', change_issue_mode, name='change_issue_mode'),
     # re_path(r'^.*\.*', issue_view, name='issue-view'),

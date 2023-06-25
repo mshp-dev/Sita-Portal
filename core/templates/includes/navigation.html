@@ -1,14 +1,14 @@
 <header class="header-global" style="direction: rtl">
   <nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark">
     <div class="container position-relative">
-      <a class="navbar-brand me-lg-5" href="{% url 'home' %}">
+      <a class="navbar-brand me-lg-5" href="{% url 'dashboard' %}">
         <img class="navbar-brand-dark" src="/static/assets/img/isc-logo.svg" alt="ISC logo" />
       </a>
       <div class="navbar-collapse collapse me-auto" id="navbar_global">
         <div class="navbar-collapse-header">
           <div class="row">
             <div class="col-6 collapse-brand">
-              <a href="{% url 'home' %}">
+              <a href="{% url 'dashboard' %}">
                 <img src="/static/assets/img/isc-logo2.svg" alt="ISC logo" />
               </a>
             </div>
@@ -39,7 +39,7 @@
                   <ul class="list-style-none mb-4">
                     {% if access != 'VIEWER' %}
                     <li class="mb-2 megamenu-item">
-                      <a class="megamenu-link" href="{% url 'home' %}">صفحه اصلی</a>
+                      <a class="megamenu-link" href="{% url 'dashboard' %}">صفحه اصلی</a>
                     </li>
                     <li class="mb-2 megamenu-item">
                       <a class="megamenu-link" href="{% url 'mftusers-create-or-change-list' %}">ایجاد/تغییر کاربر</a>

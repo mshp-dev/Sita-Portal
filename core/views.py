@@ -27,40 +27,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-@login_required(login_url='/login/')
 def index_view(request):
-    # buck insertion into or correction in db
-    # insert_into_db()
-    # clean_up(flag='perm', action=False)
-    # clean_up(flag='perm2', action=False)
-    # clean_up(flag='dir', action=False)
-    # clean_up(flag='dir3', action=False, bic_name="FIU")
-    # clean_up(flag='inv', action=False)
-    # dirs = Directory.objects.filter(name='Test')
-    # refactor_directory(operation='rename', action=False, old_name='TRANSACTION', new_name='BANKIRAN')
-
-    # invs = Invoice.objects.filter(id__in=[277, 278, 279, 280])
-    # for inv in invs:
-    #     ids = [int(i) for i in inv.permissions_list.split(',')[:-1]]
-    #     for p in Permission.objects.filter(id__in=ids):
-    #         print(p)
-    #         if p.directory.name == 'accepted':
-    #             p.directory = Directory.objects.get(pk=p.directory.parent)
-    #             p.save()
-
-    isc_user = IscUser.objects.get(user=request.user)
-
-    # users_count = len(MftUser.objects.all())
-    # directories_count = len(Directory.objects.all())
-    # banks_count = len(BankIdentifierCode.objects.all()) - 1
-
     context = {
-        'segment': 'index',
-        'username': str(isc_user.user.username),
-        'access': str(isc_user.role.code)
-        # 'users_count': str(users_count),
-        # 'directories_count': str(directories_count),
-        # 'banks_count': str(banks_count)
+        'users_count': MftUser.objects.all().count(),
+        'directories_count': Directory.objects.all().count(),
+        'business_count': BusinessCode.objects.all().count(),
+        'organizations_count': BankIdentifierCode.objects.all().count()
     }
     
     html_template = loader.get_template('core/index.html')
@@ -163,7 +135,7 @@ def login_view(request, *args, **kwargs):
     form = LoginForm(request.POST or None)
 
     msg = None
-    next_ = "/"
+    next_ = "/dashboard/"
 
     if request.META.get('QUERY_STRING'):
         qs = request.META.get('QUERY_STRING')
@@ -195,7 +167,56 @@ def login_view(request, *args, **kwargs):
 def logout_view(request, *args, **kwargs):
     logger.info(f'{request.user.username} has logged out successfully.')
     logout(request)
-    return redirect('/login/')
+    return redirect('/')
+
+
+def error_view(request, err=None, *args, **kwargs):
+    context = {}
+    
+    if err == 400 or err == None:
+        html_template = loader.get_template('core/400.html')
+        return HttpResponse(html_template.render(context, request))
+    elif err == 401:
+        html_template = loader.get_template('core/401.html')
+        return HttpResponse(html_template.render(context, request))
+    elif err == 404:
+        html_template = loader.get_template('core/404.html')
+        return HttpResponse(html_template.render(context, request))
+    elif err == 500:
+        html_template = loader.get_template('core/500.html')
+        return HttpResponse(html_template.render(context, request))
+
+
+@login_required(login_url='/login/')
+def dashboard_view(request):
+    # buck insertion into or correction in db
+    # insert_into_db()
+    # clean_up(flag='perm', action=False)
+    # clean_up(flag='perm2', action=False)
+    # clean_up(flag='dir', action=False)
+    # clean_up(flag='dir3', action=False, bic_name="FIU")
+    # clean_up(flag='inv', action=False)
+    # dirs = Directory.objects.filter(name='Test')
+    # refactor_directory(operation='rename', action=False, old_name='TRANSACTION', new_name='BANKIRAN')
+
+    # invs = Invoice.objects.filter(id__in=[277, 278, 279, 280])
+    # for inv in invs:
+    #     ids = [int(i) for i in inv.permissions_list.split(',')[:-1]]
+    #     for p in Permission.objects.filter(id__in=ids):
+    #         print(p)
+    #         if p.directory.name == 'accepted':
+    #             p.directory = Directory.objects.get(pk=p.directory.parent)
+    #             p.save()
+
+    isc_user = IscUser.objects.get(user=request.user)
+
+    context = {
+        'username': str(isc_user.user.username),
+        'access': str(isc_user.role.code)
+    }
+    
+    html_template = loader.get_template('core/dashboard.html')
+    return HttpResponse(html_template.render(context, request))
 
 
 @login_required(login_url='/login/')
@@ -337,23 +358,6 @@ def profile_view(request, *args, **kwargs):
     }
 
     return render(request, "accounts/profile.html", context)
-
-
-def error_view(request, err=None, *args, **kwargs):
-    context = {}
-    
-    if err == 400 or err == None:
-        html_template = loader.get_template('core/400.html')
-        return HttpResponse(html_template.render(context, request))
-    elif err == 401:
-        html_template = loader.get_template('core/401.html')
-        return HttpResponse(html_template.render(context, request))
-    elif err == 404:
-        html_template = loader.get_template('core/404.html')
-        return HttpResponse(html_template.render(context, request))
-    elif err == 500:
-        html_template = loader.get_template('core/500.html')
-        return HttpResponse(html_template.render(context, request))
 
 
 @login_required(login_url="/login/")

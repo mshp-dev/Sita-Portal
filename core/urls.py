@@ -2,6 +2,7 @@ from django.urls import path, re_path, include
 
 from .views import (
     index_view,
+    dashboard_view,
     login_view,
     logout_view,
     change_password_view,
@@ -34,10 +35,11 @@ from .views import (
 
 
 urlpatterns = [
-    path('', index_view, name='home'),
+    path('', index_view, name='index'),
     path('login/', login_view, name='login'),
     path("logout/", logout_view, name="logout"),
     path('register/', register_user_view, name='register'),
+    path('dashboard/', dashboard_view, name='dashboard'),
     path("change-password/", change_password_view, name="change-password"),
     path("profile/", profile_view, name="iscuser-profile"),
     path("add-data/", add_data_view, name="add-data"),

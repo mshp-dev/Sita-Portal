@@ -232,7 +232,7 @@
   $("#search-input").on("keyup", function () {
     var inp = $(this).val();
     if (inp !== "") {
-      $("option").each(function () {
+      $("#id_business option").each(function () {
         var opt = $(this).html();
         if (opt.includes(inp)) {
           $(this).show();

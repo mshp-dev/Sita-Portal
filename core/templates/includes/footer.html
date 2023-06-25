@@ -54,13 +54,13 @@
         <ul class="footer-links mt-2">
           {% if access != 'VIEWER' %}
           <li>
-            <a target="_blank" href="{% url 'home' %}">صفحه اصلی</a>
+            <a target="_blank" href="{% url 'dashboard' %}">صفحه اصلی</a>
           </li>
           <li>
             <a target="_blank" href="{% url 'mftuser-create' %}">ایجاد کاربر</a>
           </li>
           <li>
-            <a target="_blank" href="{% url 'home' %}">ایجاد دایرکتوری</a>
+            <a target="_blank" href="{% url 'dashboard' %}">ایجاد دایرکتوری</a>
           </li>
           {% endif %}
           <li>
