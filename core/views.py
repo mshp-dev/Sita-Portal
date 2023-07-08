@@ -362,12 +362,12 @@ def profile_view(request, *args, **kwargs):
 
 @login_required(login_url="/login/")
 def add_data_view(request, *args, **kwargs):
-    msg = None
-    success = False
-    isc_user        = IscUser.objects.get(user=request.user)
-    username        = str(isc_user.user.username)
-    access          = str(isc_user.role.code)
-    form = AddBusinessForm(request.POST or None)
+    msg      = None
+    success  = False
+    isc_user = IscUser.objects.get(user=request.user)
+    username = str(isc_user.user.username)
+    access   = str(isc_user.role.code)
+    form     = AddBusinessForm(request.POST or None)
 
     if not isc_user.user.is_staff:
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
@@ -1743,6 +1743,58 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                 response = {'result': 'error'}
             finally:
                 return JsonResponse(data=response, safe=False, status=status_code)
+
+
+@login_required(login_url="/login/")
+def transfer_permissions_view(request, *args, **kwargs):
+    msg      = ''
+    success  = False
+    isc_user = IscUser.objects.get(user=request.user)
+    username = str(isc_user.user.username)
+    access   = str(isc_user.role.code)
+    form     = TransferPermissionsForm(request.POST or None, request=request)
+
+    # if not isc_user.user.is_staff:
+    #     logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+    #     return redirect('/error/401/')
+    
+    if request.is_ajax():
+        if request.method == 'POST':
+            pass
+        elif request.method == 'GET':
+            pass
+
+    if request.method == "POST":
+        if form.is_valid():
+            orig_user = MftUser.objects.get(username=form.cleaned_data.get("origin_mftuser"))
+            dest_user = MftUser.objects.get(username=form.cleaned_data.get("destination_mftuser"))
+            Permission.objects.filter(user=dest_user).delete()
+            permissions = Permission.objects.filter(user=orig_user)
+            for perm in permissions:
+                Permission.objects.create(
+                    created_at=timezone.now(),
+                    created_by=isc_user,
+                    user=dest_user,
+                    directory=perm.directory,
+                    permission=perm.permission
+                )
+                logger.info(f'permission of directory {perm.directory.absolute_path} for mftuser {dest_user.username} changed to {perm.permission} by {isc_user.user.username}.')
+            logger.info(f'all permissions of {orig_user} to {dest_user} transfered successfully by {isc_user.user.username}')
+            msg = f'انتقال دسترسی های {form.cleaned_data.get("origin_mftuser")} به {form.cleaned_data.get("destination_mftuser")} با موفقیت انجام شد.'
+            success = True
+            # return redirect("/login/")
+        else:
+            # 'اطلاعات ورودی صحیح نیست!'
+            msg = 'خطاهای فوق را رفع نمائید.'
+
+    context = {
+        "username": username,
+        "access": access,
+        "form": form,
+        "msg": msg,
+        "success": success
+    }
+    return render(request, "core/transfer-permissions.html", context)
 
 
 @login_required(login_url="/login/")

@@ -79,7 +79,26 @@
             </div>
           </div>
         </div>
-        {% if access != 'CUSTOMER' %}
+        {% comment %} {% if access != 'CUSTOMER' %} {% endcomment %}
+        <div class="col-md-6 col-lg-4 text-center">
+          <div class="card border-gray-300 mb-4">
+            <div class="card-body py-5">
+              <div class="icon icon-shape icon-lg">
+                <span class="fas fa-exchange-alt text-tertiary" style="font-size: 5rem"></span>
+              </div>
+              <p class="card-text py-4 mb-0">
+                انتقال دسترسی های <br />
+                یک کاربر به کاربر دیگر
+              </p>
+              <div class="d-grid">
+                <a href="{% url 'transfer-permissions' %}" class="btn btn-primary animate-up-1"
+                  >انتقال دسترسی ها <span class="ms-2"><span class="fas fa-arrow-left"></span></span
+                ></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% comment %} {% endif %} {% endcomment %} {% if access != 'CUSTOMER' %}
         <div class="col-md-6 col-lg-4 text-center">
           <div class="card border-gray-300 mb-4">
             <div class="card-body py-5">

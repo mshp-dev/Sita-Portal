@@ -1,0 +1,77 @@
+{% extends "layouts/base.html" %} {% block title %} انتقال دسترسی ها {% endblock %} {% load static %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %} {% endblock javascripts %}
+
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <div class="section-header pb-6 bg-primary text-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-10 text-center" style="direction: rtl">
+          <h1 class="display-3 mb-4">انتقال دسترسی های کاربران</h1>
+          <p class="lead">
+            برای سهولت در اعطاء دسترسی به کاربران FTP <br />
+            امکان انتقال دسترسی های کاربران به یکدیگر فرآهم شده است.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section section-md">
+    <div class="container">
+      <div class="row mb-5 d-flex align-items-center justify-content-center">
+        <div class="col-6">
+          <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
+            <h1 class="mb-0 h3">{{ page_title }}</h1>
+            <br />
+            <span class="font-weight-normal text-danger"> {% if form.non_field_errors %} {{ form.non_field_errors | safe }} {% endif %} </span>
+            <span class="font-weight-normal"> {% if msg %} {{ msg | safe }} {% endif %} </span>
+          </div>
+          <form class="mt-5" method="POST" action="" id="add-data-form">
+            {% csrf_token %}
+            <div class="form-group mb-4" style="direction: rtl">
+              <label for="orig-user"
+                >کاربر مبدأ <sup class="text-danger"><strong>*</strong></sup></label
+              >
+              <div class="input-group" style="direction: ltr">
+                <span class="input-group-text" id="orig-user"><span class="fas fa-user"></span></span>
+                {{ form.origin_mftuser }}
+              </div>
+            </div>
+            <div class="form-group mb-4" style="direction: rtl">
+              <label for="dest-user"
+                >کاربر مقصد <sup class="text-danger"><strong>*</strong></sup></label
+              >
+              <div class="input-group" style="direction: ltr">
+                <span class="input-group-text" id="dest-user"><span class="fas fa-user"></span></span>
+                {{ form.destination_mftuser }}
+              </div>
+            </div>
+            <br />
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">ارسال</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="row mt-8 mb-5">
+        <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="goBack();" />
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  function goBack() {
+    var url = "/dashboard/";
+    window.location = url;
+  }
+</script>
+
+{% include "includes/footer.html" %} {% endblock content %}

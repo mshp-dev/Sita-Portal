@@ -26,6 +26,63 @@ class AddBusinessForm(forms.ModelForm):
         return code
 
 
+class TransferPermissionsForm(forms.ModelForm):
+    origin_mftuser      = forms.CharField(max_length=100, required=True, label="origin_mftuser", widget=forms.TextInput(attrs={"placeholder": "کاربر مبدأ", "class": "form-control"}))
+    destination_mftuser = forms.CharField(max_length=100, required=True, label="destination_mftuser", widget=forms.TextInput(attrs={"placeholder": "کاربر مقصد", "class": "form-control"}))
+    
+    class Meta:
+        model = BusinessCode
+        fields = [
+            'origin_mftuser',
+            'destination_mftuser',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(TransferPermissionsForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super(TransferPermissionsForm, self).clean()
+        origin_username = cleaned_data.get('origin_mftuser')
+        destination_username = cleaned_data.get('destination_mftuser')
+        iscuser = IscUser.objects.get(user=self.request.user)
+        if origin_username == destination_username:
+            raise ValidationError('کاربر مبدأ و مقصد نمی تواند یکی باشد.')
+        if not MftUser.objects.filter(username=origin_username).exists():
+            raise ValidationError('کاربر مبدأ وارد شده وجود ندارد.')
+        if not MftUser.objects.filter(username=destination_username).exists():
+            raise ValidationError('کاربر مقصد وارد شده وجود ندارد.')
+        if iscuser.role.code != 'ADMIN':
+            if MftUser.objects.get(username=origin_username).created_by != iscuser:
+                raise ValidationError('کاربر مبدأ توسط شما ایجاد نشده است.')
+            if MftUser.objects.get(username=destination_username).created_by != iscuser:
+                raise ValidationError('کاربر مقصد توسط شما ایجاد نشده است.')
+        if str(MftUser.objects.get(username=destination_username).business.all()) != str(MftUser.objects.get(username=origin_username).business.all()):
+            raise ValidationError('پروژه های کاربر مبدأ و مقصد برابر نیستند.')
+        
+        return cleaned_data
+    
+    # def clean_origin_mftuser(self):
+    #     origin_mftuser = self.cleaned_data.get('origin_mftuser')
+    #     if not MftUser.objects.filter(username=origin_mftuser).exists():
+    #         raise ValidationError('کاربر مبدأ وارد شده وجود ندارد.')
+    #     iscuser = IscUser.objects.get(user=self.request.user)
+    #     if iscuser.role.code != 'ADMIN':
+    #         if MftUser.objects.get(username=origin_mftuser).created_by != iscuser:
+    #             raise ValidationError('کاربر مبدأ توسط شما ایجاد نشده است.')
+    #     return origin_mftuser
+    
+    # def clean_destination_mftuser(self):
+    #     destination_mftuser = self.cleaned_data.get('destination_mftuser')
+    #     if not MftUser.objects.filter(username=destination_mftuser).exists():
+    #         raise ValidationError('کاربر مقصد وارد شده وجود ندارد.')
+    #     iscuser = IscUser.objects.get(user=self.request.user)
+    #     if iscuser.role.code != 'ADMIN':
+    #         if MftUser.objects.get(username=destination_mftuser).created_by != iscuser:
+    #             raise ValidationError('کاربر مقصد توسط شما ایجاد نشده است.')
+    #     return destination_mftuser
+
+
 class MftUserForm(forms.ModelForm):
     username     = forms.CharField(max_length=101, required=True, label='username', error_messages={'required': 'تمام فیلدهای ستاره دار را تکمیل نمائید'}, widget=forms.TextInput(attrs={"placeholder": "به صورت خودکار تکمیل می گردد", "class": "form-control", "readonly": "readonly"}))
     alias        = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={"placeholder": "برای استفاده به صورت سیستمی", "class": "form-control"}))

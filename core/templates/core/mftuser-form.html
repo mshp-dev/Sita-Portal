@@ -211,7 +211,7 @@
               </div>
               {% endcomment %}
               <div class="d-grid">
-                <a href="{% url 'home' %}" class="btn btn-secondary">رفتن به داشبورد</a>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">رفتن به داشبورد</a>
               </div>
             </div>
             {% endif %}
@@ -257,7 +257,7 @@
   }
 
   function goBack() {
-    var url = "/";
+    var url = "/dashboard/";
     window.location = url;
   }
 
