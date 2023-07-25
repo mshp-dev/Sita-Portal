@@ -1,0 +1,105 @@
+<!--Users in iscusers-list-->
+{% if users %} {% for user in users %}
+<div class="col-10 mx-auto">
+  <div class="accordion mb-2" id="{{ user.user.username }}" role-in-list="container" uid="{{ user.id }}">
+    <!--User Node-->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#{{ user.user.username }}{{ user.id }}"
+          aria-expanded="false"
+          aria-controls="{{ user.user.username }}{{ user.id }}"
+        >
+          <span class={% if user.user.is_active %}"fas fa-user-check text-success"{% else %}"fas fa-user text-danger me-1"{% endif %}></span>
+          <h3 class="display-5 ms-2">
+            {{ user.user.username }} - {{ user.department }}
+          </h3>
+        </button>
+      </h2>
+      <div
+        id="{{ user.user.username }}{{ user.id }}"
+        class="accordion-collapse collapse"
+        aria-labelledby="headingOne"
+        data-bs-parent="#{{ user.user.username }}"
+      >
+        <div class="accordion-body">
+          <div class="container">
+            <div class="row">
+              <div class="row mt-5 mb-5">
+                <span
+                  >Username: <span class="display-6 text-info"><strong> {{ user.user.username }}</strong></span></span
+                >
+                <span
+                  >First Name: <span class="display-6 text-info"><strong> {{ user.user.first_name }}</strong></span></span
+                >
+                <span
+                  >Last Name: <span class="display-6 text-info"><strong> {{ user.user.last_name }}</strong></span></span
+                >
+                <span
+                  >Email Address: <span class="display-6 text-info"><strong> {{ user.user.email }}</strong></span></span
+                >
+                <span
+                  >Mobile Phone: <span class="display-6 text-info"><strong> {{ user.mobilephone }}</strong></span></span
+                >
+                <span
+                  >OfficePhone: <span class="display-6 text-info"><strong> {{ user.officephone }}</strong></span></span
+                >
+                <span
+                  >Department: <span class="display-6 text-info"><strong> {{ user.department }}</strong></span></span
+                >
+                <span
+                  >Access/Role: <span class="display-6 text-info"><strong> {{ user.role }}</strong></span></span
+                >
+                {% if user.role.code != 'CUSTOMER' %}
+                <span
+                  >Businesses (Admin of): <span class="display-6 text-success"><strong> {{ user.get_isc_user_owned_businesses }}</strong></span></span
+                >
+                <span
+                  >Businesses (User of): <span class="display-6 text-warning"><strong> {{ user.get_isc_user_used_businesses }}</strong></span></span
+                >
+                {% endif %}
+                {% if user.role.code != 'OPERATION' %}
+                <span
+                  >Organizations: <span class="display-6 text-info"><strong> {{ user.get_iscuser_organizations }}</strong></span></span
+                >
+                {% endif %}
+              </div>
+              <div class="col">
+                <a href="#" style="width: 100%" class="btn btn-danger animate-up-1 disabled">حذف کاربر</a>
+              </div>
+              <div class="col">
+                <input
+                  type="button"
+                  role="iscuser-deactivate-btn"
+                  uid="{{ user.id }}"
+                  style="width: 100%"
+                  class={% if user.user.is_active %}"btn btn-warning animate-up-1"{% else %}"btn btn-warning animate-up-1 disabled"{% endif %}
+                  value="غیرفعالسازی کاربر"
+                />
+              </div>
+              <div class="col">
+                <input
+                  type="button"
+                  role="iscuser-activate-btn"
+                  uid="{{ user.id }}"
+                  style="width: 100%"
+                  class={% if user.user.is_active %}"btn btn-tertiary animate-up-1 disabled"{% else %}"btn btn-tertiary animate-up-1"{% endif %}
+                  value="فعالسازی کاربر"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--End of UserNode-->
+  </div>
+</div>
+{% endfor %}
+<!--No Users Found-->
+{% elif not users %}
+<h4>No isc user found</h4>
+{% endif %}

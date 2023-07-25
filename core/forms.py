@@ -337,3 +337,12 @@ class BusinessSelectionForm(forms.Form):
             'owned_business',
             'used_business'
         )
+
+
+class OrganizationSelectionForm(forms.Form):
+    organizations = forms.MultipleChoiceField(required=True, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "class": "form-control form-select", "size": 20, "parent": "organizations"}))
+    
+    class Meta:
+        fields = (
+            'organizations'
+        )

@@ -41,7 +41,26 @@
   <div class="section section-lg">
     <div class="container">
       <div class="row align-items-center" style="direction: rtl">
-        {% if access != 'VIEWER' %}
+        {% if access == 'ADMIN' %}
+        <div class="col-md-6 col-lg-4 text-center">
+          <div class="card border-gray-300 mb-4">
+            <div class="card-body py-5">
+              <div class="icon icon-shape icon-lg">
+                <span class="fas fa-user-check text-tertiary" style="font-size: 5rem"></span>
+              </div>
+              <p class="card-text py-4 mb-0">
+                از اینجا می توانید<br />
+                کاربران پرتال را مدیریت کنید
+              </p>
+              <div class="d-grid">
+                <a href="{% url 'iscusers-list' %}" class="btn btn-primary animate-up-1"
+                  >لیست کاربران پرتال <span class="ms-2"><span class="fas fa-arrow-left"></span></span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
         <div class="col-md-6 col-lg-4 text-center">
           <div class="card border-gray-300 mb-4">
             <div class="card-body py-5">
@@ -60,7 +79,6 @@
             </div>
           </div>
         </div>
-        {% endif %}
         <div class="col-md-6 col-lg-4 text-center">
           <div class="card border-gray-300 mb-4">
             <div class="card-body py-5">

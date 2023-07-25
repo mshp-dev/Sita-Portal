@@ -83,6 +83,50 @@ class IscUser(models.Model):
     def __str__(self):
         return f'{self.user.username} ({self.role})'
 
+    def get_isc_user_owned_businesses(self):
+        buss_str = 'سامانه/پروژه های'
+        if self.role.code == 'ADMIN':
+            opr_buss = BusinessCode.objects.all().order_by('description')
+        else:
+            opr_buss = BusinessCode.objects.filter(code__in=OperationBusiness.objects.filter(user=self, owned_by_user=True).values('access_on_bus__code')).order_by('description')
+        
+        if opr_buss.count() > 1:
+            for bus in opr_buss:
+                bus_str = str(bus)
+                buss_str += f' {bus_str.replace("سامانه ", "")}،'
+            return buss_str[:-1]
+        else:
+            return opr_buss.first()
+
+    def get_isc_user_used_businesses(self):
+        buss_str = 'سامانه/پروژه های'
+        if self.role.code == 'ADMIN':
+            opr_buss = BusinessCode.objects.all().order_by('description')
+        else:
+            opr_buss = BusinessCode.objects.filter(code__in=OperationBusiness.objects.filter(user=self, owned_by_user=False).values('access_on_bus__code')).order_by('description')
+        
+        if opr_buss.count() > 1:
+            for bus in opr_buss:
+                bus_str = str(bus)
+                buss_str += f' {bus_str.replace("سامانه ", "")}،'
+            return buss_str[:-1]
+        else:
+            return opr_buss.first()
+
+    def get_iscuser_organizations(self):
+        orgs_str = 'سازمان/بانک های'
+        if self.role.code == 'ADMIN':
+            cus_orgs = BankIdentifierCode.objects.all().order_by('description')
+        else:
+            cus_orgs = BankIdentifierCode.objects.filter(code__in=CustomerBank.objects.filter(user=self).values('access_on_bic__code')).order_by('description')
+        if cus_orgs.count() > 1:
+            for org in cus_orgs:
+                org_str = str(org)
+                orgs_str += f' {org_str.replace("بانک ", "").replace("شرکت ", "")}،'
+            return orgs_str[:-1]
+        else:
+            return cus_orgs.first()
+
 
 class MftUser(models.Model):
     id               = models.AutoField(primary_key=True)

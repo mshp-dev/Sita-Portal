@@ -53,3 +53,12 @@ def get_business_ids(buss):
     for bus in buss:
         bus_ids += f'{bus.id},'
     return bus_ids[:-1]
+
+
+@register.filter
+def get_organization_ids(orgs):
+    org_ids = ''
+    for org in orgs:
+        org_ids += f'{org.id},'
+    return org_ids[:-1]
+

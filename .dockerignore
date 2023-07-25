@@ -1,0 +1,15 @@
+.vscode
+.gitignore
+.dockerignore
+*.code-workspace
+*.sql
+Dockerfile
+docker-compose.yml
+venv
+virtualenv
+bin
+include
+lib
+lib64
+share
+pyvenv.cfg

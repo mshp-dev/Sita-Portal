@@ -23,7 +23,7 @@
             در بخش پروژه/سامانه ها می توانید دسترسی به پروژه های دیگر را به کاربری خود اضافه کنید.
           </p>
           <p class="lead mb-5">
-            در صورت تغییر در مشخصات {% if access != 'CUSTOMER' %}و یا لیست پروژه ها{% endif %}، کاربری شما <strong class="text-danger">غیرفعال</strong> شده و نیاز به <strong class="text-success">فعالسازی</strong> خواهید داشت.
+            در صورت تغییر در مشخصات و یا لیست {% if access != 'CUSTOMER' %}پروژه/سامانه ها، {% endif %}{% if access != 'OPERATION' %}سازمان/بانک ها{% endif %} کاربری شما <strong class="text-danger">غیرفعال</strong> شده و نیاز به <strong class="text-success">فعالسازی</strong> خواهید داشت.
           </p>
         </div>
       </div>
@@ -219,6 +219,60 @@
         </div>
       </div>
       {% endif %}
+      {% if access != 'OPERATION' %}
+      <div class="row justify-content-center mt-5">
+        <div class="col-12 d-flex align-items-center justify-content-center">
+          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-800">
+            <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
+              <h1 class="mb-0 h3">سازمان/بانک ها</h1>
+              <br />
+              <span class="font-weight-normal">
+                {% if error %}{% if org_msg %}
+                {{ org_msg | safe }}
+                {% endif %}{% else %}{% if org_msg %}
+                <script type="text/javascript">
+                  var msg = "{{ org_msg }}";
+                  alert(msg);
+                  window.location = "/logout/";
+                </script>
+                {% endif %}{% endif %}
+              </span>
+            </div>
+            <form class="mt-5" method="POST" action="" id="organization-form">
+              {% csrf_token %}
+              <input type="hidden" name="form-type" value="organization-form">
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="organization"
+                  >سازمان/بانک هایی که مدیر پروژه آن ها هستید <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group mb-2">
+                  <input
+                    type="text"
+                    class="form-control"
+                    style="text-align: right; direction: rtl"
+                    id="search-input-org"
+                    placeholder="جستجو در بین سازمان/بانک ها"
+                    aria-label="Search"
+                    aria-describedby="basic-addon"
+                  />
+                </div>
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="organizations" orgs-id="{{ organizations|get_organization_ids }}"><span class="fas fa-sitemap"></span></span>
+                  {{ organization_form.organizations }}
+                </div>
+              </div>
+              <br />
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary">بروزرسانی سازمان/بانک ها</button>
+              </div>
+              {% comment %} <div class="d-grid mt-3">
+                <input type="button" class="btn btn-success" value="بازگشت" onClick="goBack();" />
+              </div> {% endcomment %}
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endif %}
     </div>
     <div class="container mt-8">
       <div class="row mb-6">
@@ -229,6 +283,24 @@
 </main>
 
 <script type="text/javascript">
+  $("#search-input-org").on("keyup", function () {
+    var inp = $(this).val();
+    if (inp !== "") {
+      $("#id_organizations option").each(function () {
+        var opt = $(this).html();
+        if (opt.includes(inp)) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    } else {
+      $("#id_organizations option").each(function () {
+        $(this).show();
+      });
+    }
+  });
+
   $("#search-input-o").on("keyup", function () {
     var inp = $(this).val();
     if (inp !== "") {
@@ -269,6 +341,13 @@
     var url = "/dashboard/";
     window.location = url;
   }
+
+  $(function () {
+    var orgs_ids = $("#organizations").attr("orgs-id");
+    $.each(orgs_ids.split(","), function (i, e) {
+      $("#id_organizations option[value='" + e + "']").prop("selected", true);
+    });
+  });
 
   $(function () {
     var o_bus_ids = $("#owned-business").attr("o-bus-id");

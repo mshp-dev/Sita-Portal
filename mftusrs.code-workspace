@@ -15,6 +15,16 @@
         "database": "mftusers",
         "username": "postgres",
         "password": "Admin@postgres#110"
+      },
+      {
+        "previewLimit": 50,
+        "server": "107.173.59.120",
+        "port": 80,
+        "driver": "PostgreSQL",
+        "name": "test",
+        "database": "db",
+        "username": "postgres",
+        "password": "password"
       }
     ]
   }
