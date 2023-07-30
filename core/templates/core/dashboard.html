@@ -60,6 +60,24 @@
             </div>
           </div>
         </div>
+        <div class="col-md-6 col-lg-4 text-center">
+          <div class="card border-gray-300 mb-4">
+            <div class="card-body py-5">
+              <div class="icon icon-shape icon-lg">
+                <span class="fas fa-key text-tertiary" style="font-size: 5rem"></span>
+              </div>
+              <p class="card-text py-4 mb-0">
+                از اینجا می توانید<br />
+                کلمه عبور کاربران را ریست کنید
+              </p>
+              <div class="d-grid">
+                <a href="{% url 'reset-password' %}" class="btn btn-primary animate-up-1"
+                  >ریست کلمه عبور <span class="ms-2"><span class="fas fa-arrow-left"></span></span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
         {% endif %}
         <div class="col-md-6 col-lg-4 text-center">
           <div class="card border-gray-300 mb-4">

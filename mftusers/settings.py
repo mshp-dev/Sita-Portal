@@ -40,7 +40,7 @@ SFTP_HOST = 'sft.iranet.net'
 SFTP_PORT = 9022
 SFTP_USERNAME = 'sita2'
 SFTP_PASSWORD = 'Sita2@Sita32022'
-SFTP_PATH = 'Sync_Shared_Folder/Recieved_From_IRANET/Imported_Webuser'
+SFTP_PATH = 'Portal_WebUser'
 
 # Application definition
 
@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    
     'core.apps.CoreConfig',
     'invoice.apps.InvoiceConfig',
 ]

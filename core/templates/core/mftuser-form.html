@@ -4,8 +4,8 @@
 {% block title %} فرم ایجاد کاربر {% endblock %} {% load static %}
 
 <!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %}
-<link type="text/css" href="css/virtual-select.min.css" rel="stylesheet" />
+{% block stylesheets %} {% comment %} <link type="text/css" href="css/virtual-select.min.css" rel="stylesheet" /> {% endcomment %}
+<!--prettier-ignore-->
 {% endblock stylesheets %} {% block content %}
 
 <main>
@@ -227,7 +227,9 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+{% comment %}
 <script type="text/javascript" src="js/virtual-select.min.js"></script>
+{% endcomment %}
 <script>
   $("#search-input").on("keyup", function () {
     var inp = $(this).val();
@@ -314,9 +316,9 @@
     }
   });
 
-  VirtualSelect.init({
+  /*VirtualSelect.init({
     ele: "#id_business",
-  });
+  });*/
 
   var username = document.getElementById("id_username");
 

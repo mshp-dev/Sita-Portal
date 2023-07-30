@@ -39,12 +39,18 @@ class BaseCoding(models.Model):
 
 class BusinessCode(BaseCoding):
     code             = models.CharField(max_length=20, blank=False, unique=True, default='...')
-    address          = models.CharField(max_length=100, blank=False, default='/DATA')
+    origin_address   = models.CharField(max_length=100, blank=False, default='/DATA')
+    remote_address   = models.CharField(max_length=100, blank=False, default='/SMB')
+
+
+class OrganizationType(BaseCoding):
+    code             = models.CharField(max_length=100, blank=False, unique=True, default='BANK')
 
 
 class BankIdentifierCode(BaseCoding):
-    code             = models.CharField(max_length=20, blank=False, unique=True, default='_ISC')
-    directory_name   = models.CharField(max_length=50, blank=False, default='_ISC')
+    code              = models.CharField(max_length=20, blank=False, unique=True, default='_ISC')
+    directory_name    = models.CharField(max_length=50, blank=False, default='_ISC')
+    organization_type = models.ForeignKey(OrganizationType, to_field='code', blank=False, default='STATE_BANK', on_delete=models.CASCADE)
 
 
 class IscUserAccessCode(BaseCoding):
@@ -61,12 +67,8 @@ class DirectoryPermissionCode(BaseCoding):
     code             = models.CharField(max_length=20, blank=False, unique=True, default='READ')
 
 
-class CustomerAccessCode(BaseCoding):
-    code             = models.CharField(max_length=10, blank=False, unique=True, default='MftUser')
-
-
-class CustomerAccessType(BaseCoding):
-    code             = models.CharField(max_length=10, blank=False, unique=True, default='OWNER')
+# class CustomerAccessCode(BaseCoding):
+#     code             = models.CharField(max_length=10, blank=False, unique=True, default='MftUser')
 
 
 class DirectoryIndexCode(BaseCoding):
@@ -234,7 +236,11 @@ class Directory(models.Model):
     
     @property
     def absolute_path(self):
-        return f'{self.business.address}/{self.relative_path}'
+        return f'{self.business.origin_address}/{self.relative_path}'
+    
+    @property
+    def remote_path(self):
+        return f'{self.business.remote_address}/{self.relative_path}'
 
 
 class Permission(models.Model):
@@ -257,16 +263,16 @@ class Permission(models.Model):
         return self.directory.absolute_path
 
 
-class CustomerAccess(models.Model):
-    id               = models.AutoField(primary_key=True)
-    user             = models.ForeignKey(IscUser, blank=False, on_delete=models.CASCADE)
-    access_on        = models.ForeignKey(CustomerAccessCode, to_field='code', blank=False, on_delete=models.CASCADE)
-    access_type      = models.ForeignKey(CustomerAccessType, to_field='code', blank=False, on_delete=models.CASCADE)
-    target_id        = models.IntegerField(blank=False, default=-1)
-    created_at       = models.DateTimeField(default=timezone.now)
+# class CustomerAccess(models.Model):
+#     id               = models.AutoField(primary_key=True)
+#     user             = models.ForeignKey(IscUser, blank=False, on_delete=models.CASCADE)
+#     access_on        = models.ForeignKey(CustomerAccessCode, to_field='code', blank=False, on_delete=models.CASCADE)
+#     access_type      = models.ForeignKey(CustomerAccessType, to_field='code', blank=False, on_delete=models.CASCADE)
+#     target_id        = models.IntegerField(blank=False, default=-1)
+#     created_at       = models.DateTimeField(default=timezone.now)
 
-    def __str__(self):
-        return f'{self.user.user.username} has {self.access_type} access on {self.access_on} with id {self.target_id}'
+#     def __str__(self):
+#         return f'{self.user.user.username} has {self.access_type} access on {self.access_on} with id {self.target_id}'
 
 
 class CustomerBank(models.Model):

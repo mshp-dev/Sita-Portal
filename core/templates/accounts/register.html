@@ -107,6 +107,9 @@
                 <label for="department"
                   >گروه/دپارتمان <sup class="text-danger"><strong>*</strong></sup></label
                 >
+                <p>
+                  <span style="font-size: 0.7rem">لطفاً گروهی که در آن قرار دارید را انتخاب نمائید.</span>
+                </p>
                 <div class="input-group" style="direction: ltr">
                   <span class="input-group-text" id="department"><span class="fas fa-building"></span></span>
                   {{ form.department }}
@@ -189,6 +192,8 @@
   $(window).on("load", function () {
     $("#id_organization option[value=1]").prop("selected", true);
     $("#id_business option[value=1]").prop("selected", true);
+
+    $("#id_business option[value=88]").attr("style", "font-style: italic; font-size: 1.5rem; color: orangered;");
 
     var access_type = $("#current-access-type").html();
     check_access_type(access_type);

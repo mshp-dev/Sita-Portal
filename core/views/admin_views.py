@@ -46,7 +46,8 @@ def add_data_view(request, *args, **kwargs):
                 type_id=CodingType.objects.get(type=1009),
                 code=form.cleaned_data.get("code"),
                 description=form.cleaned_data.get("description"),
-                address=form.cleaned_data.get("address")
+                origin_address=form.cleaned_data.get("origin_address"),
+                remote_address=form.cleaned_data.get("remote_address")
             )
             bus.save()
             dir_ = Directory(
@@ -59,7 +60,7 @@ def add_data_view(request, *args, **kwargs):
                 created_by=IscUser.objects.get(pk=1)
             )
             dir_.save()
-            logger.info(f'{isc_user.user.username} add {bus.code} business.')
+            logger.info(f'{isc_user.user.username} added {bus.code} business.')
             for bic in BankIdentifierCode.objects.all():
                 ch_dir = Directory(
                     name=bic.directory_name,
@@ -639,3 +640,35 @@ def iscusers_update_view(request, id, *args, **kwargs):
             finally:
                 return JsonResponse(data=response, safe=False, status=status_code)
 
+
+@login_required(login_url='/login/')
+def reset_password_view(request, *args, **kwargs):
+    isc_user = IscUser.objects.get(user=request.user)
+    msg = None
+    success = None
+
+    if not isc_user.user.is_staff:
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        return redirect('/error/401/')
+
+    if request.method == "POST":
+        form = ResetPasswordForm(request.POST)
+        if form.is_valid():
+            user = User.objects.get(username=form.cleaned_data['username'])
+            user.set_password(form.cleaned_data['new_password'])
+            user.save()
+            msg = "کلمه عبور با موفقیت ریست شد."
+            success = True
+            logger.info(f'{user.username} password has been reset by {isc_user.user.username}.')
+        else:
+            msg = form.errors
+    else:
+        form = ResetPasswordForm()
+
+    context = {
+        "form": form,
+        "msg": msg,
+        "success": success
+    }
+
+    return render(request, "accounts/reset-password.html", context)

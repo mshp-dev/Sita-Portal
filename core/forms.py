@@ -7,16 +7,18 @@ from .models import *
 
 
 class AddBusinessForm(forms.ModelForm):
-    code        = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "کد پروژه", "class": "form-control"}))
-    description = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "نام کامل (فارسی)", "class": "form-control"}))
-    address     = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "/DATA", "class": "form-control"}))
+    code           = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "کد پروژه", "class": "form-control"}))
+    description    = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "نام کامل (فارسی)", "class": "form-control"}))
+    origin_address = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "/DATA", "class": "form-control"}))
+    remote_address = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={"placeholder": "/SMB", "class": "form-control"}))
 
     class Meta:
         model = BusinessCode
         fields = [
             'code',
             'description',
-            'address',
+            'origin_address',
+            'remote_address',
         ]
     
     def clean_code(self):
@@ -213,6 +215,25 @@ class ChangePasswordForm(forms.Form):
     new_password    = forms.CharField(max_length=100, required=True, widget=forms.PasswordInput(attrs={"placeholder": "New Password", "class": "form-control"}))
     repeat_password = forms.CharField(max_length=100, required=True, widget=forms.PasswordInput(attrs={"placeholder": "Repeat Password", "class": "form-control"}))
 
+
+class ResetPasswordForm(forms.Form):
+    username        = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={"placeholder": "Username", "class": "form-control"}))
+    new_password    = forms.CharField(max_length=100, required=True, widget=forms.PasswordInput(attrs={"placeholder": "New Password", "class": "form-control"}))
+    repeat_password = forms.CharField(max_length=100, required=True, widget=forms.PasswordInput(attrs={"placeholder": "Repeat Password", "class": "form-control"}))
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if not User.objects.filter(username=username).exists():
+            raise ValidationError('کاربر وارد شده وجود ندارد.')
+        return username
+
+    def clean(self):
+        cleaned_data = super(ResetPasswordForm, self).clean()
+        if len(cleaned_data['new_password']) < 8:
+            raise ValidationError('حداقل تعداد کاراکتر برای کلمه عبور باید 8 عدد باشد.')
+        if cleaned_data['new_password'] != cleaned_data['repeat_password']:
+            raise ValidationError('کلمه عبور وارد شده با تکرار آن برابر نیست.')
+        return cleaned_data
 
 class IscUserForm(forms.ModelForm):
     username     = forms.CharField(max_length=101, required=True, widget=forms.TextInput(attrs={"placeholder": "Username", "class": "form-control"}))

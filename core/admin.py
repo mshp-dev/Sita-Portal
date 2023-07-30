@@ -8,13 +8,13 @@ class CodingTypeAdmin(admin.ModelAdmin):
 
 
 class BusinessCodeAdmin(admin.ModelAdmin):
-    list_display = ['code', 'description', 'address']
-    list_filter = ['address']
+    list_display = ['code', 'description', 'origin_address', 'remote_address']
+    list_filter = ['origin_address', 'remote_address']
     ordering = ['description']
 
 
 class BankIdentifierCodeAdmin(admin.ModelAdmin):
-    list_display = ['code', 'description', 'type_id']
+    list_display = ['code', 'organization_type', 'description', 'type_id']
     ordering = ['description']
 
 
@@ -31,11 +31,11 @@ class DirectoryPermissionCodeAdmin(admin.ModelAdmin):
     ordering = ['value']
 
 
-class CustomerAccessCodeAdmin(admin.ModelAdmin):
-    list_display = ['code', 'description', 'type_id']
+# class CustomerAccessCodeAdmin(admin.ModelAdmin):
+#     list_display = ['code', 'description', 'type_id']
 
 
-class CustomerAccessTypeAdmin(admin.ModelAdmin):
+class OrganizationTypeAdmin(admin.ModelAdmin):
     list_display = ['code', 'description', 'type_id']
 
 
@@ -106,8 +106,8 @@ admin.site.register(BankIdentifierCode, BankIdentifierCodeAdmin)
 admin.site.register(IscDepartmentCode, IscDepartmentCodeAdmin)
 admin.site.register(IscUserAccessCode, IscUserAccessCodeAdmin)
 admin.site.register(DirectoryPermissionCode, DirectoryPermissionCodeAdmin)
-admin.site.register(CustomerAccessCode, CustomerAccessCodeAdmin)
-admin.site.register(CustomerAccessType, CustomerAccessTypeAdmin)
+# admin.site.register(CustomerAccessCode, CustomerAccessCodeAdmin)
+admin.site.register(OrganizationType, OrganizationTypeAdmin)
 admin.site.register(DirectoryIndexCode, DirectoryIndexCodeAdmin)
 admin.site.register(IscUser, IscUserAdmin)
 admin.site.register(MftUser, MftUserAdmin)

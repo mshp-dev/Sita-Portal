@@ -95,17 +95,21 @@ def register_user_view(request):
             logger.info(f'{isc_user.user.username} registered successfully.')
             bus_msg = ''
             if user_role.code == 'OPERATION':
-                for bus in businesses:
-                    bus_code = BusinessCode.objects.get(id=int(bus))
-                    opr_buss = OperationBusiness.objects.filter(access_on_bus=bus_code).values('user')
-                    user_depts = IscUser.objects.filter(id__in=[obu['user'] for obu in opr_buss]).values('department') #.exclude(user=isc_user.user)
-                    udl = [IscDepartmentCode.objects.get(code=ud['department']) for ud in user_depts]
-                    if user_depts.count() == 0 or isc_user.department in udl:
-                        OperationBusiness.objects.create(user=isc_user, access_on_bus=BusinessCode.objects.get(id=int(bus)))
-                        logger.info(f'access on {bus_code.code} for {isc_user.user.username} has beeen given.')
-                    else:
-                        logger.warning(f'access on {bus_code.code} for {isc_user.user.username} has beeen given.')
-                        bus_msg += f'دسترسی به سامانه/پروژه {bus_code.code} ایجاد نشد. متعلق به گروه دیگری می باشد.\n'
+                no_project_bus = BusinessCode.objects.get(code='NO_PROJECT')
+                if str(no_project_bus.id) in businesses:
+                    logger.info(f'user {isc_user.user.username} has NO_PROJECT access.')
+                else:
+                    for bus in businesses:
+                        bus_code = BusinessCode.objects.get(id=int(bus))
+                        opr_buss = OperationBusiness.objects.filter(access_on_bus=bus_code).values('user')
+                        user_depts = IscUser.objects.filter(id__in=[obu['user'] for obu in opr_buss]).values('department') #.exclude(user=isc_user.user)
+                        udl = [IscDepartmentCode.objects.get(code=ud['department']) for ud in user_depts]
+                        if user_depts.count() == 0 or isc_user.department in udl:
+                            OperationBusiness.objects.create(user=isc_user, access_on_bus=BusinessCode.objects.get(id=int(bus)))
+                            logger.info(f'access on {bus_code.code} for {isc_user.user.username} has beeen given.')
+                        else:
+                            logger.warning(f'access on {bus_code.code} for {isc_user.user.username} has beeen given.')
+                            bus_msg += f'دسترسی به سامانه/پروژه {bus_code.code} ایجاد نشد. متعلق به گروه دیگری می باشد.\n'
             elif user_role.code == 'CUSTOMER':
                 for org in organizations:
                     organization = BankIdentifierCode.objects.get(id=int(org))
