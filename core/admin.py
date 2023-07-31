@@ -14,7 +14,7 @@ class BusinessCodeAdmin(admin.ModelAdmin):
 
 
 class BankIdentifierCodeAdmin(admin.ModelAdmin):
-    list_display = ['code', 'organization_type', 'description', 'type_id']
+    list_display = ['code', 'organization_type', 'description', 'type_id', 'sub_domain']
     ordering = ['description']
 
 
@@ -31,8 +31,8 @@ class DirectoryPermissionCodeAdmin(admin.ModelAdmin):
     ordering = ['value']
 
 
-# class CustomerAccessCodeAdmin(admin.ModelAdmin):
-#     list_display = ['code', 'description', 'type_id']
+class DomainNameAdmin(admin.ModelAdmin):
+    list_display = ['code', 'description', 'type_id']
 
 
 class OrganizationTypeAdmin(admin.ModelAdmin):
@@ -106,7 +106,7 @@ admin.site.register(BankIdentifierCode, BankIdentifierCodeAdmin)
 admin.site.register(IscDepartmentCode, IscDepartmentCodeAdmin)
 admin.site.register(IscUserAccessCode, IscUserAccessCodeAdmin)
 admin.site.register(DirectoryPermissionCode, DirectoryPermissionCodeAdmin)
-# admin.site.register(CustomerAccessCode, CustomerAccessCodeAdmin)
+admin.site.register(DomainName, DomainNameAdmin)
 admin.site.register(OrganizationType, OrganizationTypeAdmin)
 admin.site.register(DirectoryIndexCode, DirectoryIndexCodeAdmin)
 admin.site.register(IscUser, IscUserAdmin)

@@ -40,17 +40,22 @@ class BaseCoding(models.Model):
 class BusinessCode(BaseCoding):
     code             = models.CharField(max_length=20, blank=False, unique=True, default='...')
     origin_address   = models.CharField(max_length=100, blank=False, default='/DATA')
-    remote_address   = models.CharField(max_length=100, blank=False, default='/SMB')
+    remote_address   = models.CharField(max_length=100, blank=False, default='resource:sftp://')
 
 
 class OrganizationType(BaseCoding):
     code             = models.CharField(max_length=100, blank=False, unique=True, default='BANK')
 
 
+class DomainName(BaseCoding):
+    code             = models.CharField(max_length=250, blank=False, unique=True, default='example.com')
+
+
 class BankIdentifierCode(BaseCoding):
     code              = models.CharField(max_length=20, blank=False, unique=True, default='_ISC')
     directory_name    = models.CharField(max_length=50, blank=False, default='_ISC')
     organization_type = models.ForeignKey(OrganizationType, to_field='code', blank=False, default='STATE_BANK', on_delete=models.CASCADE)
+    sub_domain        = models.ForeignKey(DomainName, to_field='code', blank=True, default='nibn.ir', on_delete=models.CASCADE)
 
 
 class IscUserAccessCode(BaseCoding):

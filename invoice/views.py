@@ -86,13 +86,17 @@ def invoice_create_view(request, *args, **kwargs):
 def invoice_confirm_view(request, iid, *args, **kwargs):
     isc_user = IscUser.objects.get(user=request.user)
 
+    if not isc_user.user.is_staff:
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        return redirect('/error/401/')
+
     if request.is_ajax():
         if request.method == 'POST':
             invoice = None
             invoice_type = InvoiceType.objects.get(code=request.POST.get('itype'))
             if invoice_type.code == 'INVDIR':
                 invoice = PreInvoice.objects.get(pk=iid)
-                if invoice.created_by == isc_user or isc_user.role.code == 'ADMIN':
+                if isc_user.role.code == 'ADMIN':
                     dirs_list = [int(d) for d in invoice.directories_list.split(',')[:-1]]
                     Directory.objects.filter(pk__in=dirs_list).update(is_confirmed=True)
                     confirm_directory_tree(dirs_list, survey='BACKWARD')
@@ -113,7 +117,7 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                     }
             else:
                 invoice = Invoice.objects.get(pk=iid)
-                if invoice.created_by == isc_user or isc_user.role.code == 'ADMIN':
+                if isc_user.role.code == 'ADMIN':
                     mftuser = MftUser.objects.get(pk=invoice.mftuser)
                     mftuser.is_confirmed = True
                     mftuser.modified_at = timezone.now()
@@ -152,7 +156,7 @@ def invoice_reject_view(request, iid, *args, **kwargs):
                 invoice = PreInvoice.objects.get(pk=iid)
             else:
                 invoice = Invoice.objects.get(pk=iid)
-            if invoice.created_by == isc_user or isc_user.role.code == 'ADMIN':
+            if isc_user.role.code == 'ADMIN':
                 invoice.confirm_or_reject = 'REJECTED'
                 invoice.status = -1
                 invoice.description = request.POST.get('reason')
