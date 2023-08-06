@@ -265,7 +265,10 @@ class Permission(models.Model):
 
     @property
     def directory_path(self):
-        return self.directory.absolute_path
+        if self.directory.bic.sub_domain.code == 'nibn.ir':
+            return self.directory.absolute_path
+        else:
+            return self.directory.remote_path
 
 
 # class CustomerAccess(models.Model):

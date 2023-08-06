@@ -14,7 +14,7 @@
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-12 d-flex align-items-center justify-content-center">
-          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-600">
+          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-1000">
             <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
               <h1 class="mb-0 h3">فرم ایجاد کاربر جدید</h1>
               <br />
@@ -133,9 +133,22 @@
                     aria-describedby="basic-addon"
                   />
                 </div>
+                <p style="direction: ltr">
+                  <span class="ms-8" style="font-size: 0.7rem; font-weight: bold">سامانه/پروژه های انتخاب شده</span>
+                </p>
                 <div class="input-group" style="direction: ltr">
                   <span class="input-group-text" id="business"><span class="fas fa-sitemap"></span></span>
-                  {{ form.business }}
+                  <select id="left-business" class="form-control form-select" size="10" parent="business">
+                    {% for bus in buss %}
+                    <option style="display: none" value="{{ bus.id }}">{{ bus.description }}</option>
+                    {% endfor %}
+                  </select>
+                  <select id="right-business" style="direction: rtl" class="form-control form-select" size="10" parent="business">
+                    {% for bus in buss %}
+                    <option value="{{ bus.id }}">{{ bus.description }}</option>
+                    {% endfor %}
+                  </select>
+                  <div style="display: none">{{ form.business }}</div>
                 </div>
               </div>
               <div id="organization-parent" class="form-group mb-4" style="direction: rtl">
@@ -156,9 +169,22 @@
                     aria-describedby="basic-addon"
                   />
                 </div>
+                <p style="direction: ltr">
+                  <span class="ms-8" style="font-size: 0.7rem; font-weight: bold">سازمان/بانک های انتخاب شده</span>
+                </p>
                 <div class="input-group" style="direction: ltr">
                   <span class="input-group-text" id="organization"><span class="fas fa-university"></span></span>
-                  {{ form.organization }}
+                  <select id="left-organization" class="form-control form-select" size="10" parent="organization">
+                    {% for org in orgs %}
+                    <option style="display: none" value="{{ org.id }}">{{ org.description }}</option>
+                    {% endfor %}
+                  </select>
+                  <select id="right-organization" style="direction: rtl" class="form-control form-select" size="10" parent="organization">
+                    {% for org in orgs %}
+                    <option value="{{ org.id }}">{{ org.description }}</option>
+                    {% endfor %}
+                  </select>
+                  <div style="display: none">{{ form.organization }}</div>
                 </div>
               </div>
               <br />
@@ -187,59 +213,114 @@
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
-<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
-<script>
+<script src="{% static 'assets/js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript">
   $(window).on("load", function () {
-    $("#id_organization option[value=1]").prop("selected", true);
-    $("#id_business option[value=1]").prop("selected", true);
+    //$("#id_organization option[value=1]").prop("selected", true);
+    //$("#id_business option[value=1]").prop("selected", true);
 
-    $("#id_business option[value=88]").attr("style", "font-style: italic; font-size: 1.5rem; color: orangered;");
+    $("#right-business option[value=88]").attr("style", "font-style: italic; font-size: 1.5rem; color: orangered;");
+
+    $("option").each(function () {
+      $(this).attr("is_selected", "false");
+    });
 
     var access_type = $("#current-access-type").html();
     check_access_type(access_type);
   });
 
+  function goBack() {
+    var url = "/";
+    window.location = url;
+  }
+
   function check_access_type(access_type) {
     if (access_type == "OPERATION") {
       $("#organization-parent").hide();
-      $("#id_organization option").each(function () {
-        $(this).prop("selected", false);
-      });
       $("#id_organization option[value=1]").prop("selected", true);
       $("#business-parent").show();
       $("#id_business option").each(function () {
         $(this).prop("selected", false);
       });
+      $("#right-business option").each(function () {
+        $(this).prop("is_selected", "false");
+        $(this).attr("style", "");
+      });
+      $("#right-business option[value=88]").prop("style", "font-style: italic; font-size: 1.5rem; color: orangered;");
+      $("#left-business option").each(function () {
+        $(this).prop("is_selected", "false");
+        $(this).attr("style", "display: none");
+      });
     } else if (access_type == "CUSTOMER") {
       $("#business-parent").hide();
-      $("#id_business option").each(function () {
-        $(this).prop("selected", false);
-      });
       $("#id_business option[value=1]").prop("selected", true);
       $("#organization-parent").show();
       $("#id_organization option").each(function () {
         $(this).prop("selected", false);
       });
+      $("#right-organization option").each(function () {
+        $(this).prop("is_selected", "false");
+        $(this).attr("style", "");
+      });
+      $("#left-organization option").each(function () {
+        $(this).prop("is_selected", "false");
+        $(this).attr("style", "display: none");
+      });
     }
   }
+
+  /*const form = document.getElementById("iscuser-form");
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const XHR = new XMLHttpRequest();
+    var FD = new FormData(form);
+    var selected_organizations = document.getElementById("left-organization");
+    selected_organizations.querySelectorAll("[is_selected=true]").forEach((opt) => {
+      $("#id_organization option").each(function () {
+        if ($(this).val() === opt.value) {
+          $(this).prop("selected", true);
+        }
+      });
+    });
+    //FD.set("organization", org_list.replace(/\,$/, ""));
+    var selected_businesses = document.getElementById("left-business");
+    selected_businesses.querySelectorAll("[is_selected=true]").forEach((opt) => {
+      $("#id_business option").each(function () {
+        if ($(this).val() === opt.value) {
+          $(this).prop("selected", true);
+        }
+      });
+    });
+    //FD.set("business", bus_list.replace(/\,$/, ""));
+    XHR.addEventListener("load", (event) => {
+      console.log(event);
+    });
+    XHR.addEventListener("error", (event) => {
+      alert("خطایی رخ داده است! با مدیر سیستم تماس بگیرید.");
+    });
+    XHR.open("POST", "#");
+    XHR.send(FD);
+  });*/
 
   $("#business-search-input").on("keyup", function () {
     var inp = $(this).val();
     if (inp !== "") {
-      $("#id_business option").each(function () {
+      $("#right-business option").each(function () {
         var opt = $(this).html();
-        if (opt.includes(inp)) {
+        if (opt.includes(inp) && $(this).attr("is_selected") === "false") {
           $(this).show();
         } else {
           $(this).hide();
         }
       });
-      $("#id_business :selected").each(function () {
+      /*$("#id_business :selected").each(function () {
         $(this).show();
-      });
+      });*/
     } else {
-      $("#id_business option").each(function () {
-        $(this).show();
+      $("#right-business option").each(function () {
+        if ($(this).attr("is_selected") === "false") {
+          $(this).show();
+        }
       });
     }
   });
@@ -247,28 +328,93 @@
   $("#organization-search-input").on("keyup", function () {
     var inp = $(this).val();
     if (inp !== "") {
-      $("#id_organization option").each(function () {
+      $("#right-organization option").each(function () {
         var opt = $(this).html();
-        if (opt.includes(inp)) {
+        if (opt.includes(inp) && $(this).attr("is_selected") === "false") {
           $(this).show();
         } else {
           $(this).hide();
         }
       });
-      $("#id_organization :selected").each(function () {
+      /*$("#id_organization :selected").each(function () {
         $(this).show();
-      });
+      });*/
     } else {
-      $("#id_organization option").each(function () {
-        $(this).show();
+      $("#right-organization option").each(function () {
+        if ($(this).attr("is_selected") === "false") {
+          $(this).show();
+        }
       });
     }
   });
 
-  function goBack() {
-    var url = "/";
-    window.location = url;
-  }
+  $("#right-business option").on("click", function () {
+    var value = $(this).val();
+    $(this).attr("is_selected", "true");
+    $("#id_business option").each(function () {
+      if ($(this).val() === value) {
+        $(this).prop("selected", true);
+      }
+    });
+    $("#left-business option").each(function () {
+      if ($(this).val() === value) {
+        $(this).attr("style", "");
+        $(this).attr("is_selected", "true");
+      }
+    });
+    $(this).attr("style", "display: none");
+  });
+
+  $("#left-business option").on("click", function () {
+    var value = $(this).val();
+    $("#id_business option").each(function () {
+      if ($(this).val() === value) {
+        $(this).prop("selected", false);
+      }
+    });
+    $("#right-business option").each(function () {
+      if ($(this).val() === value) {
+        $(this).attr("style", "");
+        $(this).attr("is_selected", "false");
+      }
+    });
+    $(this).attr("style", "display: none");
+    $(this).attr("is_selected", "false");
+  });
+
+  $("#right-organization option").on("click", function () {
+    var value = $(this).val();
+    $(this).attr("is_selected", "true");
+    $("#id_organization option").each(function () {
+      if ($(this).val() === value) {
+        $(this).prop("selected", true);
+      }
+    });
+    $("#left-organization option").each(function () {
+      if ($(this).val() === value) {
+        $(this).attr("style", "");
+        $(this).attr("is_selected", "true");
+      }
+    });
+    $(this).attr("style", "display: none");
+  });
+
+  $("#left-organization option").on("click", function () {
+    var value = $(this).val();
+    $("#id_organization option").each(function () {
+      if ($(this).val() === value) {
+        $(this).prop("selected", false);
+      }
+    });
+    $("#right-organization option").each(function () {
+      if ($(this).val() === value) {
+        $(this).attr("style", "");
+        $(this).attr("is_selected", "false");
+      }
+    });
+    $(this).attr("style", "display: none");
+    $(this).attr("is_selected", "false");
+  });
 
   var dept = document.getElementById("id_department");
   dept.addEventListener("change", function (event) {
@@ -293,15 +439,6 @@
         console.log(errorMsg);
       });
   });
-
-  /*var options = document.querySelectorAll("option");
-  options.forEach((opt) => {
-    if (opt.getAttribute("parent") == "department") {
-      bic.appendChild(opt);
-    } else if (opt.getAttribute("parent") == "business") {
-      bus.appendChild(opt);
-    }
-  });*/
 
   var username = document.getElementById("id_username");
   username.addEventListener("change", function (event) {

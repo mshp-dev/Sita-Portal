@@ -65,7 +65,7 @@ class MftUserTempAdmin(admin.ModelAdmin):
 
 class DirectoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'relative_path', 'bic', 'index_code', 'created_by']
-    list_filter = ['bic', 'business', 'created_by']
+    list_filter = ['index_code__code', 'bic', 'business']
     search_fields = ['relative_path', 'bic__description', 'business__description']
     ordering = ['name', 'relative_path']
 

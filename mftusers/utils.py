@@ -614,10 +614,16 @@ def export_user_with_paths_v2(id, isc_user):
     webuser_temp_file.write(bytes_template.decode('utf-8'))
     webuser_temp_file.flush()
     webuser_file = File(webuser_temp_file, name=f'{mftuser.username}.xml')
+    paths_temp_file = ntf(mode='w+', encoding='utf-8', delete=True)
+    for d in Directory.objects.filter(pk__in=[dir_['directory'] for dir_ in Permission.objects.filter(user=mftuser, is_confirmed=True).values('directory')]).order_by('relative_path'):
+        paths_temp_file.write(f'{d.relative_path},\n')
+    paths_temp_file.flush()
+    paths_file = File(paths_temp_file, name=f'{mftuser.username}.csv')
     if ReadyToExport.objects.filter(mftuser=mftuser).exists():
         rte = ReadyToExport.objects.get(mftuser=mftuser)
         rte.number_of_exports = rte.number_of_exports + 1
         rte.webuser = webuser_file
+        rte.paths = paths_file
         rte.save()
     else:
         if os.path.exists(os.path.join(settings.MEDIA_ROOT, 'exports', f'{mftuser.username}.xml')):
@@ -625,7 +631,8 @@ def export_user_with_paths_v2(id, isc_user):
         ReadyToExport.objects.create(
             mftuser=mftuser,
             created_by=isc_user,
-            webuser=webuser_file
+            webuser=webuser_file,
+            paths=paths_file
         )
 
 
@@ -652,7 +659,12 @@ def make_virtual_file(directory, permissions, virtual_file):
     _diskQuotaUnit = ET.SubElement(virtual_file, 'diskQuotaUnit')
     _diskQuotaUnit.text = 'M'
     _path = ET.SubElement(virtual_file, 'path')
-    _path.text = directory.absolute_path
+    dir_path = ''
+    if directory.bic.sub_domain == DomainName.objects.get(code='nibn.ir'):
+        dir_path = directory.absolute_path
+    else:
+        dir_path = directory.remote_path
+    _path.text = dir_path
     virtual_files = ET.SubElement(virtual_file, 'virtualFiles')
     chs = directory.children.split(',')[:-1]
     dirs_with_perms = [dir_['directory'] for dir_ in all_dirs if str(dir_['directory']) in chs]

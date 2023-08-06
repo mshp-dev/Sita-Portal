@@ -115,6 +115,7 @@ def mftuser_create_view(request, *args, **kwargs):
         'crud': 'create',
         'form': form,
         'msg': msg,
+        'buss': buss,
         'success': success,
         'new_user_id': -1 if mftuser is None else mftuser.id,
         'page_title': 'فرم ایجاد کاربر FTP',
@@ -269,16 +270,16 @@ def mftuser_details_view(request, id, *args, **kwargs):
 
     if isc_user.role.code == 'CUSTOMER':
         orgs = [acc.access_on_bic for acc in CustomerBank.objects.filter(user=isc_user)]
-        buss = [bus for bus in BusinessCode.objects.all()]
+        buss = [bus for bus in BusinessCode.objects.all().order_by('description')]
     elif isc_user.role.code == 'OPERATION':
-        orgs = [acc for acc in BankIdentifierCode.objects.all()]
+        orgs = [acc for acc in BankIdentifierCode.objects.all().order_by('description')]
         if OperationBusiness.objects.filter(user=isc_user, owned_by_user=True).exists():
-            buss = [bus.access_on_bus for bus in OperationBusiness.objects.filter(user=isc_user, owned_by_user=True).order_by('access_on_bus')]
+            buss = [bus.access_on_bus for bus in OperationBusiness.objects.filter(user=isc_user, owned_by_user=True).order_by('access_on_bus__description')]
         else:
             buss = [BusinessCode.objects.get(code='NO_PROJECT'),]
     elif isc_user.role.code == 'ADMIN':
-        orgs = [bic for bic in BankIdentifierCode.objects.all()]
-        buss = [bus for bus in BusinessCode.objects.all()]
+        orgs = [bic for bic in BankIdentifierCode.objects.all().order_by('description')]
+        buss = [bus for bus in BusinessCode.objects.all().order_by('description')]
     
     form = MftUserForm(request.POST or None, instance=mftuser, request=request)
     form.fields['organization'].choices = [(bic.id, bic) for bic in orgs]
@@ -414,6 +415,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
         'username': str(isc_user.user.username),
         'access': str(isc_user.role.code),
         'mftuser': mftuser,
+        "buss": buss,
         'used_buss': mftuser.get_used_business(obj=True),
         'confirmed': confirmed,
         'form': form

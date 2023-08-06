@@ -66,7 +66,7 @@ def register_user_view(request):
     form.fields['department'].choices = [(dept.id, dept) for dept in IscDepartmentCode.objects.all().order_by('description')]
     form.fields['business'].choices = [(bus.id, bus) for bus in BusinessCode.objects.all().order_by('description')]
     form.fields['organization'].choices = [(org.id, org) for org in BankIdentifierCode.objects.all().order_by('description')]
-
+    
     if request.method == "POST":
         # form = SignUpForm(request.POST)
         if form.is_valid():
@@ -108,14 +108,14 @@ def register_user_view(request):
                             OperationBusiness.objects.create(user=isc_user, access_on_bus=BusinessCode.objects.get(id=int(bus)))
                             logger.info(f'access on {bus_code.code} for {isc_user.user.username} has beeen given.')
                         else:
-                            logger.warning(f'access on {bus_code.code} for {isc_user.user.username} has beeen given.')
+                            logger.warning(f'access on {bus_code.code} for {isc_user.user.username} has not beeen given.')
                             bus_msg += f'دسترسی به سامانه/پروژه {bus_code.code} ایجاد نشد. متعلق به گروه دیگری می باشد.\n'
             elif user_role.code == 'CUSTOMER':
                 for org in organizations:
                     organization = BankIdentifierCode.objects.get(id=int(org))
                     CustomerBank.objects.create(
-                        user=isc_user,
-                        access_on_bic=organization
+                       user=isc_user,
+                       access_on_bic=organization
                     )
                     logger.info(f'access on {organization.code} for {isc_user.user.username} has beeen given.')
             msg = f'<p>کاربری {user.username} ایجاد گردید،<br />برای فعالسازی آن لطفاً با 29985700 تماس بگیرید.</p><br ><p>{bus_msg}</p>'
@@ -123,11 +123,14 @@ def register_user_view(request):
             # return redirect("/login/")
         else:
             # 'اطلاعات ورودی صحیح نیست!'
+            print(form.errors)
             msg = form.errors
             access_type = form.cleaned_data.get("department").access_type.code
 
     context = {
         "form": form,
+        "orgs": BankIdentifierCode.objects.all().order_by('description'),
+        "buss": BusinessCode.objects.all().order_by('description'),
         "msg": msg,
         "success": success,
         "access_type": access_type
@@ -386,6 +389,8 @@ def profile_view(request, *args, **kwargs):
         'owned_business': [ob.access_on_bus for ob in o_buss] if isc_user.role.code == 'OPERATION' else [ob for ob in o_buss],
         'used_business': [ub.access_on_bus for ub in u_buss] if isc_user.role.code == 'OPERATION' else [],
         'organizations': user_orgs,
+        'all_organizations': BankIdentifierCode.objects.all().order_by('description'),
+        'all_businesses': BusinessCode.objects.all().order_by('description'),
         'username': str(isc_user.user.username),
         'access': str(isc_user.role.code),
         'profile_form': profile_form,

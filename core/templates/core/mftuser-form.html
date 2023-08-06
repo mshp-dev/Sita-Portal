@@ -20,7 +20,7 @@
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-12 d-flex align-items-center justify-content-center">
-          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-800">
+          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-1000">
             <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
               <h1 class="mb-0 h3">{{ page_title }}</h1>
               <br />
@@ -67,8 +67,21 @@
                     aria-describedby="basic-addon"
                   />
                 </div>
+                <p style="direction: ltr">
+                  <span class="ms-8" style="font-size: 0.7rem; font-weight: bold">سامانه/پروژه های انتخاب شده</span>
+                </p>
                 <div class="input-group" style="direction: ltr">
-                  {{ form.business }}
+                  <select id="left-business" class="form-control form-select" size="10" parent="business">
+                    {% for bus in buss %}
+                    <option style="display: none" value="{{ bus.id }}">{{ bus.description }}</option>
+                    {% endfor %}
+                  </select>
+                  <select id="right-business" style="direction: rtl" class="form-control form-select" size="10" parent="business">
+                    {% for bus in buss %}
+                    <option value="{{ bus.id }}">{{ bus.description }}</option>
+                    {% endfor %}
+                  </select>
+                  <div style="display: none">{{ form.business }}</div>
                   <span class="input-group-text" id="business"><span class="fas fa-sitemap"></span></span>
                 </div>
               </div>
@@ -231,22 +244,77 @@
 <script type="text/javascript" src="js/virtual-select.min.js"></script>
 {% endcomment %}
 <script>
+  $(window).on("load", function () {
+    $("#right-business option[value=88]").attr("style", "font-style: italic; font-size: 1.5rem; color: orangered;");
+
+    $("option").each(function () {
+      $(this).attr("is_selected", "false");
+    });
+
+    $("#left-business option").each(function () {
+      $(this).attr("style", "display: none");
+    });
+
+    $("#id_business option").each(function () {
+      $(this).prop("selected", false);
+    });
+  });
+
   $("#search-input").on("keyup", function () {
     var inp = $(this).val();
     if (inp !== "") {
-      $("#id_business option").each(function () {
+      $("#right-business option").each(function () {
         var opt = $(this).html();
-        if (opt.includes(inp)) {
+        if (opt.includes(inp) && $(this).attr("is_selected") === "false") {
           $(this).show();
         } else {
           $(this).hide();
         }
       });
+      /*$("#id_business :selected").each(function () {
+          $(this).show();
+        });*/
     } else {
-      $("option").each(function () {
-        $(this).show();
+      $("#right-business option").each(function () {
+        if ($(this).attr("is_selected") === "false") {
+          $(this).show();
+        }
       });
     }
+  });
+
+  $("#right-business option").on("click", function () {
+    var value = $(this).val();
+    $(this).attr("is_selected", "true");
+    $("#id_business option").each(function () {
+      if ($(this).val() === value) {
+        $(this).prop("selected", true);
+      }
+    });
+    $("#left-business option").each(function () {
+      if ($(this).val() === value) {
+        $(this).attr("style", "");
+        $(this).attr("is_selected", "true");
+      }
+    });
+    $(this).attr("style", "display: none");
+  });
+
+  $("#left-business option").on("click", function () {
+    var value = $(this).val();
+    $("#id_business option").each(function () {
+      if ($(this).val() === value) {
+        $(this).prop("selected", false);
+      }
+    });
+    $("#right-business option").each(function () {
+      if ($(this).val() === value) {
+        $(this).attr("style", "");
+        $(this).attr("is_selected", "false");
+      }
+    });
+    $(this).attr("style", "display: none");
+    $(this).attr("is_selected", "false");
   });
 
   function scroll() {

@@ -94,7 +94,7 @@ class MftUserForm(forms.ModelForm):
     officephone  = forms.DecimalField(max_digits=8, required=True, widget=forms.TextInput(attrs={"placeholder": "123456798", "maxlength": "8", "class": "form-control"}))
     mobilephone  = forms.DecimalField(max_digits=11, required=True, widget=forms.TextInput(attrs={"placeholder": "09123456798", "maxlength": "11", "class": "form-control"}))
     organization = forms.ChoiceField(required=True, error_messages={'invalid_choice': 'یک سازمان/بانک را انتخاب نمائید'}, widget=forms.Select(attrs={"class": "form-control form-select form-select-bg-left", "parent": "organization"}))
-    business     = forms.MultipleChoiceField(required=True, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "class": "form-control form-select", "size": 10, "parent": "business", "data-search": "true", "data-silent-initial-value-set": "true"}))
+    business     = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"size": 10, "parent": "business", "data-search": "true", "data-silent-initial-value-set": "true"}))
     # business     = forms.MultipleChoiceField(required=True, widget=forms.CheckboxSelectMultiple(attrs={"style": "direction: rtl", "class": "form-control form-check", "parent": "business", "data-search": "true", "data-silent-initial-value-set": "true"}))
     # ipaddr       = forms.CharField(max_length=15, required=False, widget=forms.TextInput(attrs={"placeholder": "123.123.123.123", "class": "form-control"}))
     # disk_quota   = forms.IntegerField(max_value=100000000, min_value=100, help_text='کمک کمک کمک', required=True, widget=forms.TextInput(attrs={"placeholder": "حجم مورد نیاز در سیتا", "class": "form-control"}))
@@ -162,9 +162,12 @@ class MftUserForm(forms.ModelForm):
         org = BankIdentifierCode.objects.get(pk=self.cleaned_data.get('organization'))
         return org
     
-    # def clean_business(self):
-    #     business = BusinessCode.objects.get(id=self.cleaned_data.get('business'))
-    #     return business
+    def clean_business(self):
+        business = self.cleaned_data.get('business')
+        if not business or business == []:
+            raise ValidationError('باید حداقل یک پروژه/سامانه انتخاب کنید.')
+        # business = BusinessCode.objects.get(id=self.cleaned_data.get('business'))
+        return business
     
     def clean_mobilephone(self):
         phone_number = str(self.cleaned_data.get('mobilephone'))
@@ -235,6 +238,7 @@ class ResetPasswordForm(forms.Form):
             raise ValidationError('کلمه عبور وارد شده با تکرار آن برابر نیست.')
         return cleaned_data
 
+
 class IscUserForm(forms.ModelForm):
     username     = forms.CharField(max_length=101, required=True, widget=forms.TextInput(attrs={"placeholder": "Username", "class": "form-control"}))
     password     = forms.CharField(min_length=8, required=True, widget=forms.PasswordInput(attrs={"placeholder": "Password", "class": "form-control"}))
@@ -244,8 +248,8 @@ class IscUserForm(forms.ModelForm):
     officephone  = forms.DecimalField(max_digits=8, required=True, widget=forms.TextInput(attrs={"placeholder": "123456798", "maxlength": "8", "class": "form-control"}))
     mobilephone  = forms.DecimalField(max_digits=11, required=True, widget=forms.TextInput(attrs={"placeholder": "09123456798", "maxlength": "11", "class": "form-control"}))
     department   = forms.ChoiceField(required=True, widget=forms.Select(attrs={"class": "form-control form-select", "parent": "department"}))
-    business     = forms.MultipleChoiceField(required=True, widget=forms.SelectMultiple(attrs={"class": "form-control form-select", "size": 10, "parent": "business"}))
-    organization = forms.MultipleChoiceField(required=True, widget=forms.SelectMultiple(attrs={"class": "form-control form-select", "size": 10, "parent": "organization"}))
+    business     = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"size": 10, "parent": "business"}))
+    organization = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"size": 10, "parent": "organization"}))
 
     class Meta:
         model = IscUser
@@ -266,13 +270,19 @@ class IscUserForm(forms.ModelForm):
         dept = IscDepartmentCode.objects.get(id=self.cleaned_data.get('department'))
         return dept
     
-    # def clean_business(self):
-    #     business = BusinessCode.objects.get(id=self.cleaned_data.get('business'))
-    #     return business
+    def clean_business(self):
+        business = self.cleaned_data.get('business')
+        if not business or business == []:
+            raise ValidationError('باید حداقل یک پروژه/سامانه انتخاب کنید.')
+        # business = BusinessCode.objects.get(id=self.cleaned_data.get('business'))
+        return business
     
-    # def clean_organizations(self):
-    #     organizations = BankIdentifierCode.objects.get(id=self.cleaned_data.get('organizations'))
-    #     return organizations
+    def clean_organization(self):
+        organization = self.cleaned_data.get('organization')
+        if not organization or organization == []:
+            raise ValidationError('باید حداقل یک سازمان/بانک انتخاب کنید.')
+        # organization = BankIdentifierCode.objects.get(id=self.cleaned_data.get('organization'))
+        return organization
     
     def clean_mobilephone(self):
         phone_number = str(self.cleaned_data.get('mobilephone'))
@@ -350,8 +360,8 @@ class UserProfileForm(forms.Form):
 
 
 class BusinessSelectionForm(forms.Form):
-    owned_business = forms.MultipleChoiceField(required=True, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "class": "form-control form-select", "size": 20, "parent": "owned-business"}))
-    used_business  = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "class": "form-control form-select", "size": 20, "parent": "used-business"}))
+    owned_business = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "size": 20, "parent": "owned-business"}))
+    used_business  = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "size": 20, "parent": "used-business"}))
     
     class Meta:
         fields = (
@@ -359,11 +369,32 @@ class BusinessSelectionForm(forms.Form):
             'used_business'
         )
 
+    def clean_owned_business(self):
+        business = self.cleaned_data.get('owned_business')
+        if not business or business == []:
+            raise ValidationError('باید حداقل یک پروژه/سامانه انتخاب کنید.')
+        # business = BusinessCode.objects.get(id=self.cleaned_data.get('business'))
+        return business
+
+    def clean_used_business(self):
+        business = self.cleaned_data.get('used_business')
+        if not business or business == []:
+            raise ValidationError('باید حداقل یک پروژه/سامانه انتخاب کنید.')
+        # business = BusinessCode.objects.get(id=self.cleaned_data.get('business'))
+        return business
+
 
 class OrganizationSelectionForm(forms.Form):
-    organizations = forms.MultipleChoiceField(required=True, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "class": "form-control form-select", "size": 20, "parent": "organizations"}))
+    organizations = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "size": 20, "parent": "organizations"}))
     
     class Meta:
         fields = (
             'organizations'
         )
+    
+    def clean_organizations(self):
+        organizations = self.cleaned_data.get('organizations')
+        if not organizations or organizations == []:
+            raise ValidationError('باید حداقل یک سازمان/بانک انتخاب کنید.')
+        # organization = BankIdentifierCode.objects.get(id=self.cleaned_data.get('organization'))
+        return organizations

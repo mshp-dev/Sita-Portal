@@ -11,7 +11,7 @@
 <script type="text/javascript" src="{% static 'js/treeitem.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
 {% endcomment %}
-<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script src="{% static 'assets/js/jquery-3.4.1.min.js' %}"></script>
 {% if access == 'ADMIN' %}
 <script type="text/javascript">
   $(function () {
@@ -65,7 +65,7 @@
   <div class="section section-md">
     <div class="container">
       <div class="row mb-8">
-        <div class="col-8 mx-auto">
+        <div class="col-10 mx-auto">
           {% comment %} <div class="nav-wrapper position-relative mb-2">
             <ul class="nav nav-pills nav-fill flex-column flex-md-row" id="tabs-manage-data" role="tablist">
               <li class="nav-item">
@@ -99,7 +99,7 @@
           <div class="card-body p-0">
             <div class="tab-content" id="tabcontent">
               <div class="tab-pane fade" id="tabs-info" role="tabpanel" aria-labelledby="tabs-info-tab"> {% endcomment %}
-                <div class="col-10 mx-auto">
+                <div class="col mx-auto">
                   <div class="text-center text-md-center mb-4 mt-4" style="direction: rtl">
                     {% comment %} <h1 class="mb-0 h3">مشخصات کاربر {{ mftuser.username }}</h1>
                     <br /> {% endcomment %}
@@ -186,9 +186,22 @@
                           aria-describedby="basic-addon"
                         />
                       </div>
+                      <p style="direction: ltr">
+                        <span class="ms-8" style="font-size: 0.7rem; font-weight: bold">سامانه/پروژه های انتخاب شده</span>
+                      </p>
                       <div class="input-group" style="direction: ltr">
                         <span class="input-group-text" id="business" bus-id="{{ mftuser.business.all|get_business_ids }}"><span class="fas fa-sitemap"></span></span>
-                        {{ form.business }}
+                        <select id="left-business" style="direction: ltr" class="form-control form-select" size="10" parent="business">
+                          {% for bus in buss %}
+                          <option value="{{ bus.id }}">{{ bus.description }}</option>
+                          {% endfor %}
+                        </select>
+                        <select id="right-business" style="direction: rtl" class="form-control form-select" size="10" parent="business">
+                          {% for bus in buss %}
+                          <option value="{{ bus.id }}">{{ bus.description }}</option>
+                          {% endfor %}
+                        </select>
+                        <div style="display: none">{{ form.business }}</div>
                       </div>
                     </div>
                     <div class="form-group mb-4" style="direction: rtl">
@@ -268,38 +281,86 @@
 </main>
 
 <script type="text/javascript">
-  window.onload = function () {
+  $(window).on("load", function () {
     var org = document.getElementById("id_organization");
     var orgParent = document.getElementById("organization");
     org.value = parseInt(orgParent.getAttribute("org-id"));
-    //var bus = document.getElementById("id_business");
-    //var busParent = document.getElementById("business");
-    //bus.value = parseInt(busParent.getAttribute("bus-id"));
-  };
+
+    //$("#right-business option[value=88]").attr("style", "font-style: italic; font-size: 1.5rem; color: orangered;");
+
+    $("option").each(function () {
+      $(this).attr("is_selected", "false");
+    });
+
+    $("#left-business option").each(function () {
+      $(this).attr("style", "display: none");
+    });
+
+    var bus_ids = $("#business").attr("bus-id");
+    $.each(bus_ids.split(","), function (i, e) {
+      $("#id_business option[value='" + e + "']").attr("selected", true);
+      $("#right-business option[value='" + e + "']").attr("is_selected", true);
+      $("#right-business option[value='" + e + "']").attr("style", "display: none");
+      $("#left-business option[value='" + e + "']").attr("is_selected", true);
+      $("#left-business option[value='" + e + "']").attr("style", "");
+    });
+  });
 
   $("#search-input").on("keyup", function () {
     var inp = $(this).val();
     if (inp !== "") {
-      $("option").each(function () {
+      $("#right-business option").each(function () {
         var opt = $(this).html();
-        if (opt.includes(inp)) {
-          $(this).show();
+        if (opt.includes(inp) && $(this).attr("is_selected") === "false") {
+          $(this).prop("style", "");
         } else {
-          $(this).hide();
+          $(this).prop("style", "display: none");
         }
       });
-    } else {
-      $("option").each(function () {
+      /*$("#id_business :selected").each(function () {
         $(this).show();
+      });*/
+    } else {
+      $("#right-business option").each(function () {
+        if ($(this).attr("is_selected") === "false") {
+          $(this).prop("style", "");
+        }
       });
     }
   });
 
-  $(function () {
-    var bus_ids = $("#business").attr("bus-id");
-    $.each(bus_ids.split(","), function (i, e) {
-      $("#id_business option[value='" + e + "']").prop("selected", true);
+  $("#right-business option").on("click", function () {
+    var value = $(this).val();
+    $(this).attr("is_selected", "true");
+    $("#id_business option").each(function () {
+      if ($(this).val() === value) {
+        $(this).prop("selected", true);
+      }
     });
+    $("#left-business option").each(function () {
+      if ($(this).val() === value) {
+        $(this).attr("style", "");
+        $(this).attr("is_selected", "true");
+      }
+    });
+    $(this).attr("style", "display: none");
+  });
+
+  $("#left-business option").on("click", function () {
+    var value = $(this).val();
+    $("#id_business option").each(function () {
+      if ($(this).val() === value) {
+        $(this).prop("selected", false);
+      }
+    });
+    $("#right-business option").each(function () {
+      if ($(this).val() === value) {
+        $(this).attr("style", "");
+        $(this).attr("is_selected", "false");
+      }
+    });
+    $(this).attr("style", "display: none");
+    $(this).attr("is_selected", "false");
   });
 
   function goBack() {
@@ -307,26 +368,26 @@
     window.location = url;
   }
 
-  function makeInvoice() {
-    var mftuser = document.getElementById("current-user-id");
-    var url = "/invoices/create/?user=" + mftuser.innerHTML;
-    window.location = url;
-  }
+  /*function makeInvoice() {
+      var mftuser = document.getElementById("current-user-id");
+      var url = "/invoices/create/?user=" + mftuser.innerHTML;
+      window.location = url;
+    }
 
-  /*var bus = document.getElementById("id_business");
-  bus.addEventListener("change", function (event) {
-    var busParent = document.getElementById("business");
-    event.currentTarget.value = parseInt(busParent.getAttribute("bus-id"));
+    var bus = document.getElementById("id_business");
+    bus.addEventListener("change", function (event) {
+      var busParent = document.getElementById("business");
+      event.currentTarget.value = parseInt(busParent.getAttribute("bus-id"));
   });*/
 
   var options = document.querySelectorAll("option");
   options.forEach((opt) => {
     opt.setAttribute("style", "direction: rtl");
     /*if (opt.getAttribute("parent") == "organization") {
-      bic.appendChild(opt);
-    } else if (opt.getAttribute("parent") == "business") {
-      bus.appendChild(opt);
-    }*/
+        bic.appendChild(opt);
+      } else if (opt.getAttribute("parent") == "business") {
+        bus.appendChild(opt);
+      }*/
   });
 
   var email = document.getElementById("id_email");
