@@ -48,6 +48,16 @@ def invoice_create_view(request, *args, **kwargs):
                         bus_dirs = Directory.objects.filter(business=BusinessCode.objects.get(pk=int(request.POST.get('ubus')))).order_by('relative_path')
                     elif invoice_type.code == 'INVOBUS':
                         bus_dirs = Directory.objects.filter(business__in=mftuser.business.all()).order_by('relative_path')
+                    for bd in bus_dirs:
+                        if not Permission.objects.filter(user=mftuser, directory=bd, permission=256).exists():
+                            logger.warn(f'default permission on {bd.absolute_path} for {mftuser.username} does not exists.')
+                            Permission.objects.create(
+                                user=mftuser,
+                                directory=bd,
+                                permission=256, # List (مشاهده)
+                                created_by=isc_user
+                            )
+                            logger.info(f'permission of directory {bd.absolute_path} for mftuser {mftuser.username} changed to [256] by {isc_user.user.username}.')
                     permissions = Permission.objects.filter(user=mftuser, directory__in=bus_dirs, is_confirmed=False)
                     if permissions.filter(permission__in=[1, 2, 32, 4]).exists():
                         for p in permissions.values('id').distinct():
