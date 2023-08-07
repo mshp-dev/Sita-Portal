@@ -225,6 +225,18 @@ function cleanInputValue(input, type) {
   return input;
 }
 
+function switch_business({ src_option, dst_option, hid_option, action }) {
+  id = $(src_option).val();
+  src_option_name = $(src_option).id();
+  dst_option_name = $(dst_option).id();
+  hid_option_name = $(hid_option).id();
+  $("#" + src_option_name + " option[value='" + id + "']").attr("is_selected", "false");
+  $("#" + src_option_name + " option[value='" + id + "']").prop("style", "display: none");
+  $("#" + hid_option_name + " option[value='" + id + "']").prop("selected", action);
+  $("#" + dst_option_name + " option[value='" + id + "']").prop("style", "");
+  $("#" + dst_option_name + " option[value='" + id + "']").attr("is_selected", "true");
+}
+
 function goBack() {
   var url = "/";
   window.location = url;

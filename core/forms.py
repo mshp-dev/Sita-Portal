@@ -360,8 +360,8 @@ class UserProfileForm(forms.Form):
 
 
 class BusinessSelectionForm(forms.Form):
-    owned_business = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "size": 20, "parent": "owned-business"}))
-    used_business  = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "size": 20, "parent": "used-business"}))
+    owned_business = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "size": 10, "parent": "owned-business"}))
+    used_business  = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"style": "direction: rtl", "size": 10, "parent": "used-business"}))
     
     class Meta:
         fields = (

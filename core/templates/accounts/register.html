@@ -117,7 +117,8 @@
               </div>
               <div id="business-parent" class="form-group mb-4" style="display: none; direction: rtl">
                 <label for="business"
-                  >سامانه/پروژه های تحت اختیار <sup class="text-danger"><strong>*</strong></sup></label
+                  >سامانه/پروژه های تحت اختیار <br />(<strong style="font-size: 1.25rem" class="text-danger">فقط</strong> سامانه/پروژه هایی که تحت
+                  اختیار گروه شماست و به عنوان admin آن سامانه/پروژه هستید) <sup class="text-danger"><strong>*</strong></sup></label
                 >
                 <p>
                   <span style="font-size: 0.7rem">با نگهداشتن کلید CTRL می توانید چند سامانه را انتخاب نمایید</span>
@@ -219,7 +220,7 @@
     //$("#id_organization option[value=1]").prop("selected", true);
     //$("#id_business option[value=1]").prop("selected", true);
 
-    $("#right-business option[value=88]").attr("style", "font-style: italic; font-size: 1.5rem; color: orangered;");
+    //$("#right-business option[value=88]").attr("style", "font-style: italic; font-size: 1.5rem; color: orangered;");
 
     $("option").each(function () {
       $(this).attr("is_selected", "false");
@@ -246,7 +247,7 @@
         $(this).prop("is_selected", "false");
         $(this).attr("style", "");
       });
-      $("#right-business option[value=88]").prop("style", "font-style: italic; font-size: 1.5rem; color: orangered;");
+      //$("#right-business option[value=88]").prop("style", "font-style: italic; font-size: 1.5rem; color: orangered;");
       $("#left-business option").each(function () {
         $(this).prop("is_selected", "false");
         $(this).attr("style", "display: none");
@@ -266,6 +267,23 @@
         $(this).prop("is_selected", "false");
         $(this).attr("style", "display: none");
       });
+    }
+  }
+
+  function switch_business(option, direction) {
+    id = $(option).val();
+    if (direction === "left_to_right") {
+      $("#left-business option[value='" + id + "']").attr("is_selected", "false");
+      $("#left-business option[value='" + id + "']").prop("style", "display: none");
+      $("#id_business option[value='" + id + "']").prop("selected", false);
+      $("#right-business option[value='" + id + "']").prop("style", "");
+      $("#right-business option[value='" + id + "']").attr("is_selected", "true");
+    } else if (direction === "right_to_left") {
+      $("#right-business option[value='" + id + "']").attr("is_selected", "false");
+      $("#right-business option[value='" + id + "']").prop("style", "display: none");
+      $("#id_business option[value='" + id + "']").prop("selected", true);
+      $("#left-business option[value='" + id + "']").prop("style", "");
+      $("#left-business option[value='" + id + "']").attr("is_selected", "true");
     }
   }
 
@@ -349,37 +367,24 @@
   });
 
   $("#right-business option").on("click", function () {
-    var value = $(this).val();
-    $(this).attr("is_selected", "true");
-    $("#id_business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).prop("selected", true);
+    switch_business(this, "right_to_left");
+    if ($(this).val() != 88) {
+      if ($("#left-business option[value=88]").attr("is_selected") == "true") {
+        switch_business($("#left-business option[value='" + $(this).val() + "']"), "left_to_right");
       }
-    });
-    $("#left-business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).attr("style", "");
-        $(this).attr("is_selected", "true");
-      }
-    });
-    $(this).attr("style", "display: none");
+    } else if ($(this).val() == 88) {
+      $("#left-business option").each(function () {
+        if ($(this).attr("is_selected") == "true") {
+          if ($(this).val() != 88) {
+            switch_business(this, "left_to_right");
+          }
+        }
+      });
+    }
   });
 
   $("#left-business option").on("click", function () {
-    var value = $(this).val();
-    $("#id_business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).prop("selected", false);
-      }
-    });
-    $("#right-business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).attr("style", "");
-        $(this).attr("is_selected", "false");
-      }
-    });
-    $(this).attr("style", "display: none");
-    $(this).attr("is_selected", "false");
+    switch_business(this, "left_to_right");
   });
 
   $("#right-organization option").on("click", function () {

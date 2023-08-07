@@ -167,7 +167,8 @@
               <input type="hidden" name="form-type" value="business-form">
               <div class="form-group mb-4" style="direction: rtl">
                 <label for="business"
-                  >سامانه/پروژه هایی که سرویس می دهید <sup class="text-danger"><strong>*</strong></sup></label
+                >لطفاً از لیست زیر انتخاب نمائید
+                <br />(<strong style="font-size: 1.25rem" class="text-danger">فقط</strong> سامانه/پروژه هایی که تحت اختیار گروه شماست و به عنوان admin آن سامانه/پروژه هستید) <sup class="text-danger"><strong>*</strong></sup></label
                 >
                 <div class="input-group mb-2">
                   <input
@@ -182,12 +183,12 @@
                 </div>
                 <div class="input-group" style="direction: ltr">
                   <span class="input-group-text" id="owned-business" o-bus-id="{{ owned_business|get_business_ids }}"><span class="fas fa-sitemap"></span></span>
-                  <select id="left-owned-business" class="form-control form-select" size="20" parent="business">
+                  <select id="left-owned-business" class="form-control form-select" size="7" parent="business">
                     {% for bus in all_businesses %}
                     <option value="{{ bus.id }}">{{ bus.description }}</option>
                     {% endfor %}
                   </select>
-                  <select id="right-owned-business" style="direction: rtl" class="form-control form-select" size="20" parent="business">
+                  <select id="right-owned-business" style="direction: rtl" class="form-control form-select" size="7" parent="business">
                     {% for bus in all_businesses %}
                     <option value="{{ bus.id }}">{{ bus.description }}</option>
                     {% endfor %}
@@ -197,7 +198,8 @@
               </div>
               <div class="form-group mb-4" style="direction: rtl">
                 <label for="business"
-                  >سامانه/پروژه ای که سرویس می گیرید</label
+                >لطفاً از لیست زیر انتخاب نمائید
+                <br />(<strong style="font-size: 1.25rem" class="text-danger">فقط</strong> سامانه/پروژه هایی که تحت اختیار گروه شما نبوده و قصد دریافت سرویس از آن سامانه/پروژه دارید) <sup class="text-danger"><strong>*</strong></sup></label
                 >
                 <div class="input-group mb-2">
                   <input
@@ -212,12 +214,12 @@
                 </div>
                 <div class="input-group" style="direction: ltr">
                   <span class="input-group-text" id="used-business" u-bus-id="{{ used_business|get_business_ids }}"><span class="fas fa-sitemap"></span></span>
-                  <select id="left-used-business" class="form-control form-select" size="20" parent="business">
+                  <select id="left-used-business" class="form-control form-select" size="7" parent="business">
                     {% for bus in all_businesses %}
                     <option value="{{ bus.id }}">{{ bus.description }}</option>
                     {% endfor %}
                   </select>
-                  <select id="right-used-business" style="direction: rtl" class="form-control form-select" size="20" parent="business">
+                  <select id="right-used-business" style="direction: rtl" class="form-control form-select" size="7" parent="business">
                     {% for bus in all_businesses %}
                     <option value="{{ bus.id }}">{{ bus.description }}</option>
                     {% endfor %}
@@ -463,72 +465,75 @@
   });
 
   $("#right-owned-business option").on("click", function () {
-    var value = $(this).val();
-    $(this).attr("is_selected", "true");
-    $("#id_owned_business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).prop("selected", true);
+    switch_business(this, "right_to_left_o");
+    if ($(this).val() != 88) {
+      if ($("#left-owned-business option[value=88]").attr("is_selected") == "true") {
+        switch_business($("#left-owned-business option[value='" + $(this).val() + "']"), "left_to_right_o");
       }
-    });
-    $("#left-owned-business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).attr("style", "");
-        $(this).attr("is_selected", "true");
-      }
-    });
-    $(this).attr("style", "display: none");
+    } else if ($(this).val() == 88) {
+      $("#left-owned-business option").each(function () {
+        if ($(this).attr("is_selected") == "true") {
+          if ($(this).val() != 88) {
+            switch_business(this, "left_to_right_o");
+          }
+        }
+      });
+    }
   });
 
   $("#left-owned-business option").on("click", function () {
-    var value = $(this).val();
-    $("#id_owned_business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).prop("selected", false);
-      }
-    });
-    $("#right-owned-business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).attr("style", "");
-        $(this).attr("is_selected", "false");
-      }
-    });
-    $(this).attr("style", "display: none");
-    $(this).attr("is_selected", "false");
+    switch_business(this, "left_to_right_o");
   });
 
   $("#right-used-business option").on("click", function () {
-    var value = $(this).val();
-    $(this).attr("is_selected", "true");
-    $("#id_used_business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).prop("selected", true);
+    switch_business(this, "right_to_left_u");
+    if ($(this).val() != 88) {
+      if ($("#left-used-business option[value=88]").attr("is_selected") == "true") {
+        switch_business($("#left-used-business option[value='" + $(this).val() + "']"), "left_to_right_u");
       }
-    });
-    $("#left-used-business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).attr("style", "");
-        $(this).attr("is_selected", "true");
-      }
-    });
-    $(this).attr("style", "display: none");
+    } else if ($(this).val() == 88) {
+      $("#left-used-business option").each(function () {
+        if ($(this).attr("is_selected") == "true") {
+          if ($(this).val() != 88) {
+            switch_business(this, "left_to_right_u");
+          }
+        }
+      });
+    }
   });
 
   $("#left-used-business option").on("click", function () {
-    var value = $(this).val();
-    $("#id_used_business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).prop("selected", false);
-      }
-    });
-    $("#right-used-business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).attr("style", "");
-        $(this).attr("is_selected", "false");
-      }
-    });
-    $(this).attr("style", "display: none");
-    $(this).attr("is_selected", "false");
+    switch_business(this, "left_to_right_u");
   });
+
+  function switch_business(option, direction) {
+    id = $(option).val();
+    if (direction === "left_to_right_o") {
+      $("#left-owned-business option[value='" + id + "']").attr("is_selected", "false");
+      $("#left-owned-business option[value='" + id + "']").prop("style", "display: none");
+      $("#id_owned_business option[value='" + id + "']").prop("selected", false);
+      $("#right-owned-business option[value='" + id + "']").prop("style", "");
+      $("#right-owned-business option[value='" + id + "']").attr("is_selected", "true");
+    } else if (direction === "right_to_left_o") {
+      $("#right-owned-business option[value='" + id + "']").attr("is_selected", "false");
+      $("#right-owned-business option[value='" + id + "']").prop("style", "display: none");
+      $("#id_owned_business option[value='" + id + "']").prop("selected", true);
+      $("#left-owned-business option[value='" + id + "']").prop("style", "");
+      $("#left-owned-business option[value='" + id + "']").attr("is_selected", "true");
+    } else if (direction === "left_to_right_u") {
+      $("#left-used-business option[value='" + id + "']").attr("is_selected", "false");
+      $("#left-used-business option[value='" + id + "']").prop("style", "display: none");
+      $("#id_used_business option[value='" + id + "']").prop("selected", false);
+      $("#right-used-business option[value='" + id + "']").prop("style", "");
+      $("#right-used-business option[value='" + id + "']").attr("is_selected", "true");
+    } else if (direction === "right_to_left_u") {
+      $("#right-used-business option[value='" + id + "']").attr("is_selected", "false");
+      $("#right-used-business option[value='" + id + "']").prop("style", "display: none");
+      $("#id_used_business option[value='" + id + "']").prop("selected", true);
+      $("#left-used-business option[value='" + id + "']").prop("style", "");
+      $("#left-used-business option[value='" + id + "']").attr("is_selected", "true");
+    }
+  }
 
   function goBack() {
     var url = "/dashboard/";

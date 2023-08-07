@@ -306,6 +306,23 @@
     });
   });
 
+  function switch_business(option, direction) {
+    id = $(option).val();
+    if (direction === "left_to_right") {
+      $("#left-business option[value='" + id + "']").attr("is_selected", "false");
+      $("#left-business option[value='" + id + "']").prop("style", "display: none");
+      $("#id_business option[value='" + id + "']").prop("selected", false);
+      $("#right-business option[value='" + id + "']").prop("style", "");
+      $("#right-business option[value='" + id + "']").attr("is_selected", "true");
+    } else if (direction === "right_to_left") {
+      $("#right-business option[value='" + id + "']").attr("is_selected", "false");
+      $("#right-business option[value='" + id + "']").prop("style", "display: none");
+      $("#id_business option[value='" + id + "']").prop("selected", true);
+      $("#left-business option[value='" + id + "']").prop("style", "");
+      $("#left-business option[value='" + id + "']").attr("is_selected", "true");
+    }
+  }
+
   $("#search-input").on("keyup", function () {
     var inp = $(this).val();
     if (inp !== "") {
@@ -330,37 +347,24 @@
   });
 
   $("#right-business option").on("click", function () {
-    var value = $(this).val();
-    $(this).attr("is_selected", "true");
-    $("#id_business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).prop("selected", true);
+    switch_business(this, "right_to_left");
+    if ($(this).val() != 88) {
+      if ($("#left-business option[value=88]").attr("is_selected") == "true") {
+        switch_business($("#left-business option[value='" + $(this).val() + "']"), "left_to_right");
       }
-    });
-    $("#left-business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).attr("style", "");
-        $(this).attr("is_selected", "true");
-      }
-    });
-    $(this).attr("style", "display: none");
+    } else if ($(this).val() == 88) {
+      $("#left-business option").each(function () {
+        if ($(this).attr("is_selected") == "true") {
+          if ($(this).val() != 88) {
+            switch_business(this, "left_to_right");
+          }
+        }
+      });
+    }
   });
 
   $("#left-business option").on("click", function () {
-    var value = $(this).val();
-    $("#id_business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).prop("selected", false);
-      }
-    });
-    $("#right-business option").each(function () {
-      if ($(this).val() === value) {
-        $(this).attr("style", "");
-        $(this).attr("is_selected", "false");
-      }
-    });
-    $(this).attr("style", "display: none");
-    $(this).attr("is_selected", "false");
+    switch_business(this, "left_to_right");
   });
 
   function goBack() {
