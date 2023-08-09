@@ -980,7 +980,11 @@ def transfer_permissions_view(request, *args, **kwargs):
         if form.is_valid():
             orig_user = MftUser.objects.get(username=form.cleaned_data.get("origin_mftuser"))
             dest_user = MftUser.objects.get(username=form.cleaned_data.get("destination_mftuser"))
-            Permission.objects.filter(user=dest_user).delete()
+            old_permissions = Permission.objects.filter(user=dest_user)
+            confirmed_permissions = old_permissions.filter(is_confirmed=True)
+            # confirmed_permissions_path = confirmed_permissions.filter(is_confirmed=True).values('directory__relative_path').distinct()
+            # confirmed_permissions_path_list = [cpp['directory__relative_path'] for cpp in confirmed_permissions_path]
+            old_permissions.delete()
             permissions = Permission.objects.filter(user=orig_user)
             for perm in permissions:
                 Permission.objects.create(
@@ -988,9 +992,12 @@ def transfer_permissions_view(request, *args, **kwargs):
                     created_by=isc_user,
                     user=dest_user,
                     directory=perm.directory,
-                    permission=perm.permission
+                    permission=perm.permission,
+                    is_confirmed=True if confirmed_permissions.filter(directory=perm.directory, permission=perm.permission).exists() else False
                 )
                 logger.info(f'permission of directory {perm.directory.absolute_path} for mftuser {dest_user.username} changed to {perm.permission} by {isc_user.user.username}.')
+            # TODO: confirm old permissisons 
+            # Permission.objects.filter(user=dest_user, directory__relative_path__in=confirmed_permissions_path_list).update(is_confirmed=True)
             logger.info(f'all permissions of {orig_user} to {dest_user} transfered successfully by {isc_user.user.username}')
             msg = f'انتقال دسترسی های {form.cleaned_data.get("origin_mftuser")} به {form.cleaned_data.get("destination_mftuser")} با موفقیت انجام شد.'
             success = True

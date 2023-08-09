@@ -602,6 +602,15 @@ def export_user_with_paths_v2(id, isc_user):
     # ip[0].text = mftuser.ipaddr
     virtualFile = template.xpath('//webUsers/webUser/virtualFile')
     virtual_files = template.xpath('//webUsers/webUser/virtualFile/virtualFiles')
+    for bus in mftuser.business.all():
+        if not Permission.objects.filter(user=mftuser, directory__parent=0, directory__business=bus).exists():
+            Permission.objects.create(
+                user=mftuser,
+                directory=Directory.objects.get(business=bus, parent=0),
+                permission=256, # List (مشاهده)
+                created_by=isc_user,
+                is_confirmed=True
+            )
     permissions = Permission.objects.filter(user=mftuser, is_confirmed=True).exclude(directory__index_code__code='-1', directory__children='')
     for item in permissions.filter(directory__index_code__code='-1'):
         if not permissions.filter(directory__id__in=[int(i) for i in item.directory.children.split(',')[:-1]]).exists():

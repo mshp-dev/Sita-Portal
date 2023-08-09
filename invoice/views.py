@@ -48,7 +48,7 @@ def invoice_create_view(request, *args, **kwargs):
                         bus_dirs = Directory.objects.filter(business=BusinessCode.objects.get(pk=int(request.POST.get('ubus')))).order_by('relative_path')
                     elif invoice_type.code == 'INVOBUS':
                         bus_dirs = Directory.objects.filter(business__in=mftuser.business.all()).order_by('relative_path')
-                    for bd in bus_dirs:
+                    for bd in bus_dirs.filter(parent=0):
                         if not Permission.objects.filter(user=mftuser, directory=bd, permission=256).exists():
                             logger.warn(f'default permission on {bd.absolute_path} for {mftuser.username} does not exists.')
                             Permission.objects.create(
@@ -133,7 +133,13 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                     mftuser.modified_at = timezone.now()
                     mftuser.save()
                     perms_list = [int(p) for p in invoice.permissions_list.split(',')[:-1]]
-                    Permission.objects.filter(pk__in=perms_list).update(is_confirmed=True)
+                    perms_list_exists = []
+                    for p in perms_list:
+                        if Permission.objects.filter(pk=p).exists():
+                            perms_list_exists.append(p)
+                        else:
+                            logger.warn(f'permission with id {p} does not exists.')
+                    Permission.objects.filter(pk__in=perms_list_exists).update(is_confirmed=True)
                     # export_user_with_paths(invoice.mftuser, isc_user)
                     export_user_with_paths_v2(invoice.mftuser, isc_user)
                     invoice.confirm_or_reject = 'CONFIRMED'
