@@ -76,7 +76,11 @@
 		<password>$5$2n1V2cKxaJjzXHGmTE2eDw==$V13n4/dUM4WgJaZCsi6PXg1EVeuzCocorLxeV5tUYBY=</password>
 		<name></name>
 		<webGroups />
-		<ipFilterEntries />
+		<ipFilterEntries>
+		    <ipFilterEntry>
+		        <address></address>
+		    </ipFilterEntry>
+		</ipFilterEntries>
 		<virtualFile>
 			<type>D</type>
 			<filePermissions>0</filePermissions>

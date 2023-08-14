@@ -40,7 +40,8 @@ SFTP_HOST = 'sft.iranet.net'
 SFTP_PORT = 9022
 SFTP_USERNAME = 'sita2'
 SFTP_PASSWORD = 'Sita2@Sita32022'
-SFTP_PATH = 'Portal_WebUser'
+SFTP_DEFAULT_PATH = 'Imported_WebUser'
+SFTP_EXTERNAL_USERS_PATH = 'Setad_Imported_WebUser'
 
 # Application definition
 

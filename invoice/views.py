@@ -112,6 +112,7 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                     confirm_directory_tree(dirs_list, survey='BACKWARD')
                     invoice.confirm_or_reject = 'CONFIRMED'
                     invoice.status = 1
+                    invoice.managed_by = isc_user
                     invoice.save()
                     response = {
                         'result': 'success',
@@ -144,6 +145,7 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                     export_user_with_paths_v2(invoice.mftuser, isc_user)
                     invoice.confirm_or_reject = 'CONFIRMED'
                     invoice.status = 1
+                    invoice.managed_by = isc_user
                     invoice.save()
                     response = {
                         'result': 'success',
@@ -175,6 +177,7 @@ def invoice_reject_view(request, iid, *args, **kwargs):
             if isc_user.role.code == 'ADMIN':
                 invoice.confirm_or_reject = 'REJECTED'
                 invoice.status = -1
+                invoice.managed_by = isc_user
                 invoice.description = request.POST.get('reason')
                 invoice.save()
                 response = {
@@ -207,12 +210,13 @@ def invoice_update_view(request, iid, *args, **kwargs):
             if isc_user.role.code == 'ADMIN':
                 invoice.confirm_or_reject = 'UNDEFINED'
                 invoice.status = 0
+                invoice.managed_by = isc_user
+                invoice.save()
                 response = {
                     'result': 'success',
                     'type': 'pre' if invoice_type.code == 'INVDIR' else '',
                     'updated': invoice.id
                 }
-                invoice.save()
                 logger.info(f'invoice with serial number {invoice.serial_number} updated by {isc_user.user.username}.')
             else:
                 logger.critical(f'unauthorized trying update of invoice with serial number {invoice.serial_number} by {isc_user.user.username}.')

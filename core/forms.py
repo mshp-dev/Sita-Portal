@@ -145,7 +145,7 @@ class MftUserForm(forms.ModelForm):
     def clean_alias(self):
         alias = self.cleaned_data.get('alias')
         if alias != '':
-            if MftUser.objects.filter(Q(alias=alias) | Q(username=alias)).exists():
+            if MftUser.objects.filter(Q(alias=alias)).exists() or MftUser.objects.filter(Q(username=alias)).exists():
                 if 'create' not in self.request.path:
                     id_ = int(self.request.path.split('/')[-2])
                     mftuser = MftUser.objects.get(pk=id_)

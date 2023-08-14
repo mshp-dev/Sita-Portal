@@ -729,7 +729,7 @@ def make_report_in_csv_format(dir_default_depth, name='report'):
     return os.path.join(os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv'))
 
 
-def export_users_with_sftp(files_list, dest=settings.SFTP_PATH):
+def export_users_with_sftp(files_list, dest):
     tp = paramiko.Transport((settings.SFTP_HOST, int(settings.SFTP_PORT)))
     tp.connect(username=settings.SFTP_USERNAME, password=settings.SFTP_PASSWORD)
     sftp_client = paramiko.SFTPClient.from_transport(tp)

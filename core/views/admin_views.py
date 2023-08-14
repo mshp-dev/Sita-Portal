@@ -14,6 +14,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.contrib.auth.hashers import make_password
+from django.conf import settings
 
 from invoice.models import Invoice, PreInvoice
 
@@ -271,10 +272,15 @@ def sftp_user_view(request, id, *args, **kwargs):
         files_list = []
         try:
             files_list = [re.webuser.path for re in rtes]
-            export_users_with_sftp(files_list=files_list)
             if len(files_list) > 1:
+                export_users_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
                 logger.info(f'all mftusers exported with sftp by {isc_user.user.username} successfully.')
             else:
+                mftuser = MftUser.objects.get(pk=rtes.first().id)
+                if mftuser.organization.sub_domain == DomainName.objects.get(code='nibn.ir'):
+                    export_users_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
+                else:
+                    export_users_with_sftp(files_list=files_list, dest=settings.SFTP_EXTERNAL_USERS_PATH)
                 logger.info(f'mftuser with id {rtes.first().id} exported with sftp by {isc_user.user.username} successfully.')
             response = {'result': 'success'}
         except Exception as e:
@@ -507,6 +513,7 @@ def mftuser_delete_view(request, id, *args, **kwargs):
         msg = f'کاربر {mftuser.username} موقتاً حذف شد، منتظر تأیید مدیر سیستم باشید.'
         mftuser.business.clear()
         mftuser.delete()
+        #TODO: delete invoices of this user
         logger.info(f'mftuser {mftuser.username} deleted by {isc_user.user.username}.')
         success = True
         # return redirect("/mftusers/")
