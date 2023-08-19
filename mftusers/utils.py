@@ -574,7 +574,15 @@ def export_user_with_paths(id, isc_user):
 
 def export_user_with_paths_v2(id, isc_user):
     mftuser = MftUser.objects.get(pk=id)
-    template = ET.parse(os.path.join(settings.MEDIA_ROOT, 'template.xml'))
+    template_name = ''
+    is_foreign_mftuser = None
+    if mftuser.organization.sub_domain == DomainName.objects.get(code='nibn.ir'):
+        template_name = 'default_mftuser_template.xml'
+        is_foreign_mftuser = False
+    else:
+        template_name = 'foreign_mftuser_template.xml'
+        is_foreign_mftuser = True
+    template = ET.parse(os.path.join(settings.MEDIA_ROOT, template_name))
     description = template.xpath('//webUsers/webUser/description')
     description[0].text = mftuser.description
     email = template.xpath('//webUsers/webUser/email')
@@ -617,7 +625,7 @@ def export_user_with_paths_v2(id, isc_user):
             permissions = permissions.exclude(directory__id=item.directory.id)
     for bus_dir in list(permissions.filter(directory__parent=0).values('directory').distinct()):
         virtual_file = ET.SubElement(virtual_files[0], 'virtualFile')
-        make_virtual_file(Directory.objects.get(pk=bus_dir['directory']), permissions, virtual_file)
+        make_virtual_file(Directory.objects.get(pk=bus_dir['directory']), permissions, virtual_file, foreign_user=is_foreign_mftuser)
     webuser_temp_file = ntf(mode='w+', encoding='utf-8', delete=True)
     bytes_template = ET.tostring(template, pretty_print=True)
     webuser_temp_file.write(bytes_template.decode('utf-8'))
@@ -645,7 +653,7 @@ def export_user_with_paths_v2(id, isc_user):
         )
 
 
-def make_virtual_file(directory, permissions, virtual_file):
+def make_virtual_file(directory, permissions, virtual_file, foreign_user=False):
     all_dirs = permissions.values('directory').distinct()
     summed = permissions.filter(directory=directory).aggregate(Sum('permission'))
     _type = ET.SubElement(virtual_file, 'type')
@@ -669,17 +677,20 @@ def make_virtual_file(directory, permissions, virtual_file):
     _diskQuotaUnit.text = 'M'
     _path = ET.SubElement(virtual_file, 'path')
     dir_path = ''
-    if directory.bic.sub_domain == DomainName.objects.get(code='nibn.ir'):
-        dir_path = directory.absolute_path
+    if foreign_user:
+        dir_path = directory.foreign_path
     else:
-        dir_path = directory.remote_path
+        if directory.bic.sub_domain == DomainName.objects.get(code='nibn.ir'):
+            dir_path = directory.absolute_path
+        else:
+            dir_path = directory.remote_path
     _path.text = dir_path
     virtual_files = ET.SubElement(virtual_file, 'virtualFiles')
     chs = directory.children.split(',')[:-1]
     dirs_with_perms = [dir_['directory'] for dir_ in all_dirs if str(dir_['directory']) in chs]
     for d in dirs_with_perms:
         vf = ET.SubElement(virtual_files, 'virtualFile')
-        make_virtual_file(Directory.objects.get(pk=d), permissions, vf)
+        make_virtual_file(Directory.objects.get(pk=d), permissions, vf, foreign_user=foreign_user)
 
 
 def zip_all_exported_users(name='export'):

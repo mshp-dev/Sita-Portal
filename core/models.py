@@ -40,7 +40,8 @@ class BaseCoding(models.Model):
 class BusinessCode(BaseCoding):
     code             = models.CharField(max_length=20, blank=False, unique=True, default='...')
     origin_address   = models.CharField(max_length=100, blank=False, default='/DATA')
-    remote_address   = models.CharField(max_length=100, blank=False, default='resource:sftp://')
+    foreign_address   = models.CharField(max_length=100, blank=False, default='/SMB')
+    remote_address   = models.CharField(max_length=100, blank=False, default='resource:sftp://SETAD/SITA')
 
 
 class OrganizationType(BaseCoding):
@@ -244,6 +245,10 @@ class Directory(models.Model):
         return f'{self.business.origin_address}/{self.relative_path}'
     
     @property
+    def foreign_path(self):
+        return f'{self.business.foreign_address}/{self.relative_path}'
+    
+    @property
     def remote_path(self):
         return f'{self.business.remote_address}/{self.relative_path}'
 
@@ -265,10 +270,12 @@ class Permission(models.Model):
 
     @property
     def directory_path(self):
-        if self.directory.bic.sub_domain.code == 'nibn.ir':
+        if self.directory.bic.sub_domain.code == 'nibn.ir' and self.user.organization.sub_domain.code == 'nibn.ir':
             return self.directory.absolute_path
-        else:
+        elif self.directory.bic.sub_domain.code != 'nibn.ir' and self.user.organization.sub_domain.code == 'nibn.ir':
             return self.directory.remote_path
+        elif self.directory.bic.sub_domain.code != 'nibn.ir' and self.user.organization.sub_domain.code != 'nibn.ir':
+            return self.directory.foreign_path
 
 
 # class CustomerAccess(models.Model):

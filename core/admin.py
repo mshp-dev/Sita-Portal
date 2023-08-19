@@ -8,7 +8,7 @@ class CodingTypeAdmin(admin.ModelAdmin):
 
 
 class BusinessCodeAdmin(admin.ModelAdmin):
-    list_display = ['code', 'description', 'origin_address', 'remote_address']
+    list_display = ['code', 'description', 'origin_address', 'foreign_address', 'remote_address']
     list_filter = ['origin_address', 'remote_address']
     ordering = ['description']
 

@@ -808,13 +808,16 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                     for pv in splited:
                         if Permission.objects.filter(user=mftuser, directory=directory, permission=pv).exists():
                             Permission.objects.filter(user=mftuser, directory=directory, permission=pv).delete()
-                        if pv == 1: #Download (Read)
+                        if pv == 0: #Create Folder
+                            Permission.objects.filter(user=mftuser, directory=directory, permission=4).delete()  #Create
+                        elif pv == 1: #Download (Read)
                             Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete()  #Append
                         elif pv == 2: #Upload (Write)
                             Permission.objects.filter(user=mftuser, directory=directory, permission=512).delete()   #Overwrite
                             Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete()  #Append
                         elif pv == 32: #Delete (Modify)
                             Permission.objects.filter(user=mftuser, directory=directory, permission=8).delete()      #Rename
+                    logger.info(f'{splitted} permissions of directory {directory.absolute_path} for mftuser {mftuser.username} removed by {isc_user.user.username}.')
                 elif action == 'add':
                     check_parents_permission(
                         isc_user=isc_user,
@@ -831,7 +834,24 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                                 created_by=isc_user
                             )
                             perm.save()
-                        if pv == 1: #Download (Read)
+                        if pv == 0: #Create Folder
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=256, #List
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=128).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=128, #Checksum
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                        elif pv == 1: #Download (Read)
                             if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
                                 perm = Permission(
                                     user=mftuser,
@@ -946,7 +966,7 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                                     created_by=isc_user
                                 )
                                 perm.save()
-                logger.info(f'permission of directory {directory.absolute_path} for mftuser {mftuser.username} changed to {splited} by {isc_user.user.username}.')
+                    logger.info(f'permission of directory {directory.absolute_path} for mftuser {mftuser.username} changed to {splited} by {isc_user.user.username}.')
                 response = {'result': 'success'}
             except Exception as e:
                 print(e)

@@ -276,12 +276,12 @@ def sftp_user_view(request, id, *args, **kwargs):
                 export_users_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
                 logger.info(f'all mftusers exported with sftp by {isc_user.user.username} successfully.')
             else:
-                mftuser = MftUser.objects.get(pk=rtes.first().id)
+                mftuser = MftUser.objects.get(pk=rtes.first().mftuser.id)
                 if mftuser.organization.sub_domain == DomainName.objects.get(code='nibn.ir'):
                     export_users_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
                 else:
                     export_users_with_sftp(files_list=files_list, dest=settings.SFTP_EXTERNAL_USERS_PATH)
-                logger.info(f'mftuser with id {rtes.first().id} exported with sftp by {isc_user.user.username} successfully.')
+                logger.info(f'mftuser with id {rtes.first().mftuser.id} exported with sftp by {isc_user.user.username} successfully.')
             response = {'result': 'success'}
         except Exception as e:
             logger.error(e)
