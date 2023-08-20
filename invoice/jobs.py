@@ -41,7 +41,7 @@ class DeleteOldInvoicesJob():
             if old_invoices.count() > 1:
                 logger.warn(f'found {old_invoices.count()} UNDEFINED invoices older than {thirty_days_ago}.')
                 inv_ids = [oi.id for oi in old_invoices]
-                Invoice.objects.update()
+                # Invoice.objects.update()
                 for oi in old_invoices:
                     oi.confirm_or_reject = 'REJECTED'
                     invoice.status = -1
