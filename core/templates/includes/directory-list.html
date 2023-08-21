@@ -18,9 +18,9 @@
   {% comment %} {% if mftuser %}permission="{{ permissions|item:el.dir.name }}"{% endif %} {% endcomment %}
 >
   {% if filtered %}
-  <span>{{ el.dir.relative_path }}</span>
+  <span id="span-{{ el.dir.id }}">{{ el.dir.relative_path }}</span>
   {% else %}
-  <span>{{ el.dir.name }}</span>
+  <span id="span-{{ el.dir.id }}">{{ el.dir.name }}</span>
   {% endif %}
   <ul id="group-{{ el.dir.id }}" role="group">
     {% include "includes/directory-list.html" with elements=el.children %}

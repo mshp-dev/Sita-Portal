@@ -40,7 +40,7 @@ class BaseCoding(models.Model):
 class BusinessCode(BaseCoding):
     code             = models.CharField(max_length=20, blank=False, unique=True, default='...')
     origin_address   = models.CharField(max_length=100, blank=False, default='/DATA')
-    foreign_address   = models.CharField(max_length=100, blank=False, default='/SMB')
+    foreign_address  = models.CharField(max_length=100, blank=False, default='/SMB')
     remote_address   = models.CharField(max_length=100, blank=False, default='resource:sftp://SETAD/SITA')
 
 

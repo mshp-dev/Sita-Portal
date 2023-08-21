@@ -1,0 +1,41 @@
+<!--Logs in logs-list-->
+{% if logs %} {% for log in logs %}
+<div class="col-10 mx-auto">
+  <div class="accordion mb-2" id="log-{{ log.id }}-parent" role-in-list="container">
+    <!--User Node-->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#log-{{ log.id }}"
+          aria-expanded="false"
+          aria-controls="log-{{ log.id }}"
+        >
+          <span class="fas fa-document me-1"></span>
+          <h3 class="display-5 ms-2">{{ log.name }}</h3>
+        </button>
+      </h2>
+      <div id="log-{{ log.id }}" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#log-{{ log.id }}-parent">
+        <div class="accordion-body">
+          <div class="container">
+            <div class="row">
+              <div class="row mt-5 mb-5">
+                {% for line in log.text %}
+                <p>{{ line }}</p>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--End of UserNode-->
+  </div>
+</div>
+{% endfor %}
+<!--No Logs Found-->
+{% elif not logs %}
+<h4>No log file found</h4>
+{% endif %}

@@ -40,11 +40,11 @@ class DeleteOldInvoicesJob():
             old_invoices = Invoice.objects.filter(created_at__lte=thirty_days_ago, status=0) #confirm_or_reject='UNDEFINED'
             if old_invoices.count() > 1:
                 logger.warn(f'found {old_invoices.count()} UNDEFINED invoices older than {thirty_days_ago}.')
-                inv_ids = [oi.id for oi in old_invoices]
+                # inv_ids = [oi.id for oi in old_invoices]
                 # Invoice.objects.update()
                 for oi in old_invoices:
                     oi.confirm_or_reject = 'REJECTED'
-                    invoice.status = -1
+                    oi.status = -1
                     oi.description = 'گذشتن مدت زمان 30/سی روز از ایجاد این درخواست'
                     oi.save()
                     logger.info(f'invoice with serial number {oi.serial_number} rejected by system.')

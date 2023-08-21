@@ -357,6 +357,15 @@ def delete_dir_and_clean_sub_directories(dir_):
     dir_.delete()
 
 
+def change_all_sub_directories_relative_path(children, parent_relative_path):
+    chs = [int(c) for c in children.split(',')[:-1]]
+    for ch in Directory.objects.filter(pk__in=chs):
+        ch.relative_path = f'{parent_relative_path}/{ch.name}'
+        ch.save()
+        if ch.children != '':
+            change_all_sub_directories_relative_path(ch.children, ch.relative_path)
+
+
 def make_username_old(firstname, lastname, delimiter):
     cleaned_firstname = firstname.replace(' ', '').lower()
     cleaned_lastname = lastname.replace(' ', '').lower()

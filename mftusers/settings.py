@@ -178,6 +178,7 @@ STATICFILES_DIRS = (
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+LOGGING_PATH = os.path.join(BASE_DIR, 'logs')
 
 # LOGGING = {
 #     'version': 1,
@@ -194,7 +195,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #     'handlers': {
 #         'file': {
 #             'class': 'logging.handlers.TimedRotatingFileHandler',
-#             # 'filename': '/var/log/mftusers/mftusers.log',
+#             # 'filename': f'{LOGGING_PATH}/mftusers.log',
 #             'filename': 'mftusers.log',
 #             'when': 'midnight',
 #             'backupCount': 60,

@@ -217,7 +217,7 @@ def invoice_update_view(request, iid, *args, **kwargs):
                     'type': 'pre' if invoice_type.code == 'INVDIR' else '',
                     'updated': invoice.id
                 }
-                logger.info(f'invoice with serial number {invoice.serial_number} updated by {isc_user.user.username}.')
+                logger.info(f'status of invoice with serial number {invoice.serial_number} updated to undefined by {isc_user.user.username}.')
             else:
                 logger.critical(f'unauthorized trying update of invoice with serial number {invoice.serial_number} by {isc_user.user.username}.')
                 response = {

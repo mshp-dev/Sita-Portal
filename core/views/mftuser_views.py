@@ -1067,3 +1067,4 @@ def delete_directory_view(request, did, *args, **kwargs):
             
             return JsonResponse(data=response, safe=False)
 
+

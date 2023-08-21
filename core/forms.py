@@ -7,10 +7,11 @@ from .models import *
 
 
 class AddBusinessForm(forms.ModelForm):
-    code           = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "کد پروژه", "class": "form-control"}))
-    description    = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "نام کامل (فارسی)", "class": "form-control"}))
-    origin_address = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "/DATA", "class": "form-control"}))
-    remote_address = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={"placeholder": "/SMB", "class": "form-control"}))
+    code            = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "کد سامانه/پروژه", "class": "form-control"}))
+    description     = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "نام کامل (فارسی)", "class": "form-control"}))
+    origin_address  = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "/DATA", "class": "form-control"}))
+    foreign_address = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={"placeholder": "/SMB", "class": "form-control"}))
+    remote_address  = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={"placeholder": "resource:protocol://ADDRESS", "class": "form-control"}))
 
     class Meta:
         model = BusinessCode
@@ -18,6 +19,7 @@ class AddBusinessForm(forms.ModelForm):
             'code',
             'description',
             'origin_address',
+            'foreign_address',
             'remote_address',
         ]
     
@@ -26,6 +28,38 @@ class AddBusinessForm(forms.ModelForm):
         if BusinessCode.objects.filter(code=code).exists():
             raise ValidationError('کد پروژه/سامانه وارد شده تکراری می باشد.')
         return code
+
+
+class AddOrganizationForm(forms.ModelForm):
+    organization_code        = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "کد سازمان/بانک", "class": "form-control"}))
+    organization_description = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "نام کامل (فارسی)", "class": "form-control"}))
+    directory_name           = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "DirectoryName", "class": "form-control"}))
+    organization_type        = forms.ChoiceField(required=False, widget=forms.Select(attrs={"class": "form-control form-select"}))
+    sub_domain               = forms.ChoiceField(required=False, widget=forms.Select(attrs={"class": "form-control form-select"}))
+
+    class Meta:
+        model = BankIdentifierCode
+        fields = [
+            'organization_code',
+            'organization_description',
+            'directory_name',
+            'organization_type',
+            'sub_domain',
+        ]
+    
+    def clean_organization_code(self):
+        code = self.cleaned_data.get('organization_code')
+        if BankIdentifierCode.objects.filter(code=code).exists():
+            raise ValidationError('کد سازمان/بانک وارد شده تکراری می باشد.')
+        return code
+    
+    def clean_organization_type(self):
+        org_type = OrganizationType.objects.get(id=self.cleaned_data.get('organization_type'))
+        return org_type
+    
+    def clean_sub_domain(self):
+        sub_domain = DomainName.objects.get(id=self.cleaned_data.get('sub_domain'))
+        return sub_domain
 
 
 class TransferPermissionsForm(forms.ModelForm):

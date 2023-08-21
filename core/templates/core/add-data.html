@@ -22,55 +22,130 @@
 
   <div class="section section-md">
     <div class="container">
-      <div class="row mb-5 d-flex align-items-center justify-content-center">
-        <div class="col-6">
-          <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
-            <h1 class="mb-0 h3">{{ page_title }}</h1>
-            <br />
-            <span class="font-weight-normal"> {% if msg %} {{ msg | safe }} {% endif %} </span>
+      <div class="row justify-content-center">
+        <div class="col-12 d-flex align-items-center justify-content-center">
+          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-700">
+            <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
+              <h1 class="mb-0 h3">افزودن سامانه/پروژه</h1>
+              <br />
+              {% comment %} <span class="font-weight-normal"> {% if msg %} {{ msg | safe }} {% endif %} </span> {% endcomment %}
+              <span class="font-weight-normal">
+                {% if error %}{% if bus_msg %}{{ bus_msg | safe }}{% endif %}{% else %}{% if bus_msg %}{{ bus_msg }}{% endif %}{% endif %}
+              </span>
+            </div>
+            <form class="mt-5" method="POST" action="" id="add-data-form">
+              {% csrf_token %}
+              <input type="hidden" name="form-type" value="business-form">
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="code"
+                  >کد سامانه/پروژه <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="code"><span class="fas fa-sitemap"></span></span>
+                  {{ business_form.code }}
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="description"
+                  >نام کامل پروژه/سامانه <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="description"><span class="fas fa-sitemap"></span></span>
+                  {{ business_form.description }}
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="origin_address"
+                  >آدرس فیزیکی سیتا <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="origin_address"><span class="fas fa-address-book"></span></span>
+                  {{ business_form.origin_address }}
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="foreign_address">آدرس کاربران خارجی در ستاد </label>
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="foreign_address"><span class="fas fa-address-book"></span></span>
+                  {{ business_form.foreign_address }}
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="remote_address">آدرس مجازی ستاد در سیتا </label>
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="remote_address"><span class="fas fa-address-book"></span></span>
+                  {{ business_form.remote_address }}
+                </div>
+              </div>
+              <br />
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary">افزودن</button>
+              </div>
+            </form>
           </div>
-          <form class="mt-5" method="POST" action="" id="add-data-form">
-            {% csrf_token %}
-            <div class="form-group mb-4" style="direction: rtl">
-              <label for="code"
-                >کد سامانه/پروژه <sup class="text-danger"><strong>*</strong></sup></label
-              >
-              <div class="input-group" style="direction: ltr">
-                <span class="input-group-text" id="code"><span class="fas fa-sitemap"></span></span>
-                {{ form.code }}
-              </div>
-            </div>
-            <div class="form-group mb-4" style="direction: rtl">
-              <label for="description"
-                >نام کامل پروژه/سامانه <sup class="text-danger"><strong>*</strong></sup></label
-              >
-              <div class="input-group" style="direction: ltr">
-                <span class="input-group-text" id="description"><span class="fas fa-building"></span></span>
-                {{ form.description }}
-              </div>
-            </div>
-            <div class="form-group mb-4" style="direction: rtl">
-              <label for="origin_address"
-                >آدرس فیزیکی <sup class="text-danger"><strong>*</strong></sup></label
-              >
-              <div class="input-group" style="direction: ltr">
-                <span class="input-group-text" id="origin_address"><span class="fas fa-address-book"></span></span>
-                {{ form.origin_address }}
-              </div>
-            </div>
-            <div class="form-group mb-4" style="direction: rtl">
-              <label for="remote_address">آدرس مجازی </label>
-              <div class="input-group" style="direction: ltr">
-                <span class="input-group-text" id="remote_address"><span class="far fa-address-book"></span></span>
-                {{ form.remote_address }}
-              </div>
-            </div>
-            <br />
-            <div class="d-grid">
-              <button type="submit" class="btn btn-primary">افزودن</button>
-            </div>
-          </form>
         </div>
+        <div class="row justify-content-center mt-6">
+          <div class="col-12 d-flex align-items-center justify-content-center">
+            <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-700">
+              <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
+                <h1 class="mb-0 h3">افزودن سازمان/بانک</h1>
+                <br />
+                {% comment %} <span class="font-weight-normal"> {% if msg %} {{ msg | safe }} {% endif %} </span> {% endcomment %}
+                <span class="font-weight-normal">
+                  {% if error %}{% if org_msg %}{{ org_msg | safe }}{% endif %}{% else %}{% if org_msg %}{{ org_msg }}{% endif %}{% endif %}
+                </span>
+              </div>
+              <form class="mt-5" method="POST" action="" id="add-data-form">
+                {% csrf_token %}
+                <input type="hidden" name="form-type" value="organization-form">
+                <div class="form-group mb-4" style="direction: rtl">
+                  <label for="organization_code"
+                    >کد سازمان/بانک <sup class="text-danger"><strong>*</strong></sup></label
+                  >
+                  <div class="input-group" style="direction: ltr">
+                    <span class="input-group-text" id="organization_code"><span class="fas fa-building"></span></span>
+                    {{ organization_form.organization_code }}
+                  </div>
+                </div>
+                <div class="form-group mb-4" style="direction: rtl">
+                  <label for="organization_description"
+                    >نام کامل سازمان/بانک <sup class="text-danger"><strong>*</strong></sup></label
+                  >
+                  <div class="input-group" style="direction: ltr">
+                    <span class="input-group-text" id="organization_description"><span class="fas fa-building"></span></span>
+                    {{ organization_form.organization_description }}
+                  </div>
+                </div>
+                <div class="form-group mb-4" style="direction: rtl">
+                  <label for="directory_name"
+                    >نام دایرکتوری <sup class="text-danger"><strong>*</strong></sup></label
+                  >
+                  <div class="input-group" style="direction: ltr">
+                    <span class="input-group-text" id="directory_name"><span class="fas fa-address-book"></span></span>
+                    {{ organization_form.directory_name }}
+                  </div>
+                </div>
+                <div class="form-group mb-4" style="direction: rtl">
+                  <label for="irganization_type">نوع سازمان </label>
+                  <div class="input-group" style="direction: ltr">
+                    <span class="input-group-text" id="irganization_type"><span class="fas fa-address-book"></span></span>
+                    {{ organization_form.organization_type }}
+                  </div>
+                </div>
+                <div class="form-group mb-4" style="direction: rtl">
+                  <label for="sub_domain">دامنه/شبکه متصل </label>
+                  <div class="input-group" style="direction: ltr">
+                    <span class="input-group-text" id="sub_domain"><span class="fas fa-address-book"></span></span>
+                    {{ organization_form.sub_domain }}
+                  </div>
+                </div>
+                <br />
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-primary">افزودن</button>
+                </div>
+              </form>
+            </div>
+          </div>
       </div>
       <div class="row mt-8 mb-5">
         <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="goBack();" />
@@ -97,8 +172,32 @@
     event.currentTarget.value = d;
   });
 
+  var org_code = document.getElementById("id_organization_code");
+  org_code.addEventListener("change", function (event) {
+    var c = cleanInputValue(event.currentTarget.value, "code");
+    event.currentTarget.value = c;
+  });
+
+  var org_desc = document.getElementById("id_organization_description");
+  org_desc.addEventListener("change", function (event) {
+    var d = cleanInputValue(event.currentTarget.value, "desc");
+    event.currentTarget.value = d;
+  });
+
+  var dir_name = document.getElementById("id_directory_name");
+  dir_name.addEventListener("change", function (event) {
+    var d = cleanInputValue(event.currentTarget.value, "dir_name");
+    event.currentTarget.value = d;
+  });
+
   var address = document.getElementById("id_origin_address");
   address.addEventListener("change", function (event) {
+    var addr = cleanInputValue(event.currentTarget.value, "addr");
+    event.currentTarget.value = addr;
+  });
+
+  var remote_address = document.getElementById("id_remote_address");
+  remote_address.addEventListener("change", function (event) {
     var addr = cleanInputValue(event.currentTarget.value, "addr");
     event.currentTarget.value = addr;
   });
@@ -108,16 +207,18 @@
       input = input.replace(/[a-z]/g, "");
       input = input.replace(/[A-Z]/g, "");
     } */
-    if (type == "code") {
+    if (type == "code" || type == "dir_name" || type == "addr") {
       input = input.replace(/[\u0600-\u06FF]/g, "");
-    } else if (type == "addr") {
-      input = input.replace(/[\u0600-\u06FF]/g, "");
+      input = input.replace(/\(/g, "");
+      input = input.replace(/\)/g, "");
     }
     if (type != "addr") {
       input = input.replace(/\//g, "");
     }
-    input = input.replace(/\_/g, "");
-    input = input.replace(/\-/g, "");
+    if (type != "dir_name") {
+      input = input.replace(/\_/g, "");
+      input = input.replace(/\-/g, "");
+    }
     input = input.replace(/\@/g, "");
     input = input.replace(/\#/g, "");
     input = input.replace(/\!/g, "");
@@ -126,8 +227,6 @@
     input = input.replace(/\^/g, "");
     input = input.replace(/\&/g, "");
     input = input.replace(/\*/g, "");
-    //input = input.replace(/\(/g, "");
-    //input = input.replace(/\)/g, "");
     input = input.replace(/\[/g, "");
     input = input.replace(/\]/g, "");
     input = input.replace(/\{/g, "");

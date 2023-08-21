@@ -20,6 +20,8 @@
       treeitems[i].addEventListener("click", function (event) {
         var absolutePath1 = document.getElementById("absolute-path-1");
         var absolutePath2 = document.getElementById("absolute-path-2");
+        var absolutePath3 = document.getElementById("absolute-path-3");
+        var renameInput = document.getElementById("rename-input");
         var parentId = document.getElementById("parent-id");
         var currentDirId = document.getElementById("current-dir-id");
         var currentDirName = document.getElementById("current-dir-name");
@@ -38,6 +40,9 @@
         indexCode.innerHTML = index;
         absolutePath1.innerHTML = path + '/{<span class="text-danger">NEW</span>}';
         absolutePath2.innerHTML = path;
+        absolutePath3.innerHTML = path;
+        var paths = path.split("/");
+        renameInput.value = paths[paths.length - 1];
 
         event.stopPropagation();
         event.preventDefault();
@@ -135,7 +140,19 @@
                 افزودن
                 <div aria-hidden="true" class="fas fa-plus" style="width: 1.2em"></div>
               </button>
-              {% comment %} {% if access == 'ADMIN' %} {% endcomment %}
+              {% if access == 'ADMIN' %}
+              <button
+                id="btn-rename-dir"
+                style="font-size: 0.8rem"
+                aria-label="تغییر نام"
+                title="تغییر نام"
+                type="button"
+                class="btn btn-outline-warning col-2 ms-2 mb-4"
+              >
+                تغییر نام
+                <div aria-hidden="true" class="fas fa-edit" style="width: 1.2em"></div>
+              </button>
+              {% endif %}
               <button
                 id="btn-delete-dir"
                 style="font-size: 0.8rem"
@@ -149,17 +166,16 @@
               </button>
               <button
                 id="btn-invoice-dir"
-                style="font-size: 1rem; width: 25%; height: 5rem"
+                style="font-size: 1rem; width: 25%"
                 aria-label="درخواست تأیید"
                 title="درخواست تأیید"
                 type="button"
-                class="btn btn-outline-success ms-2 mb-4 float-end"
+                class="btn btn-outline-success ms-2 mb-2 float-end"
               >
                 ارسال درخواست تأیید
                 <div aria-hidden="true" class="fas fa-check" style="width: 1.2em"></div>
               </button>
             </div>
-            {% comment %} {% endif %} {% endcomment %}
             <script>
               $(function () {
                 $("#btn-add-new-dir").click(function () {
@@ -175,6 +191,18 @@
                       alert("در حال حاضر امکان ایجاد دایرکتوری در این مسیر را ندارید!\nلطفاً با مدیر سیستم (29985700) تماس بگیرید.");
                     }*/ else {
                     $("#new-dir-modal").modal("show");
+                  }
+                });
+
+                $("#btn-rename-dir").click(function () {
+                  var absPath = $("#absolute-path-1").html();
+                  var index = $("#index-code").html();
+                  if (absPath == "") {
+                    alert("یک دایرکتوری را انتخاب نمائید!");
+                  } else if (parseInt(index) >= -1) {
+                    alert("دسترسی تغییر نام این دایرکتوری را ندارید!");
+                  } else {
+                    $("#rename-modal").modal("show");
                   }
                 });
 
@@ -389,6 +417,68 @@
                             } else {
                               alert("نام دایرکتوری را وارد کنید!");
                             }
+                            return false;
+                          });
+                        });
+                      </script>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal fade" id="rename-modal" role="dialog" aria-labelledby="ren-modal" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                  <div class="modal-content" style="direction: rtl">
+                    <div class="modal-header">
+                      <h2 class="h6 modal-title">تغییر نام دایرکتوری</h2>
+                      <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="direction: ltr">
+                      <p id="absolute-path-3"></p>
+                      <div class="input-group mb-3">
+                        <input
+                          id="rename-input"
+                          type="text"
+                          class="form-control"
+                          placeholder="Directory"
+                          aria-label="Directory"
+                          aria-describedby="dir-rename-input"
+                        />
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button id="confirm-rename" type="button" class="btn btn-secondary ms-auto">بله</button>
+                      <button type="button" class="btn btn-link ms-0" data-bs-dismiss="modal">خیر</button>
+                      <script type="text/javascript">
+                        $(function () {
+                          $("#confirm-rename").click(function () {
+                            var did = $("#current-dir-id").html();
+                            var csrf = "{{ csrf_token }}";
+                            var new_name = $("#rename-input").val();
+                            $.post(
+                              "/directory/" + did + "/rename/",
+                              {
+                                csrfmiddlewaretoken: csrf,
+                                new_name: new_name,
+                              },
+                              function (response) {
+                                $("#rename-modal").modal("hide");
+                                if (response.result == "error") {
+                                  alert("خطایی رخ داده است، با مدیر سیستم تماس بگیرید.");
+                                } else if (response.result == "success") {
+                                  /*var new_name = $("#rename-input").val();
+                                  $("#treeitem-" + response.renamed_dir).attr("current-dir-name", new_name);
+                                  $("#span-" + response.renamed_dir).html(new_name);
+                                  var path = $("#treeitem-" + response.renamed_dir).attr('absolute')
+                                  $("#absolute-path-1").html(path + '/{<span class="text-danger">NEW</span>}');
+                                  $("#absolute-path-2").html();
+                                  $("#absolute-path-3").html();*/
+                                  alert("نام دایرکتوری با موفقیت تغییر یافت.");
+                                  location.reload();
+                                } else if (response.result == "failed") {
+                                  alert("دسترسی تغییر نام این دایرکتوری را ندارید!");
+                                }
+                              }
+                            );
                             return false;
                           });
                         });

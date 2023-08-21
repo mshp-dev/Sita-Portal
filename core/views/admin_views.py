@@ -17,81 +17,125 @@ from django.contrib.auth.hashers import make_password
 from django.conf import settings
 
 from invoice.models import Invoice, PreInvoice
-
 from mftusers.utils import *
-
 from core.models import *
 from core.forms import *
 
-import logging
+from datetime import datetime as dt
+
+import logging, os
 
 logger = logging.getLogger(__name__)
 
 
 @login_required(login_url="/login/")
 def add_data_view(request, *args, **kwargs):
-    msg      = None
-    success  = False
     isc_user = IscUser.objects.get(user=request.user)
     username = str(isc_user.user.username)
-    access   = str(isc_user.role.code)
-    form     = AddBusinessForm(request.POST or None)
+    access = str(isc_user.role.code)
+    bus_msg = org_msg = ''
+    submit_error = False
 
     if not isc_user.user.is_staff:
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
         return redirect('/error/401/')
+
+    organization_form = AddOrganizationForm()
+    business_form = AddBusinessForm()
+    organization_form.fields['organization_type'].choices = [(org_type.id, org_type) for org_type in OrganizationType.objects.all().order_by('description')]
+    organization_form.fields['sub_domain'].choices = [(dn.id, dn) for dn in DomainName.objects.all().order_by('description')]
     
-    if request.method == "POST":
-        if form.is_valid():
-            bus = BusinessCode(
-                type_id=CodingType.objects.get(type=1009),
-                code=form.cleaned_data.get("code"),
-                description=form.cleaned_data.get("description"),
-                origin_address=form.cleaned_data.get("origin_address"),
-                remote_address=form.cleaned_data.get("remote_address")
-            )
-            bus.save()
-            dir_ = Directory(
-                name=bus.code,
-                relative_path=bus.code,
-                index_code=DirectoryIndexCode.objects.get(code=0),
-                parent=0,
-                business=bus,
-                bic=BankIdentifierCode.objects.get(code='BMJI'),
-                created_by=IscUser.objects.get(pk=1)
-            )
-            dir_.save()
-            logger.info(f'{isc_user.user.username} added {bus.code} business.')
-            for bic in BankIdentifierCode.objects.all():
-                ch_dir = Directory(
-                    name=bic.directory_name,
-                    relative_path=f'{bus.code}/{bic.directory_name}',
-                    index_code=DirectoryIndexCode.objects.get(code=-1),
-                    parent=dir_.id,
+    if request.method == 'POST':
+        print(request.POST.get("form-type"))
+        if request.POST.get("form-type") == "organization-form":
+            organization_form = AddOrganizationForm(request.POST)
+            organization_form.fields['organization_type'].choices = [(org_type.id, org_type) for org_type in OrganizationType.objects.all().order_by('description')]
+            organization_form.fields['sub_domain'].choices = [(dn.id, dn) for dn in DomainName.objects.all().order_by('description')]
+            if organization_form.is_valid():
+                bic = BankIdentifierCode(
+                    type_id=CodingType.objects.get(type=1001),
+                    code=organization_form.cleaned_data.get("organization_code"),
+                    description=organization_form.cleaned_data.get("organization_description"),
+                    directory_name=organization_form.cleaned_data.get("directory_name"),
+                    organization_type=organization_form.cleaned_data.get("organization_type"),
+                    sub_domain=organization_form.cleaned_data.get("sub_domain")
+                )
+                bic.save()
+                logger.info(f'{isc_user.user.username} added {bic.code} organization.')
+                for bus in BusinessCode.objects.all():
+                    try:
+                        bus_dir = Directory.objects.get(business=bus, parent=0)
+                    except Exception as e:
+                        logger.error(e)
+                        continue
+                    ch_dir = Directory(
+                        name=bic.directory_name,
+                        relative_path=f'{bus.code}/{bic.directory_name}',
+                        index_code=DirectoryIndexCode.objects.get(code=-1),
+                        parent=bus_dir.id,
+                        business=bus,
+                        bic=bic,
+                        created_by=isc_user
+                    )
+                    ch_dir.save()
+                    logger.info(f'a directory in {ch_dir.absolute_path} created.')
+                    bus_dir.children += f'{ch_dir.id},'
+                    bus_dir.save()
+                org_msg = f'سازمان/بانک {bic.code} با موفقیت اضافه گردید.'
+                submit_error = False
+            else:
+                org_msg = business_form.errors
+                submit_error = True
+        elif request.POST.get("form-type") == "business-form":
+            business_form = AddBusinessForm(request.POST)
+            if business_form.is_valid():
+                bus = BusinessCode(
+                    type_id=CodingType.objects.get(type=1009),
+                    code=business_form.cleaned_data.get("code"),
+                    description=business_form.cleaned_data.get("description"),
+                    origin_address=business_form.cleaned_data.get("origin_address"),
+                    foreign_address=business_form.cleaned_data.get("foreign_address"),
+                    remote_address=business_form.cleaned_data.get("remote_address")
+                )
+                bus.save()
+                dir_ = Directory(
+                    name=bus.code,
+                    relative_path=bus.code,
+                    index_code=DirectoryIndexCode.objects.get(code=0),
+                    parent=0,
                     business=bus,
-                    bic=bic,
+                    bic=BankIdentifierCode.objects.get(code='BMJI'),
                     created_by=isc_user
                 )
-                ch_dir.save()
-                logger.info(f'a directory in {ch_dir.absolute_path} created.')
-                dir_.children += f'{ch_dir.id},'
-            dir_.save()
-
-            msg = f'پروژه/سامانه {bus.code} با موفقیت اضافه گردید.'
-            success = True
-
-            # return redirect("/login/")
-
-        else:
-            # 'اطلاعات ورودی صحیح نیست!'
-            msg = form.errors
-
+                dir_.save()
+                logger.info(f'{isc_user.user.username} added {bus.code} business.')
+                for bic in BankIdentifierCode.objects.all():
+                    ch_dir = Directory(
+                        name=bic.directory_name,
+                        relative_path=f'{bus.code}/{bic.directory_name}',
+                        index_code=DirectoryIndexCode.objects.get(code=-1),
+                        parent=dir_.id,
+                        business=bus,
+                        bic=bic,
+                        created_by=isc_user
+                    )
+                    ch_dir.save()
+                    logger.info(f'a directory in {ch_dir.absolute_path} created.')
+                    dir_.children += f'{ch_dir.id},'
+                dir_.save()
+                bus_msg = f'پروژه/سامانه {bus.code} با موفقیت اضافه گردید.'
+                submit_error = False
+            else:
+                bus_msg = business_form.errors
+                submit_error = True
     context = {
         "username": username,
         "access": access,
-        "form": form,
-        "msg": msg,
-        "success": success
+        "organization_form": organization_form,
+        "business_form": business_form,
+        'bus_msg': bus_msg,
+        'org_msg': org_msg,
+        "error": submit_error
     }
     return render(request, "core/add-data.html", context)
 
@@ -591,6 +635,36 @@ def mftuser_restore_or_delete_view(request, id, *args, **kwargs):
 
 
 @login_required(login_url="/login/")
+def rename_directory_view(request, did, *args, **kwargs):
+    isc_user = IscUser.objects.get(user=request.user)
+    dir_ = Directory.objects.get(pk=did)
+
+    if not isc_user.user.is_staff:
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        return redirect('/error/401/')
+
+    if request.is_ajax():
+        if request.method == 'POST':
+            try:
+                if isc_user.role.code == 'ADMIN' or dir_.created_by.department == isc_user.department:
+                    old_name = dir_.name
+                    new_name = request.POST.get('new_name')
+                    dir_.name = new_name
+                    dir_.relative_path = dir_.relative_path.replace(old_name, new_name)
+                    dir_.save()
+                    change_all_sub_directories_relative_path(dir_.children, dir_.relative_path)
+                    logger.info(f'directory with id {dir_.id} renamed from {old_name} to {new_name} by {isc_user.user.username}.')
+                    response = {'result': 'success', 'renamed_dir': dir_.id}
+                else:
+                    response = {'result': 'failed'}
+            except Exception as e:
+                print(e)
+                response = {'result': 'error'}
+            
+            return JsonResponse(data=response, safe=False)
+
+
+@login_required(login_url="/login/")
 def iscusers_list_view(request, *args, **kwargs):
     isc_user = IscUser.objects.get(user=request.user)
 
@@ -679,3 +753,43 @@ def reset_password_view(request, *args, **kwargs):
     }
 
     return render(request, "accounts/reset-password.html", context)
+
+
+@login_required(login_url="/login/")
+def logs_list_view(request, *args, **kwargs):
+    isc_user = IscUser.objects.get(user=request.user)
+
+    if not isc_user.user.is_staff:
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        return redirect('/error/401/')
+
+    logs = []
+    id = 1
+    for log in os.listdir(settings.LOGGING_PATH):
+        with open(f'{settings.LOGGING_PATH}/{log}', mode='r', encoding='utf-8') as l:
+            lines = l.readlines()
+            log_name = log
+            if log_name == 'portal.log':
+                log_name += f'.{dt.now().strftime("%Y-%m-%d")}'
+            logs.append({
+                "id": id,
+                "name": log_name,
+                "text": lines
+            })
+            id += 1
+    
+    context = {
+        'username': str(isc_user.user.username),
+        'access': str(isc_user.role.code),
+        'logs': logs
+    }
+
+    if request.is_ajax():
+        if request.method == "GET":
+            query = request.GET.get('q')
+            filtered_logs = list(log['id'] for log in context['logs'])
+            if query != '':
+                filtered_logs = list(log['id'] for log in context['logs'] if query in log['name'])
+            return JsonResponse(data={"filtered_logs": filtered_logs}, safe=False)
+    
+    return render(request, "core/logs-list.html", context)
