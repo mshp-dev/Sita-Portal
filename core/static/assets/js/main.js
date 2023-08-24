@@ -142,12 +142,15 @@ function getPermissions(uid) {
         } else if (perm.value == 0) {
           // Apply To Subfolders
           applySubPermCheck.checked = true;
-          if (subDirPermCheck) {
+          /*if (subDirPermCheck) {
             subDirPermCheck.checked = true;
-          }
+          }*/
         } else if (perm.value == 4) {
           // Create
           createPermCheck.checked = true;
+          if (subDirPermCheck) {
+            subDirPermCheck.checked = true;
+          }
         } else if (perm.value == 16) {
           // Rename
           renamePermCheck.checked = true;

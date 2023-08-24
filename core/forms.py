@@ -212,7 +212,7 @@ class MftUserForm(forms.ModelForm):
             else:
                 id_ = int(self.request.path.split('/')[-2])
                 mftuser = MftUser.objects.get(pk=id_)
-                temp_user = MftUser.objects.get(mobilephone=phone_number)
+                temp_user = MftUser.objects.filter(mobilephone=phone_number).first()
                 if mftuser != temp_user:
                     raise ValidationError('این شماره همراه قبلاً برای کاربر دیگری استفاده شده است.')
         if not phone_number.startswith('9'):

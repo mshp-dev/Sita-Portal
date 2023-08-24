@@ -10,7 +10,7 @@
 {% block javascripts %}
 <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
 <script type="text/javascript">
-  function addTreeItemsFunctionality() {
+  /*function addTreeItemsFunctionality() {
     var treeitems = document.querySelectorAll('[role="treeitem"]');
     for (var i = 0; i < treeitems.length; i++) {
       treeitems[i].addEventListener("click", function (event) {
@@ -53,9 +53,9 @@
         event.preventDefault();
       });
     }
-  }
+  }*/
 
-  function getPermissions(uid) {
+  /*function getPermissions(uid) {
     var did = document.getElementById("current-dir-id").innerHTML;
     var currentUserId = document.getElementById("current-user-id");
     currentUserId.innerHTML = uid;
@@ -155,10 +155,24 @@
       .catch((errorMsg) => {
         console.log(errorMsg);
       });
-  }
+  }*/
 </script>
 <script type="text/javascript">
   $(function () {
+    $(":button[btn-func='btn-accordion-collapse']").click(function () {
+      var inv_id = $(this).attr("inv-id");
+      var permissions_list_parent = $("#permission-list-" + inv_id);
+      if ($(permissions_list_parent).html() == "") {
+        $.get("/invoices/get-permissions/" + inv_id + "/", function (response) {
+          if (response.result == "error") {
+            alert(response.message);
+          } else if (response.result == "success") {
+            $(permissions_list_parent).html(response.permissions_list);
+          }
+        });
+      }
+    });
+
     $("input[role='mftuser-confirm-btn']").click(function () {
       var uid = $(this).attr("uid");
       var csrf = "{{ csrf_token }}";
@@ -369,19 +383,6 @@
               <li class="col-4 nav-item">
                 <a
                   class="nav-link mb-sm-3 mb-md-0 {% if selected_tab == 'tabs-rejected-invoices' %}avtive{% endif %}"
-                  id="tabs-rejected-invoice-tab"
-                  data-bs-toggle="tab"
-                  href="#tabs-rejected-invoices"
-                  role="tab"
-                  aria-controls="tabs-rejected-invoices"
-                  aria-selected="{% if selected_tab == 'tabs-rejected-invoices' %}false{% endif %}"
-                  ><strong>درخواست های رد شده</strong> <span class="fas fa-file-alt text-danger"></span
-                ></a>
-              </li>
-              {% endcomment %}
-              <li class="col-4 nav-item">
-                <a
-                  class="nav-link mb-sm-3 mb-md-0 {% if selected_tab == 'tabs-rejected-invoices' %}avtive{% endif %}"
                   id="tabs-rejected-invoices-tab"
                   data-bs-toggle="tab"
                   href="#tabs-rejected-invoices"
@@ -391,6 +392,19 @@
                   ><strong>درخواست های رد شده</strong> <span class="fas fa-file-alt text-danger"></span
                 ></a>
               </li>
+              <li class="col-4 nav-item">
+                <a
+                  class="nav-link mb-sm-3 mb-md-0 {% if selected_tab == 'tabs-confirmed-invoices' %}avtive{% endif %}"
+                  id="tabs-confirmed-invoice-tab"
+                  data-bs-toggle="tab"
+                  href="#tabs-confirmed-invoices"
+                  role="tab"
+                  aria-controls="tabs-confirmed-invoices"
+                  aria-selected="{% if selected_tab == 'tabs-confirmed-invoices' %}false{% endif %}"
+                  ><strong>درخواست های تأیید شده</strong> <span class="fas fa-file-alt text-success"></span
+                ></a>
+              </li>
+              {% endcomment %}
               <li class="col-4 nav-item">
                 <a
                   class="nav-link mb-sm-3 mb-md-0 {% if selected_tab == 'tabs-undefined-invoices' %}avtive{% endif %}"
@@ -451,6 +465,22 @@
                 {% comment %} {% include "includes/admin-invoice-list.html" with invoices=undefined_pre_invoices %} {% endcomment %}
                 {% include "includes/admin-invoice-list.html" with invoices=pre_invoices|filter_invoices %}
               </div>
+              {% comment %}
+              <div
+                class="tab-pane fade {% if selected_tab == 'tabs-confirmed-invoices' %}active show{% endif %}"
+                id="tabs-confirmed-invoices"
+                role="tabpanel"
+                aria-labelledby="tabs-confirmed-invoices"
+              >
+                <br />
+                <br />
+                <br />
+                <!--prettier-ignore-->
+                {% comment %} {% include "includes/admin-invoice-list.html" with invoices=confirmed_invoices %} { endcomment %}
+                {% include "includes/admin-invoice-list.html" with invoices=invoices|filter_invoices:'CONFIRMED' %}
+                {% include "includes/admin-invoice-list.html" with invoices=pre_invoices|filter_invoices:'CONFIRMED' %}
+              </div>
+              {% endcomment %}
               <div
                 class="tab-pane fade {% if selected_tab == 'tabs-undefined-invoices' %}active show{% endif %}"
                 id="tabs-undefined-invoices"
@@ -464,6 +494,7 @@
                 {% comment %} {% include "includes/admin-invoice-list.html" with invoices=undefined_invoices %} {% endcomment %}
                 {% include "includes/admin-invoice-list.html" with invoices=invoices|filter_invoices %}
               </div>
+              {% comment %}
               <div
                 class="tab-pane fade {% if selected_tab == 'tabs-rejected-invoices' %}active show{% endif %}"
                 id="tabs-rejected-invoices"
@@ -475,10 +506,11 @@
                 <br />
                 <!--prettier-ignore-->
                 {% comment %} {% include "includes/admin-invoice-list.html" with invoices=rejected_invoices %}
-                {% include "includes/admin-invoice-list.html" with invoices=rejected_pre_invoices %} {% endcomment %}
+                {% include "includes/admin-invoice-list.html" with invoices=rejected_pre_invoices %} { endcomment %}
                 {% include "includes/admin-invoice-list.html" with invoices=invoices|filter_invoices:'REJECTED' %}
                 {% include "includes/admin-invoice-list.html" with invoices=pre_invoices|filter_invoices:'REJECTED' %}
               </div>
+              {% endcomment %}
             </div>
           </div>
         </div>

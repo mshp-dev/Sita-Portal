@@ -187,10 +187,10 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
     # invoices        = Invoice.objects.filter(processed=False).order_by('created_at')
     invoices        = Invoice.objects.all().order_by('-created_at')
     pre_invoices    = PreInvoice.objects.all().order_by('-created_at')
-    elements        = []
-    new_users       = []
-    changed_users   = []
-    differences     = {}
+    # elements        = []
+    # new_users       = []
+    # changed_users   = []
+    # differences     = {}
 
     if not isc_user.user.is_staff:
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
@@ -224,14 +224,14 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
             return JsonResponse(data={"filtered_invs": filtered_invs}, safe=False)
 
     # for user in mftusers:
-    #     if MftUserTemp.objects.filter(username=user.username).exists():
-    #         changed_users.append(user)
-    #         differences[user.username] = get_user_differences(
-    #             MftUserTemp.objects.filter(username=user.username).first(),
-    #             user
-    #         )
-    #     else:
-    #         new_users.append(user)
+        #     if MftUserTemp.objects.filter(username=user.username).exists():
+        #         changed_users.append(user)
+        #         differences[user.username] = get_user_differences(
+        #             MftUserTemp.objects.filter(username=user.username).first(),
+        #             user
+        #         )
+        #     else:
+        #         new_users.append(user)
     
     context = {
         'username': username,

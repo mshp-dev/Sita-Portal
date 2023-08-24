@@ -84,17 +84,17 @@ def mftuser_create_view(request, *args, **kwargs):
                     bus = BusinessCode.objects.get(id=int(b))
                     if Directory.objects.filter(relative_path=f'{bus.code}/{mftuser.organization.directory_name}').exists():
                         mftuser.business.add(bus)
-                        create_default_permission(
-                            isc_user=isc_user,
-                            mftuser=mftuser,
-                            last_dir=Directory.objects.get(relative_path=f'{bus.code}/{mftuser.organization.directory_name}'),
-                            business=bus,
-                            home_dir=True
-                        )
+                        # create_default_permission(
+                        #     isc_user=isc_user,
+                        #     mftuser=mftuser,
+                        #     last_dir=Directory.objects.get(relative_path=f'{bus.code}/{mftuser.organization.directory_name}'),
+                        #     business=bus,
+                        #     home_dir=True
+                        # )
                         logger.info(f'access on business {bus.code} for {mftuser.username} has been created.')
                     else:
                         bus_error += f'<p>اختصاص پروژه/سامانه {bus.code} میسر نیست.<p>'
-                        logger.warning(f'access on business {bus.code} for {mftuser.username} has been not created.')
+                        logger.warning(f'access on business {bus.code} for {mftuser.username} has not been created.')
                 
                 # if mftuser.organization.code == 'ISC':
                     # mftuser.description = str(isc_user.department)
@@ -152,6 +152,8 @@ def directories_list_view(request, *args, **kwargs):
                     index_code=new_index
                 )
                 new_dir.save()
+                #TODO: if parent dir did not have any children old
+                #      permissions more than list should be delete
                 logger.info(f'directory {new_dir.absolute_path} by {isc_user.user.username} has been created.')
                 parent.children = f'{parent.children}{new_dir.id},'
                 parent.save()
@@ -332,7 +334,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
             no_project_bus = BusinessCode.objects.get(code='NO_PROJECT')
             if str(no_project_bus.id) in form.cleaned_data.get('business'):
                 mftuser_temp.business.clear()
-                Permission.objects.filter(directory__in=dirs_).delete()
+                Permission.objects.filter(directory__parent=0).delete()
                 mftuser_origin.business.clear()
                 logger.info(f'mftuser {mftuser.username} has NO_PROJECT access.')
                 mftuser_origin.is_confirmed = False
@@ -350,25 +352,25 @@ def mftuser_details_view(request, id, *args, **kwargs):
             else:
                 for bus in mftuser_origin.business.all():
                     mftuser_temp.business.add(bus)
-                dirs = [Directory.objects.get(relative_path=b.code) for b in mftuser_temp.business.all()]
+                dirs = [Directory.objects.get(business=b, parent=0) for b in mftuser_temp.business.all()]
                 dirs_ = []
                 for d in dirs:
                     dirs_.append(d)
                     dirs_.append(Directory.objects.get(relative_path=f'{d.business.code}/{mftuser_origin.organization.directory_name}'))
-                Permission.objects.filter(directory__in=dirs_).delete()
+                Permission.objects.filter(directory__parent=0).delete()
                 mftuser_origin.business.clear()
                 for b in form.cleaned_data.get('business'):
                     bus = BusinessCode.objects.get(id=int(b))
                     if Directory.objects.filter(relative_path=f'{bus.code}/{mftuser_origin.organization.directory_name}').exists():
                         mftuser_origin.business.add(bus)
                         logger.info(f'{isc_user.user.username} added business {bus} for mftuser {mftuser_origin.username}.')
-                        create_default_permission(
-                            isc_user=isc_user,
-                            mftuser=mftuser_origin,
-                            last_dir=Directory.objects.get(relative_path=f'{bus.code}/{mftuser_origin.organization.directory_name}'),
-                            business=bus,
-                            home_dir=True
-                        )
+                        # create_default_permission(
+                        #     isc_user=isc_user,
+                        #     mftuser=mftuser_origin,
+                        #     last_dir=Directory.objects.get(relative_path=f'{bus.code}/{mftuser_origin.organization.directory_name}'),
+                        #     business=bus,
+                        #     home_dir=True
+                        # )
                         mftuser_origin.is_confirmed = False
                         mftuser_origin.email = mftuser.email
                         mftuser_origin.description = mftuser.description
@@ -441,51 +443,51 @@ def mftuser_access_view(request, uid, pid=-1, dir_name="", *args, **kwargs):
 
     if request.is_ajax():
         # if request.method == 'POST':
-        #     if not Directory.objects.filter(name=dir_name, parent=pid).exists():
-        #         parent = Directory.objects.get(pk=pid)
-        #         new_path = f'{parent.relative_path}/{dir_name}'
-        #         new_index = DirectoryIndexCode.objects.get(code=str(int(parent.index_code.code) - 1))
-        #         new_dir = Directory(
-        #             name=dir_name,
-        #             parent=pid,
-        #             relative_path=new_path,
-        #             bic=parent.bic,
-        #             business=parent.business,
-        #             created_by=isc_user,
-        #             index_code=new_index
-        #         )
-        #         new_dir.save()
-        #         logger.info(f'directory {new_dir.absolute_path} by {isc_user.user.username} has been created.')
-        #         parent.children = f'{parent.children}{new_dir.id},'
-        #         parent.save()
-        #         # CustomerAccess.objects.create(
-        #         #     user=isc_user,
-        #         #     access_on=CustomerAccessCode.objects.get(code='Directory'),
-        #         #     target_id=new_dir.id,
-        #         #     access_type=CustomerAccessType.objects.get(code='MODIFIER'),
-        #         #     created_at=timezone.now()
-        #         # )
-        #         create_default_permission(
-        #             isc_user=isc_user,
-        #             mftuser=mftuser,
-        #             last_dir=new_dir
-        #         )
-        #         # check_parents_permission(
-        #         #     isc_user=isc_user,
-        #         #     mftuser=mftuser,
-        #         #     parent=new_dir.parent
-        #         # )
-        #         # data = {'id': new_dir.id, 'business': 'Name': new_dir.name, 'path': new_dir.relative_path}
-        #         serialized_data = {
-        #             'result': 'success',
-        #             'new_dir': model_to_dict(new_dir)
-        #         }
-        #     else:
-        #         serialized_data = {
-        #             'result': 'error',
-        #             'message': 'دایرکتوری با این نام موجود است!'
-        #         }
-        #     return JsonResponse(data=serialized_data, safe=False)
+            #     if not Directory.objects.filter(name=dir_name, parent=pid).exists():
+            #         parent = Directory.objects.get(pk=pid)
+            #         new_path = f'{parent.relative_path}/{dir_name}'
+            #         new_index = DirectoryIndexCode.objects.get(code=str(int(parent.index_code.code) - 1))
+            #         new_dir = Directory(
+            #             name=dir_name,
+            #             parent=pid,
+            #             relative_path=new_path,
+            #             bic=parent.bic,
+            #             business=parent.business,
+            #             created_by=isc_user,
+            #             index_code=new_index
+            #         )
+            #         new_dir.save()
+            #         logger.info(f'directory {new_dir.absolute_path} by {isc_user.user.username} has been created.')
+            #         parent.children = f'{parent.children}{new_dir.id},'
+            #         parent.save()
+            #         # CustomerAccess.objects.create(
+            #         #     user=isc_user,
+            #         #     access_on=CustomerAccessCode.objects.get(code='Directory'),
+            #         #     target_id=new_dir.id,
+            #         #     access_type=CustomerAccessType.objects.get(code='MODIFIER'),
+            #         #     created_at=timezone.now()
+            #         # )
+            #         create_default_permission(
+            #             isc_user=isc_user,
+            #             mftuser=mftuser,
+            #             last_dir=new_dir
+            #         )
+            #         # check_parents_permission(
+            #         #     isc_user=isc_user,
+            #         #     mftuser=mftuser,
+            #         #     parent=new_dir.parent
+            #         # )
+            #         # data = {'id': new_dir.id, 'business': 'Name': new_dir.name, 'path': new_dir.relative_path}
+            #         serialized_data = {
+            #             'result': 'success',
+            #             'new_dir': model_to_dict(new_dir)
+            #         }
+            #     else:
+            #         serialized_data = {
+            #             'result': 'error',
+            #             'message': 'دایرکتوری با این نام موجود است!'
+            #         }
+            #     return JsonResponse(data=serialized_data, safe=False)
         if request.method == 'GET':
             query = request.GET.get('q')
             if query != '':
@@ -588,183 +590,183 @@ def mftuser_permissions_view(request, uid, did, *args, **kwargs):
         return redirect('/error/401/')
 
     if request.is_ajax():
-        if request.method == 'POST':
-            old_permissions = []
-            splited = []
-            status_code = 200
-            response = {}
-            try:
-                permissions = request.POST.get('permissions')
-                splited = [int(t) for t in permissions.split(',')[:-1]]
-                old_permissions = [ae for ae in Permission.objects.filter(user=mftuser, directory=directory)]
-                for op in old_permissions:
-                    if op.permission not in splited:
-                        if isc_user.role.code != 'ADMIN':
-                            if op.permission == 1: #Download (Read)
-                                Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete()  #Append
-                                # Permission.objects.filter(user=mftuser, directory=directory, permission=128).delete()   #Checksum
-                                # Permission.objects.filter(user=mftuser, directory=directory, permission=256).delete() #List
-                                splited.remove(128)
-                            elif op.permission == 2: #Upload (Write)
-                                # Permission.objects.filter(user=mftuser, directory=directory, permission=128).delete() #Checksum
-                                # Permission.objects.filter(user=mftuser, directory=directory, permission=256).delete() #List
-                                Permission.objects.filter(user=mftuser, directory=directory, permission=512).delete()   #Overwrite
-                                Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete()  #Append
-                                splited.remove(512)
-                                splited.remove(1024)
-                            elif op.permission == 32: #Delete (Modify)
-                                # Permission.objects.filter(user=mftuser, directory=directory, permission=1).delete()    #Download
-                                # Permission.objects.filter(user=mftuser, directory=directory, permission=2).delete()    #Upload
-                                # Permission.objects.filter(user=mftuser, directory=directory, permission=128).delete()  #Checksum
-                                # Permission.objects.filter(user=mftuser, directory=directory, permission=256).delete()  #List
-                                # Permission.objects.filter(user=mftuser, directory=directory, permission=512).delete()  #Overwrite
-                                # Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete() #Append
-                                Permission.objects.filter(user=mftuser, directory=directory, permission=8).delete()      #Rename
-                                splited.remove(8)
-                        op.delete()
-                for pv in splited:
-                    perm = DirectoryPermissionCode.objects.get(value=pv)
-                    if not Permission.objects.filter(user=mftuser, directory=directory, permission=perm.value).exists():
-                        perm = Permission(
-                            user=mftuser,
-                            directory=directory,
-                            permission=perm.value,
-                            created_by=isc_user
-                        )
-                        perm.save()
-                        check_parents_permission(
-                            isc_user=isc_user,
-                            mftuser=mftuser,
-                            parent=directory.parent
-                            # permission=perm.value,
-                        )
-                    if pv == 1: #Download (Read)
-                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
-                            perm = Permission(
-                                user=mftuser,
-                                directory=directory,
-                                permission=256, #List
-                                created_by=isc_user
-                            )
-                            perm.save()
-                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=128).exists():
-                            perm = Permission(
-                                user=mftuser,
-                                directory=directory,
-                                permission=128, #Checksum
-                                created_by=isc_user
-                            )
-                            perm.save()
-                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=1024).exists():
-                            perm = Permission(
-                                user=mftuser,
-                                directory=directory,
-                                permission=1024, #Append
-                                created_by=isc_user
-                            )
-                            perm.save()
-                    elif pv == 2: #Upload (Write)
-                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
-                            perm = Permission(
-                                user=mftuser,
-                                directory=directory,
-                                permission=256, #List
-                                created_by=isc_user
-                            )
-                            perm.save()
-                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=128).exists():
-                            perm = Permission(
-                                user=mftuser,
-                                directory=directory,
-                                permission=128, #Checksum
-                                created_by=isc_user
-                            )
-                            perm.save()
-                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=1024).exists():
-                            perm = Permission(
-                                user=mftuser,
-                                directory=directory,
-                                permission=1024, #Append
-                                created_by=isc_user
-                            )
-                            perm.save()
-                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=512).exists():
-                            perm = Permission(
-                                user=mftuser,
-                                directory=directory,
-                                permission=512, #Overwrite
-                                created_by=isc_user
-                            )
-                            perm.save()
-                    elif pv == 32: #Delete (Modify)
-                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
-                            perm = Permission(
-                                user=mftuser,
-                                directory=directory,
-                                permission=256, #List
-                                created_by=isc_user
-                            )
-                            perm.save()
-                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=128).exists():
-                            perm = Permission(
-                                user=mftuser,
-                                directory=directory,
-                                permission=128, #Checksum
-                                created_by=isc_user
-                            )
-                            perm.save()
-                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=512).exists():
-                            perm = Permission(
-                                user=mftuser,
-                                directory=directory,
-                                permission=512, #Overwrite
-                                created_by=isc_user
-                            )
-                            perm.save()
-                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=8).exists():
-                            perm = Permission(
-                                user=mftuser,
-                                directory=directory,
-                                permission=8, #Rename
-                                created_by=isc_user
-                            )
-                            perm.save()
-                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=1024).exists():
-                            perm = Permission(
-                                user=mftuser,
-                                directory=directory,
-                                permission=1024, #Append
-                                created_by=isc_user
-                            )
-                            perm.save()
-                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=1).exists():
-                            perm = Permission(
-                                user=mftuser,
-                                directory=directory,
-                                permission=1, #Download
-                                created_by=isc_user
-                            )
-                            perm.save()
-                        if not Permission.objects.filter(user=mftuser, directory=directory, permission=2).exists():
-                            perm = Permission(
-                                user=mftuser,
-                                directory=directory,
-                                permission=2, #Upload
-                                created_by=isc_user
-                            )
-                            perm.save()
-                    # elif pv == 0: #Subdirectory (ایجاد پوشه)
-                    #     reduce_parents_permission()
-                logger.info(f'permission of directory {directory.absolute_path} for mftuser {mftuser.username} changed to {splited} by {isc_user.user.username}.')
-                response = {'result': 'success'}
-            except Exception as e:
-                print(e)
-                status_code = 400
-                logger.error(f'permission change on directory {directory.absolute_path} to {splited} by {isc_user.user.username} encountered with error.')
-                response = {'result': 'error', 'perms': [str(op) + "," for op in old_permissions]}
-            finally:
-                return JsonResponse(data=response, safe=False, status=status_code)
-        elif request.method == 'GET':
+        # if request.method == 'POST':
+            #     old_permissions = []
+            #     splited = []
+            #     status_code = 200
+            #     response = {}
+            #     try:
+            #         permissions = request.POST.get('permissions')
+            #         splited = [int(t) for t in permissions.split(',')[:-1]]
+            #         old_permissions = [ae for ae in Permission.objects.filter(user=mftuser, directory=directory)]
+            #         for op in old_permissions:
+            #             if op.permission not in splited:
+            #                 if isc_user.role.code != 'ADMIN':
+            #                     if op.permission == 1: #Download (Read)
+            #                         Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete()  #Append
+            #                         # Permission.objects.filter(user=mftuser, directory=directory, permission=128).delete()   #Checksum
+            #                         # Permission.objects.filter(user=mftuser, directory=directory, permission=256).delete() #List
+            #                         splited.remove(128)
+            #                     elif op.permission == 2: #Upload (Write)
+            #                         # Permission.objects.filter(user=mftuser, directory=directory, permission=128).delete() #Checksum
+            #                         # Permission.objects.filter(user=mftuser, directory=directory, permission=256).delete() #List
+            #                         Permission.objects.filter(user=mftuser, directory=directory, permission=512).delete()   #Overwrite
+            #                         Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete()  #Append
+            #                         splited.remove(512)
+            #                         splited.remove(1024)
+            #                     elif op.permission == 32: #Delete (Modify)
+            #                         # Permission.objects.filter(user=mftuser, directory=directory, permission=1).delete()    #Download
+            #                         # Permission.objects.filter(user=mftuser, directory=directory, permission=2).delete()    #Upload
+            #                         # Permission.objects.filter(user=mftuser, directory=directory, permission=128).delete()  #Checksum
+            #                         # Permission.objects.filter(user=mftuser, directory=directory, permission=256).delete()  #List
+            #                         # Permission.objects.filter(user=mftuser, directory=directory, permission=512).delete()  #Overwrite
+            #                         # Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete() #Append
+            #                         Permission.objects.filter(user=mftuser, directory=directory, permission=8).delete()      #Rename
+            #                         splited.remove(8)
+            #                 op.delete()
+            #         for pv in splited:
+            #             perm = DirectoryPermissionCode.objects.get(value=pv)
+            #             if not Permission.objects.filter(user=mftuser, directory=directory, permission=perm.value).exists():
+            #                 perm = Permission(
+            #                     user=mftuser,
+            #                     directory=directory,
+            #                     permission=perm.value,
+            #                     created_by=isc_user
+            #                 )
+            #                 perm.save()
+            #                 check_parents_permission(
+            #                     isc_user=isc_user,
+            #                     mftuser=mftuser,
+            #                     parent=directory.parent
+            #                     # permission=perm.value,
+            #                 )
+            #             if pv == 1: #Download (Read)
+            #                 if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
+            #                     perm = Permission(
+            #                         user=mftuser,
+            #                         directory=directory,
+            #                         permission=256, #List
+            #                         created_by=isc_user
+            #                     )
+            #                     perm.save()
+            #                 if not Permission.objects.filter(user=mftuser, directory=directory, permission=128).exists():
+            #                     perm = Permission(
+            #                         user=mftuser,
+            #                         directory=directory,
+            #                         permission=128, #Checksum
+            #                         created_by=isc_user
+            #                     )
+            #                     perm.save()
+            #                 if not Permission.objects.filter(user=mftuser, directory=directory, permission=1024).exists():
+            #                     perm = Permission(
+            #                         user=mftuser,
+            #                         directory=directory,
+            #                         permission=1024, #Append
+            #                         created_by=isc_user
+            #                     )
+            #                     perm.save()
+            #             elif pv == 2: #Upload (Write)
+            #                 if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
+            #                     perm = Permission(
+            #                         user=mftuser,
+            #                         directory=directory,
+            #                         permission=256, #List
+            #                         created_by=isc_user
+            #                     )
+            #                     perm.save()
+            #                 if not Permission.objects.filter(user=mftuser, directory=directory, permission=128).exists():
+            #                     perm = Permission(
+            #                         user=mftuser,
+            #                         directory=directory,
+            #                         permission=128, #Checksum
+            #                         created_by=isc_user
+            #                     )
+            #                     perm.save()
+            #                 if not Permission.objects.filter(user=mftuser, directory=directory, permission=1024).exists():
+            #                     perm = Permission(
+            #                         user=mftuser,
+            #                         directory=directory,
+            #                         permission=1024, #Append
+            #                         created_by=isc_user
+            #                     )
+            #                     perm.save()
+            #                 if not Permission.objects.filter(user=mftuser, directory=directory, permission=512).exists():
+            #                     perm = Permission(
+            #                         user=mftuser,
+            #                         directory=directory,
+            #                         permission=512, #Overwrite
+            #                         created_by=isc_user
+            #                     )
+            #                     perm.save()
+            #             elif pv == 32: #Delete (Modify)
+            #                 if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
+            #                     perm = Permission(
+            #                         user=mftuser,
+            #                         directory=directory,
+            #                         permission=256, #List
+            #                         created_by=isc_user
+            #                     )
+            #                     perm.save()
+            #                 if not Permission.objects.filter(user=mftuser, directory=directory, permission=128).exists():
+            #                     perm = Permission(
+            #                         user=mftuser,
+            #                         directory=directory,
+            #                         permission=128, #Checksum
+            #                         created_by=isc_user
+            #                     )
+            #                     perm.save()
+            #                 if not Permission.objects.filter(user=mftuser, directory=directory, permission=512).exists():
+            #                     perm = Permission(
+            #                         user=mftuser,
+            #                         directory=directory,
+            #                         permission=512, #Overwrite
+            #                         created_by=isc_user
+            #                     )
+            #                     perm.save()
+            #                 if not Permission.objects.filter(user=mftuser, directory=directory, permission=8).exists():
+            #                     perm = Permission(
+            #                         user=mftuser,
+            #                         directory=directory,
+            #                         permission=8, #Rename
+            #                         created_by=isc_user
+            #                     )
+            #                     perm.save()
+            #                 if not Permission.objects.filter(user=mftuser, directory=directory, permission=1024).exists():
+            #                     perm = Permission(
+            #                         user=mftuser,
+            #                         directory=directory,
+            #                         permission=1024, #Append
+            #                         created_by=isc_user
+            #                     )
+            #                     perm.save()
+            #                 if not Permission.objects.filter(user=mftuser, directory=directory, permission=1).exists():
+            #                     perm = Permission(
+            #                         user=mftuser,
+            #                         directory=directory,
+            #                         permission=1, #Download
+            #                         created_by=isc_user
+            #                     )
+            #                     perm.save()
+            #                 if not Permission.objects.filter(user=mftuser, directory=directory, permission=2).exists():
+            #                     perm = Permission(
+            #                         user=mftuser,
+            #                         directory=directory,
+            #                         permission=2, #Upload
+            #                         created_by=isc_user
+            #                     )
+            #                     perm.save()
+            #             # elif pv == 0: #Subdirectory (ایجاد پوشه)
+            #             #     reduce_parents_permission()
+            #         logger.info(f'permission of directory {directory.absolute_path} for mftuser {mftuser.username} changed to {splited} by {isc_user.user.username}.')
+            #         response = {'result': 'success'}
+            #     except Exception as e:
+            #         print(e)
+            #         status_code = 400
+            #         logger.error(f'permission change on directory {directory.absolute_path} to {splited} by {isc_user.user.username} encountered with error.')
+            #         response = {'result': 'error', 'perms': [str(op) + "," for op in old_permissions]}
+            #     finally:
+            #         return JsonResponse(data=response, safe=False, status=status_code)
+        if request.method == 'GET':
             permissions = Permission.objects.filter(user=mftuser, directory=directory)
             response = [{'value': perm.permission} for perm in permissions] if permissions != None else [{}]
             i = len(permissions)
@@ -792,39 +794,48 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
 
     if request.is_ajax():
         if request.method == 'POST':
-            if directory.children != '':
-                logger.warn(f'{isc_user.user.username} trying to change permission of directory {directory.absolute_path} for mftuser {mftuser.username}.')
-                logger.error(f'permission of directory {directory.absolute_path} could not be more than list.')
-                return JsonResponse(data={'result': 'error'}, safe=False, status=200)
-            old_permissions = []
-            splited = []
-            status_code = 200
-            response = {}
             try:
+                response = {}
                 permissions = request.POST.get('permissions')
                 splited = [int(t) for t in permissions.split(',')[:-1]]
                 action = request.POST.get('action')
+                if directory.children != '':
+                    logger.warn(f'{isc_user.user.username} trying to change permission of directory {directory.absolute_path} for mftuser {mftuser.username}.')
+                    logger.error(f'permission of directory {directory.absolute_path} (with children) could not be more than list.')
+                    response = {
+                        'result': 'error',
+                        'message': 'به علت وجود پوشه داخل این دایرکتوری نمی توانید در این مسیر دسترسی خواندن/نوشتن/حذف فایل بدهید.'
+                    }
+                    return JsonResponse(data=response, safe=False)
+                else:
+                    if action == 'add':
+                        splited.append(0) #ApplyToSubfolder
                 if action == 'remove':
                     for pv in splited:
                         if Permission.objects.filter(user=mftuser, directory=directory, permission=pv).exists():
                             Permission.objects.filter(user=mftuser, directory=directory, permission=pv).delete()
                         if pv == 0: #Create Folder
-                            Permission.objects.filter(user=mftuser, directory=directory, permission=4).delete()  #Create
+                            Permission.objects.filter(user=mftuser, directory=directory, permission=4).delete()     #Create
                         elif pv == 1: #Download (Read)
                             Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete()  #Append
                         elif pv == 2: #Upload (Write)
                             Permission.objects.filter(user=mftuser, directory=directory, permission=512).delete()   #Overwrite
                             Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete()  #Append
                         elif pv == 32: #Delete (Modify)
-                            Permission.objects.filter(user=mftuser, directory=directory, permission=8).delete()      #Rename
-                    logger.info(f'{splitted} permissions of directory {directory.absolute_path} for mftuser {mftuser.username} removed by {isc_user.user.username}.')
+                            Permission.objects.filter(user=mftuser, directory=directory, permission=8).delete()     #Rename
+                        remaining_perms = Permission.objects.filter(user=mftuser, directory=directory)
+                        if remaining_perms.count() <= 2:
+                            remaining_perms_list = [p['permission'] for p in remaining_perms.values('permission').distinct()]
+                            if '128' in remaining_perms_list or '256' in remaining_perms_list: # if just List or Append or both remained
+                                remaining_perms.delete()
+                    logger.info(f'permission {splited} of directory {directory.absolute_path} for mftuser {mftuser.username} removed by {isc_user.user.username}.')
                 elif action == 'add':
-                    check_parents_permission(
-                        isc_user=isc_user,
-                        mftuser=mftuser,
-                        parent=directory.parent
-                        # permission=perm.value,
-                    )
+                    # check_parents_permission(
+                    #     isc_user=isc_user,
+                    #     mftuser=mftuser,
+                    #     parent=directory.parent
+                    #     # permission=perm.value,
+                    # )
                     for pv in splited:
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=pv).exists():
                             perm = Permission(
@@ -834,7 +845,7 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                                 created_by=isc_user
                             )
                             perm.save()
-                        if pv == 0: #Create Folder
+                        if pv == 0: #ApplyToSubfolder
                             if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
                                 perm = Permission(
                                     user=mftuser,
@@ -906,6 +917,31 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                                     user=mftuser,
                                     directory=directory,
                                     permission=512, #Overwrite
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                        elif pv == 4: #Create (Subfolder)
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=256, #List
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=128).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=128, #Checksum
+                                    created_by=isc_user
+                                )
+                                perm.save()
+                            if not Permission.objects.filter(user=mftuser, directory=directory, permission=0).exists():
+                                perm = Permission(
+                                    user=mftuser,
+                                    directory=directory,
+                                    permission=0, #ApplySubfolder
                                     created_by=isc_user
                                 )
                                 perm.save()
@@ -969,12 +1005,11 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                     logger.info(f'permission of directory {directory.absolute_path} for mftuser {mftuser.username} changed to {splited} by {isc_user.user.username}.')
                 response = {'result': 'success'}
             except Exception as e:
-                print(e)
-                status_code = 400
+                logger.error(e)
                 logger.error(f'permission change on directory {directory.absolute_path} to {splited} by {isc_user.user.username} encountered with error.')
-                response = {'result': 'error'}
+                response = {'result': 'error', 'message': 'مشکلی پیش آمده است، با مدیر سیستم تماس بگیرید!'}
             finally:
-                return JsonResponse(data=response, safe=False, status=status_code)
+                return JsonResponse(data=response, safe=False)
 
 
 @login_required(login_url="/login/")
@@ -1016,7 +1051,6 @@ def transfer_permissions_view(request, *args, **kwargs):
                     is_confirmed=True if confirmed_permissions.filter(directory=perm.directory, permission=perm.permission).exists() else False
                 )
                 logger.info(f'permission of directory {perm.directory.absolute_path} for mftuser {dest_user.username} changed to {perm.permission} by {isc_user.user.username}.')
-            # TODO: confirm old permissisons 
             # Permission.objects.filter(user=dest_user, directory__relative_path__in=confirmed_permissions_path_list).update(is_confirmed=True)
             logger.info(f'all permissions of {orig_user} to {dest_user} transfered successfully by {isc_user.user.username}')
             msg = f'انتقال دسترسی های {form.cleaned_data.get("origin_mftuser")} به {form.cleaned_data.get("destination_mftuser")} با موفقیت انجام شد.'
@@ -1062,7 +1096,7 @@ def delete_directory_view(request, did, *args, **kwargs):
                 else:
                     response = {'result': 'failed'}
             except Exception as e:
-                print(e)
+                logger.error(e)
                 response = {'result': 'error'}
             
             return JsonResponse(data=response, safe=False)

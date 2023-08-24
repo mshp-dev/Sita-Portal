@@ -8,6 +8,20 @@
 <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
 <script>
   $(function () {
+    $(":button[btn-func='btn-accordion-collapse']").click(function () {
+      var inv_id = $(this).attr("inv-id");
+      var permissions_list_parent = $("#permission-list-" + inv_id);
+      if ($(permissions_list_parent).html() == "") {
+        $.get("/invoices/get-permissions/" + inv_id + "/", function (response) {
+          if (response.result == "error") {
+            alert(response.message);
+          } else if (response.result == "success") {
+            $(permissions_list_parent).html(response.permissions_list);
+          }
+        });
+      }
+    });
+
     $("input[role='invoice-delete-btn']").click(function () {
       var invoice_id = $(this).attr("iid");
       var invoice_type = $(this).attr("itype");
@@ -102,7 +116,9 @@
     </div>
     <div class="container">
       {% if access == 'ADMIN' %}
-      <div id="replaceable-content" class="row mb-5">{% include "includes/admin-invoice-list.html" %}</div>
+      <div id="replaceable-content" class="row mb-5">
+        {% include "includes/admin-invoice-list.html" %} {% include "includes/admin-invoice-list.html" with invoices=pre_invoices %}
+      </div>
       {% else %}
       <div id="replaceable-content" class="row mb-5">{% include "includes/invoice-list.html" %}</div>
       {% endif %}
@@ -136,10 +152,10 @@
                   <button type="button" class="btn btn-link ms-0" data-bs-dismiss="modal">انصراف</button>
                   <script type="text/javascript">
                     /*var nameInput = document.getElementById("reason-input");
-                  nameInput.addEventListener("change", function (event) {
-                    var n = cleanInputValue(event.currentTarget.value, "name");
-                    event.currentTarget.value = n;
-                  });*/
+                    nameInput.addEventListener("change", function (event) {
+                      var n = cleanInputValue(event.currentTarget.value, "name");
+                      event.currentTarget.value = n;
+                    });*/
 
                     $(function () {
                       $("#submit-reason-btn").click(function () {

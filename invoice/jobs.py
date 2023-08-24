@@ -21,8 +21,8 @@ class DeleteOldInvoicesJob():
             year="*",
             month="*",
             day="*",
-            hour="1",
-            minute="0",
+            hour="23",
+            minute="30",
             second="0",
             timezone=utc
         )

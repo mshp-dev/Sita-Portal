@@ -72,9 +72,9 @@ class DirectoryAdmin(admin.ModelAdmin):
 
 class PermissionAdmin(admin.ModelAdmin):
     list_display = ['user', 'directory_path', 'permission', 'created_by', 'is_confirmed']
-    list_filter = ['permission', 'directory__bic', 'directory__business', 'created_by', 'is_confirmed']
-    search_fields = ['user__username', 'directory__name', 'permission']
-    ordering = ['user__username']
+    list_filter = ['is_confirmed', 'permission', 'directory__index_code__code', 'directory__bic', 'directory__business']
+    search_fields = ['user__username', 'directory__name', 'directory__relative_path']
+    ordering = ['user__username', 'directory__relative_path']
 
 
 # class CustomerAccessAdmin(admin.ModelAdmin):

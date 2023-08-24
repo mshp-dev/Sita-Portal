@@ -43,16 +43,14 @@ class BaseInvoice(models.Model):
 
 
 class Invoice(BaseInvoice):
-    mftuser          = models.IntegerField(blank=False)
+    # mftuser          = models.IntegerField(blank=False)
+    mftuser          = models.ForeignKey(MftUser, blank=False, null=True, on_delete=models.CASCADE)
     used_business    = models.IntegerField(default=0, blank=True)
     permissions_list = models.CharField(max_length=1000000, default='', blank=True)
-    
-    def get_mftuser(self):
-        return MftUser.objects.get(pk=self.mftuser)
 
     def generate_serial_number(self):
         serial_number = super(Invoice, self).generate_serial_number()
-        uid = str(self.mftuser)
+        uid = str(self.mftuser.id)
         count = len(uid)
         zero = 10 - count
         divided = int(zero / 2)
@@ -86,7 +84,7 @@ class Invoice(BaseInvoice):
 
 
 class PreInvoice(BaseInvoice):
-    directories_list  = models.CharField(max_length=100000, default='', blank=False)
+    directories_list  = models.CharField(max_length=500000, default='', blank=False)
 
     def generate_serial_number(self):
         serial_number = super(PreInvoice, self).generate_serial_number()

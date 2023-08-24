@@ -16,43 +16,43 @@
           <table class="table table-bordered" style="direction: rtl">
             <tr>
               <th class="col-4" scope="col" id="firstname-label">نام</th>
-              <td class="col-4" scope="col" id="firstname-value">{{ invoice.get_mftuser.firstname }}</td>
+              <td class="col-4" scope="col" id="firstname-value">{{ invoice.mftuser.firstname }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="lastname-label">نام خانوادگی</th>
-              <td class="col-4" scope="col" id="lastname-value">{{ invoice.get_mftuser.lastname }}</td>
+              <td class="col-4" scope="col" id="lastname-value">{{ invoice.mftuser.lastname }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="username-label">نام کاربری</th>
-              <td class="col-4" scope="col" id="username-value">{{ invoice.get_mftuser.username }}</td>
+              <td class="col-4" scope="col" id="username-value">{{ invoice.mftuser.username }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="alias-label">نام مستعار <span style="font-size: 0.5rem">(2)</span></th>
-              <td class="col-4" scope="col" id="alias-value">{{ invoice.get_mftuser.alias }}</td>
+              <td class="col-4" scope="col" id="alias-value">{{ invoice.mftuser.alias }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="email-label">ایمیل</th>
-              <td class="col-4" scope="col" id="email-value">{{ invoice.get_mftuser.email }}</td>
+              <td class="col-4" scope="col" id="email-value">{{ invoice.mftuser.email }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="officephone-label">تلفن دفتر کار</th>
-              <td class="col-4" scope="col" id="officephone-value">{{ invoice.get_mftuser.officephone }}</td>
+              <td class="col-4" scope="col" id="officephone-value">{{ invoice.mftuser.officephone }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="mobilephone-label">شماره تلفن همراه</th>
-              <td class="col-4" scope="col" id="mobilephone-value">{{ invoice.get_mftuser.mobilephone }}</td>
+              <td class="col-4" scope="col" id="mobilephone-value">{{ invoice.mftuser.mobilephone }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="organization-label">سازمان/بانک</th>
-              <td class="col-4" scope="col" id="organization-value">{{ invoice.get_mftuser.organization }}</td>
+              <td class="col-4" scope="col" id="organization-value">{{ invoice.mftuser.organization }}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="business-label">سامانه/پروژه{% if not ubus %}ها{% endif %} <span style="font-size: 0.5rem">(3)</span></th>
-              <td class="col-4" scope="col" id="business-value">{% if ubus %}{{ ubus }}{% else %}{{ invoice.get_mftuser.business.all|get_businesses }}{% endif %}</td>
+              <td class="col-4" scope="col" id="business-value">{% if ubus %}{{ ubus }}{% else %}{{ invoice.mftuser.business.all|get_businesses }}{% endif %}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="description-label">جزئیات</th>
-              <td class="col-4" scope="col" id="description-value">{{ invoice.get_mftuser.description }}</td>
+              <td class="col-4" scope="col" id="description-value">{{ invoice.mftuser.description }}</td>
             </tr>
           </table>
         </div>

@@ -10,9 +10,11 @@
           class="accordion-button collapsed"
           type="button"
           data-bs-toggle="collapse"
-          data-bs-target="#{{ invoice.get_mftuser.username|remove_dot }}{{ invoice.id }}"
+          data-bs-target="#{{ invoice.mftuser.username|remove_dot }}{{ invoice.id }}"
           aria-expanded="false"
-          aria-controls="{{ invoice.get_mftuser.username|remove_dot }}{{ invoice.id }}"
+          aria-controls="{{ invoice.mftuser.username|remove_dot }}{{ invoice.id }}"
+          inv-id="{{ invoice.id }}"
+          btn-func="btn-accordion-collapse"
         >
           <span
             class="fas fa-file-alt {% if invoice.confirm_or_reject == 'CONFIRMED' %}text-success{% elif invoice.confirm_or_reject == 'REJECTED' %}text-danger{% elif invoice.confirm_or_reject == 'UNDEFINED' %}text-warning{% endif %}"
@@ -29,7 +31,7 @@
         </button>
       </h2>
       <div
-        id="{{ invoice.get_mftuser.username|remove_dot }}{{ invoice.id }}"
+        id="{{ invoice.mftuser.username|remove_dot }}{{ invoice.id }}"
         class="accordion-collapse collapse"
         aria-labelledby="headingOne"
         data-bs-parent="#inv-{{ invoice.id }}-parent"
@@ -39,16 +41,16 @@
             <div class="row">
               <div style="direction: rtl" class="row mt-5 mb-5">
                 <span
-                  >نام مستعار: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.alias }}</strong></span></span
+                  >نام مستعار: <span class="display-6 text-info"><strong> {{ invoice.mftuser.alias }}</strong></span></span
                 >
                 <span
-                  >نام: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.firstname }}</strong></span></span
+                  >نام: <span class="display-6 text-info"><strong> {{ invoice.mftuser.firstname }}</strong></span></span
                 >
                 <span
-                  >نام خانوادگی: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.lastname }}</strong></span></span
+                  >نام خانوادگی: <span class="display-6 text-info"><strong> {{ invoice.mftuser.lastname }}</strong></span></span
                 >
                 <span
-                  >سازمان/بانک: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.organization }}</strong></span></span
+                  >سازمان/بانک: <span class="display-6 text-info"><strong> {{ invoice.mftuser.organization }}</strong></span></span
                 >
                 {% if invoice.invoice_type.code == 'INVUBUS' %}
                 <span
@@ -57,19 +59,19 @@
                 {% elif invoice.invoice_type.code == 'INVOBUS' %}
                 <span
                   >پروژه/سامانه(ها)ی تحت اختیار:
-                  <span class="display-6 text-info"><strong>{{ invoice.get_mftuser.business.all|get_businesses }}</strong></span></span
+                  <span class="display-6 text-info"><strong>{{ invoice.mftuser.business.all|get_businesses }}</strong></span></span
                 >
                 {% endif %}
                 <span
-                  >شماره تلفن همراه: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.mobilephone }}</strong></span></span
+                  >شماره تلفن همراه: <span class="display-6 text-info"><strong> {{ invoice.mftuser.mobilephone }}</strong></span></span
                 >
                 <span
-                  >شماره تلفن محل کار: <span class="display-6 text-info"><strong> {{ invoice.get_mftuser.officephone }}</strong></span></span
+                  >شماره تلفن محل کار: <span class="display-6 text-info"><strong> {{ invoice.mftuser.officephone }}</strong></span></span
                 >
-                <p class="h5 mt-4" style="direction: rtl">دسترسی بر روی مسیرها:</p>
-                {% for access in invoice.get_list_of_permissions %}
+                <p id="permission-list-{{ invoice.id }}" class="h5 mt-4" style="direction: rtl"></p>
+                {% comment %} {% for access in invoice.get_list_of_permissions %}
                 <span class="display-6 text-tertiary mb-2">({{ access.perms }}) بر روی {{ access.dir }}</span>
-                {% endfor %}
+                {% endfor %} {% endcomment %}
               </div>
               {% if pre_invoice.confirm_or_reject != 'CONFIRMED' %}
               <div class="col-6">

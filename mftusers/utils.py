@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.files import File
 from django.conf import settings
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from pathlib import Path
 
 from core.models import *
@@ -319,6 +319,101 @@ def create_default_permission(isc_user, mftuser, last_dir, business=None, home_d
             perm.save()
 
 
+def check_directory_tree_permission(isc_user, mftuser, is_confirmed=False):
+    user_dirs = Permission.objects.filter(~Q(permission=256), user=mftuser, directory__children='').values('directory').distinct()
+    for dir_ in Directory.objects.filter(pk__in=[ud['directory'] for ud in user_dirs]):
+        current_dir = Directory.objects.get(pk=dir_.parent) #dir_
+        dir_index = int(current_dir.index_code.code)
+        while dir_index <= 0:
+            non_list_perms = Permission.objects.filter(directory=current_dir, user=mftuser)
+            if non_list_perms.filter(~Q(permission=256)).exists():
+                non_list_perms.delete()
+            if not non_list_perms.filter(permission=256).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=current_dir,
+                    permission=256,
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
+            if int(current_dir.index_code.code) == 0:
+                # break
+                dir_index = 1
+            else:
+                current_dir = Directory.objects.get(pk=current_dir.parent)
+                dir_index = int(current_dir.index_code.code)
+
+
+def check_directories_minimum_permissions(isc_user, mftuser, is_confirmed=False):
+    dirs_with_no_child = Permission.objects.filter(~Q(permission=256), directory__children='', user=mftuser).values('directory').distinct()
+    for dir_ in Directory.objects.filter(pk__in=[ud['directory'] for ud in dirs_with_no_child]):
+        if not Permission.objects.filter(directory=dir_, user=mftuser, permission=0).exists():
+            Permission.objects.create(
+                user=mftuser,
+                directory=dir_,
+                permission=0, #ApplySubfolder
+                is_confirmed=is_confirmed,
+                created_by=isc_user
+            )
+        if Permission.objects.filter(directory=dir_, user=mftuser, permission=32).exists(): #Delete (Modify)
+            if not Permission.objects.filter(user=mftuser, directory=dir_, permission=1).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=dir_,
+                    permission=1, #Download
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
+            if not Permission.objects.filter(user=mftuser, directory=dir_, permission=2).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=dir_,
+                    permission=2, #Upload
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
+            if not Permission.objects.filter(user=mftuser, directory=dir_, permission=8).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=dir_,
+                    permission=8, #Rename
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
+            if not Permission.objects.filter(user=mftuser, directory=dir_, permission=128).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=dir_,
+                    permission=128, #Checksum
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
+            if not Permission.objects.filter(user=mftuser, directory=dir_, permission=256).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=dir_,
+                    permission=256, #List
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
+            if not Permission.objects.filter(user=mftuser, directory=dir_, permission=512).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=dir_,
+                    permission=512, #Overwrite
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
+            if not Permission.objects.filter(user=mftuser, directory=dir_, permission=1024).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=dir_,
+                    permission=1024, #Append
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
+
+
 def check_parents_permission(isc_user, mftuser, parent): #, permission
     directory = None
     while parent != 0:
@@ -338,6 +433,13 @@ def check_parents_permission(isc_user, mftuser, parent): #, permission
             #     created_by=isc_user
             # )
         parent = directory.parent
+    if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
+        Permission.objects.create(
+            user=mftuser,
+            directory=directory,
+            permission=256, # List (مشاهده)
+            created_by=isc_user
+        )
 
 
 def delete_dir_and_clean_sub_directories(dir_):
@@ -581,8 +683,7 @@ def export_user_with_paths(id, isc_user):
         )
 
 
-def export_user_with_paths_v2(id, isc_user):
-    mftuser = MftUser.objects.get(pk=id)
+def export_user_with_paths_v2(mftuser, isc_user):
     template_name = ''
     is_foreign_mftuser = None
     if mftuser.organization.sub_domain == DomainName.objects.get(code='nibn.ir'):
@@ -619,15 +720,16 @@ def export_user_with_paths_v2(id, isc_user):
     # ip[0].text = mftuser.ipaddr
     virtualFile = template.xpath('//webUsers/webUser/virtualFile')
     virtual_files = template.xpath('//webUsers/webUser/virtualFile/virtualFiles')
-    for bus in mftuser.business.all():
-        if not Permission.objects.filter(user=mftuser, directory__parent=0, directory__business=bus).exists():
-            Permission.objects.create(
-                user=mftuser,
-                directory=Directory.objects.get(business=bus, parent=0),
-                permission=256, # List (مشاهده)
-                created_by=isc_user,
-                is_confirmed=True
-            )
+    # for bus in mftuser.business.all():
+    #     if not Permission.objects.filter(user=mftuser, directory__parent=0, directory__business=bus).exists():
+    #         Permission.objects.create(
+    #             user=mftuser,
+    #             directory=Directory.objects.get(business=bus, parent=0),
+    #             permission=256, # List (مشاهده)
+    #             created_by=isc_user,
+    #             is_confirmed=True
+    #         )
+    # check_directory_tree_permission(isc_user=isc_user, mftuser=mftuser, is_confirmed=True)
     permissions = Permission.objects.filter(user=mftuser, is_confirmed=True).exclude(directory__index_code__code='-1', directory__children='')
     for item in permissions.filter(directory__index_code__code='-1'):
         if not permissions.filter(directory__id__in=[int(i) for i in item.directory.children.split(',')[:-1]]).exists():
@@ -1121,25 +1223,6 @@ def lower_directory_index(directory):
 def clean_up(flag='', action=False, *args, **kwargs):
     if flag == '':
         print('Nothing to cleanup.')
-    elif flag == 'dir':
-        print('Cleanup directories.')
-        for d in Directory.objects.all():
-            chs = d.children
-            old_chs = chs
-            chs = ''
-            temp = old_chs.split(',')
-            temp.pop()
-            for c in temp:
-                id_ = int(c)
-                # print(f'Checking dir with id {id}')
-                if Directory.objects.filter(pk=id_).exists():
-                    chs += f'{id_},'
-                    recursive_directory_survey(Directory.objects.get(pk=id_), action=action)
-                else:
-                    print(f'dir with id {id_} does not exists, Parent id is {d.id}')
-            d.children = chs
-            if action:
-                d.save()
     elif flag == 'perm':
         print('Cleanup permissions.')
         for p in Permission.objects.all():
@@ -1222,6 +1305,121 @@ def clean_up(flag='', action=False, *args, **kwargs):
                     if action:
                         p = Permission.objects.filter(user=u, directory=d, permission=4096).first()
                         p.delete()
+    elif flag == 'perm3':
+        print('Cleanup permissions v3.')
+        admin = IscUser.objects.get(user__username='admin')
+        all_users = MftUser.objects.all()
+        for mftuser in all_users:
+            print(f'mftuser {mftuser.username}:')
+            user_dirs = Permission.objects.filter(~Q(permission=256), user=mftuser, directory__children='', is_confirmed=True).values('directory').distinct()
+            for dir_ in Directory.objects.filter(pk__in=[ud['directory'] for ud in user_dirs]):
+                current_dir = Directory.objects.get(pk=dir_.parent)
+                dir_index = int(current_dir.index_code.code)
+                while dir_index <= 0:
+                    non_list_perms = Permission.objects.filter(directory=current_dir, user=mftuser)
+                    if non_list_perms.filter(~Q(permission=256)).exists():
+                        for p in non_list_perms:
+                            print(f'{p} deleted')
+                        if action:
+                            non_list_perms.delete()
+                    if not non_list_perms.filter(permission=256).exists():
+                        if action:
+                            Permission.objects.create(user=mftuser, directory=current_dir, permission=256, is_confirmed=True, created_by=admin)
+                        print(f'list access on {current_dir.relative_path} created')
+                    if int(current_dir.index_code.code) == 0:
+                        dir_index = 1
+                    else:
+                        current_dir = Directory.objects.get(pk=current_dir.parent)
+                        dir_index = int(current_dir.index_code.code)
+    elif flag == 'perm4':
+        print('Cleanup permissions v4.')
+        isc_user = IscUser.objects.get(user__username='admin')
+        all_users = MftUser.objects.all()
+        for mftuser in all_users:
+            print(f'mftuser {mftuser.username}:')
+            dirs_with_no_child = Permission.objects.filter(~Q(permission=256), directory__children='', user=mftuser).values('directory').distinct()
+            for dir_ in Directory.objects.filter(pk__in=[ud['directory'] for ud in dirs_with_no_child]):
+                if not Permission.objects.filter(directory=dir_, user=mftuser, permission=0).exists():
+                    print(f'ApplySubfolder access on {dir_.relative_path} created')
+                    if action:
+                        Permission.objects.create(
+                            user=mftuser,
+                            directory=dir_,
+                            permission=0, #ApplySubfolder
+                            is_confirmed=True,
+                            created_by=isc_user
+                        )
+                if Permission.objects.filter(directory=dir_, user=mftuser, permission=32).exists(): #Delete (Modify)
+                    if not Permission.objects.filter(user=mftuser, directory=dir_, permission=1).exists():
+                        print(f'Download access on {dir_.relative_path} created')
+                        if action:
+                            Permission.objects.create(
+                                user=mftuser,
+                                directory=dir_,
+                                permission=1, #Download
+                                is_confirmed=True,
+                                created_by=isc_user
+                            )
+                    if not Permission.objects.filter(user=mftuser, directory=dir_, permission=2).exists():
+                        print(f'Upload access on {dir_.relative_path} created')
+                        if action:
+                            Permission.objects.create(
+                                user=mftuser,
+                                directory=dir_,
+                                permission=2, #Upload
+                                is_confirmed=True,
+                                created_by=isc_user
+                            )
+                    if not Permission.objects.filter(user=mftuser, directory=dir_, permission=8).exists():
+                        print(f'Rename access on {dir_.relative_path} created')
+                        if action:
+                            Permission.objects.create(
+                                user=mftuser,
+                                directory=dir_,
+                                permission=8, #Rename
+                                is_confirmed=True,
+                                created_by=isc_user
+                            )
+                    if not Permission.objects.filter(user=mftuser, directory=dir_, permission=128).exists():
+                        print(f'Download Checksum on {dir_.relative_path} created')
+                        if action:
+                            Permission.objects.create(
+                                user=mftuser,
+                                directory=dir_,
+                                permission=128, #Checksum
+                                is_confirmed=True,
+                                created_by=isc_user
+                            )
+                    if not Permission.objects.filter(user=mftuser, directory=dir_, permission=256).exists():
+                        print(f'Download List on {dir_.relative_path} created')
+                        if action:
+                            Permission.objects.create(
+                                user=mftuser,
+                                directory=dir_,
+                                permission=256, #List
+                                is_confirmed=True,
+                                created_by=isc_user
+                            )
+                    if not Permission.objects.filter(user=mftuser, directory=dir_, permission=512).exists():
+                        print(f'Download Overwrite on {dir_.relative_path} created')
+                        if action:
+                            Permission.objects.create(
+                                user=mftuser,
+                                directory=dir_,
+                                permission=512, #Overwrite
+                                is_confirmed=True,
+                                created_by=isc_user
+                            )
+                    if not Permission.objects.filter(user=mftuser, directory=dir_, permission=1024).exists():
+                        print(f'Download Append on {dir_.relative_path} created')
+                        if action:
+                            Permission.objects.create(
+                                user=mftuser,
+                                directory=dir_,
+                                permission=1024, #Append
+                                is_confirmed=True,
+                                created_by=isc_user
+                            )
     elif flag == 'mftuser':
         print('Cleanup mftusers.')
         for u in MftUser.objects.all():
@@ -1232,6 +1430,38 @@ def clean_up(flag='', action=False, *args, **kwargs):
                     u.email = f'{u.username}@sita.nibn.net'
                     if action:
                         u.save()
+    elif flag == 'dir':
+        print('Cleanup directories.')
+        for d in Directory.objects.all():
+            chs = d.children
+            old_chs = chs
+            chs = ''
+            temp = old_chs.split(',')
+            temp.pop()
+            for c in temp:
+                id_ = int(c)
+                # print(f'Checking dir with id {id}')
+                if Directory.objects.filter(pk=id_).exists():
+                    chs += f'{id_},'
+                    recursive_directory_survey(Directory.objects.get(pk=id_), action=action)
+                else:
+                    print(f'dir with id {id_} does not exists, Parent id is {d.id}')
+            d.children = chs
+            if action:
+                d.save()
+    elif flag == 'dir1':
+        print('Cleanup directories v1.')
+        for d in Directory.objects.all():
+            if d.parent != 0:
+                if not Directory.objects.filter(pk=d.parent).exists():
+                    print(f'directory with id {d.parent} does not exists, parent of {d.id}')
+                    d_perms = Permission.objects.filter(directory__id=d.id)
+                    parent_perms = Permission.objects.filter(directory__id=d.id)
+                    print(f'deleting {d_perms.count()} and {parent_perms.count()} permissions')
+                    if action:
+                        d.delete()
+                        d_perms.delete()
+                        parent_perms.delete()
     elif flag == 'dir2':
         print('Cleanup directories v2.')
         for d in Directory.objects.all():

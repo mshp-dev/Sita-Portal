@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-import os, json
+import os, sys, json, logging
 from pathlib import Path
 
 # with open('/etc/portal/portal-config.json') as config_file:
@@ -180,31 +180,31 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGGING_PATH = os.path.join(BASE_DIR, 'logs')
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'formatters': {
-#         'default': {
-#             'format': '[%(asctime)s] %(levelname)s: %(message)s',
-#         },
-#         'detailed': {
-#             'format': (u'%(asctime)s [%(levelname)-8s] (%(module)s.%(funcName)s) %(message)s'),
-#             'datefmt': '[%Y-%m-%d %H:%M:%S]',
-#         },
-#     },
-#     'handlers': {
-#         'file': {
-#             'class': 'logging.handlers.TimedRotatingFileHandler',
-#             # 'filename': f'{LOGGING_PATH}/mftusers.log',
-#             'filename': 'mftusers.log',
-#             'when': 'midnight',
-#             'backupCount': 60,
-#             'formatter': 'detailed',
-#         },
-#     },
-#     'root': {
-#         'handlers': ['file'],
-#         'level': 'INFO',
-#         'propagate': True,
-#     },
-# }
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'default': {
+            'format': '[%(asctime)s] %(levelname)s: %(message)s',
+        },
+        'detailed': {
+            'format': (u'%(asctime)s [%(levelname)-8s] (%(module)s.%(funcName)s) %(message)s'),
+            'datefmt': '[%Y-%m-%d %H:%M:%S]',
+        },
+    },
+    'handlers': {
+        'file': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            # 'filename': f'{LOGGING_PATH}/mftusers.log',
+            'filename': 'mftusers.log',
+            'when': 'midnight',
+            'backupCount': 2,
+            'formatter': 'detailed',
+        },
+    },
+    'root': {
+        'handlers': ['file'],
+        'level': 'DEBUG',
+        'propagate': True,
+    },
+}
