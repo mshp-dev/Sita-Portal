@@ -776,8 +776,10 @@ def mftuser_permissions_view(request, uid, did, *args, **kwargs):
                         i -= 1
                 if i == 0:
                     response.append({'value': 'isconfirmed'})
-                else: 
+                else:
                     response.append({'value': 'notconfirmed'})
+            else:
+                response.append({'value': 'notconfirmed'})
             return JsonResponse(data=response, safe=False)
 
 
@@ -823,6 +825,8 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                             Permission.objects.filter(user=mftuser, directory=directory, permission=1024).delete()  #Append
                         elif pv == 32: #Delete (Modify)
                             Permission.objects.filter(user=mftuser, directory=directory, permission=8).delete()     #Rename
+                        elif pv == 256: #List
+                            Permission.objects.filter(user=mftuser, directory=directory, permission=128).delete()   #Checksum
                         remaining_perms = Permission.objects.filter(user=mftuser, directory=directory)
                         if remaining_perms.count() <= 2:
                             remaining_perms_list = [p['permission'] for p in remaining_perms.values('permission').distinct()]

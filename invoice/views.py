@@ -131,7 +131,7 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
             else:
                 invoice = Invoice.objects.get(pk=iid)
                 if isc_user.role.code == 'ADMIN':
-                    mftuser = MftUser.objects.get(pk=invoice.mftuser)
+                    mftuser = MftUser.objects.get(pk=invoice.mftuser.id)
                     mftuser.is_confirmed = True
                     mftuser.modified_at = timezone.now()
                     mftuser.save()

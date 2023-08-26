@@ -214,9 +214,9 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
                         filtered_invs['pre_invoices'].append(int(inv))
                 else:
                     for inv in invoices:
-                        mftuser = inv.get_mftuser()
-                        buss = [bus.description for bus in mftuser.business.all()]
-                        if query in mftuser.username or query in mftuser.alias or query in mftuser.organization.description or query in inv.serial_number or query in inv.created_by.user.username or query in inv.get_jalali_created_at() or query in buss:
+                        # mftuser = inv.get_mftuser()
+                        buss = [bus.description for bus in inv.mftuser.business.all()]
+                        if query in inv.mftuser.username or query in inv.mftuser.alias or query in inv.mftuser.organization.description or query in inv.serial_number or query in inv.created_by.user.username or query in inv.get_jalali_created_at() or query in buss:
                             filtered_invs['invoices'].append(inv.id)
                     for inv in pre_invoices:
                         if query in inv.serial_number or query in inv.created_by.user.username or query in inv.get_jalali_created_at():

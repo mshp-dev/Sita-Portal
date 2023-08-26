@@ -355,6 +355,64 @@ def check_directories_minimum_permissions(isc_user, mftuser, is_confirmed=False)
                 is_confirmed=is_confirmed,
                 created_by=isc_user
             )
+        if Permission.objects.filter(directory=dir_, user=mftuser, permission=1).exists(): #Download
+            if not Permission.objects.filter(user=mftuser, directory=dir_, permission=128).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=dir_,
+                    permission=128, #Checksum
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
+            if not Permission.objects.filter(user=mftuser, directory=dir_, permission=256).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=dir_,
+                    permission=256, #List
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
+            if not Permission.objects.filter(user=mftuser, directory=dir_, permission=1024).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=dir_,
+                    permission=1024, #Append
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
+        if Permission.objects.filter(directory=dir_, user=mftuser, permission=2).exists(): #Upload
+            if not Permission.objects.filter(user=mftuser, directory=dir_, permission=128).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=dir_,
+                    permission=128, #Checksum
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
+            if not Permission.objects.filter(user=mftuser, directory=dir_, permission=256).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=dir_,
+                    permission=256, #List
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
+            if not Permission.objects.filter(user=mftuser, directory=dir_, permission=1024).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=dir_,
+                    permission=1024, #Append
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
+            if not Permission.objects.filter(user=mftuser, directory=dir_, permission=512).exists():
+                Permission.objects.create(
+                    user=mftuser,
+                    directory=dir_,
+                    permission=512, #Overwrite
+                    is_confirmed=is_confirmed,
+                    created_by=isc_user
+                )
         if Permission.objects.filter(directory=dir_, user=mftuser, permission=32).exists(): #Delete (Modify)
             if not Permission.objects.filter(user=mftuser, directory=dir_, permission=1).exists():
                 Permission.objects.create(
@@ -412,6 +470,20 @@ def check_directories_minimum_permissions(isc_user, mftuser, is_confirmed=False)
                     is_confirmed=is_confirmed,
                     created_by=isc_user
                 )
+    all_dirs = Permission.objects.filter(user=mftuser).values('directory').distinct()
+    for dir_ in Directory.objects.filter(pk__in=[ud['directory'] for ud in all_dirs]):
+        dir_perms = Permission.objects.filter(directory=dir_, user=mftuser)
+        if dir_perms.count() == 1:
+            p = dir_perms.first()
+            if p.permission != 256:
+                p.delete()
+            else:
+                if dir_.children == '':
+                    p.delete()
+                else:
+                    chs = [int(c) for c in dir_.children.split(',')[:-1]]
+                    if not Permission.objects.filter(directory__pk__in=chs, user=mftuser).exists():
+                        p.delete()
 
 
 def check_parents_permission(isc_user, mftuser, parent): #, permission
@@ -1308,7 +1380,7 @@ def clean_up(flag='', action=False, *args, **kwargs):
     elif flag == 'perm3':
         print('Cleanup permissions v3.')
         admin = IscUser.objects.get(user__username='admin')
-        all_users = MftUser.objects.all()
+        all_users = kwargs['all_users'] #MftUser.objects.all()
         for mftuser in all_users:
             print(f'mftuser {mftuser.username}:')
             user_dirs = Permission.objects.filter(~Q(permission=256), user=mftuser, directory__children='', is_confirmed=True).values('directory').distinct()
@@ -1420,6 +1492,38 @@ def clean_up(flag='', action=False, *args, **kwargs):
                                 is_confirmed=True,
                                 created_by=isc_user
                             )
+    elif flag == 'perm5':
+        print('Cleanup permissions v5.')
+        isc_user = IscUser.objects.get(user__username='admin')
+        for p in Permission.objects.filter(~Q(directory__children='') & ~Q(directory__business__code='NAHAB') & ~Q(permission=256)):
+            print(f'{p.user.username} has more than LIST access on {p.directory.relative_path}')
+        if action:
+            Permission.objects.filter(~Q(directory__children='') & ~Q(directory__business__code='NAHAB') & ~Q(permission=256)).delete()
+        # for p in Permission.objects.filter(~Q(directory__index_code__code='-1'), ~Q(directory__business__code='NAHAB'), directory__children='', permission=256): #List
+        #     if not Permission.objects.filter(directory=p.directory, user=p.user, permission=128).exists(): #Checksum
+        #         print(f'{p.user.username} has LIST access on {p.directory.relative_path} without CHECKSUM')
+        #         if action:
+        #             Permission.objects.create(permission=128, user=p.user, directory=p.directory, created_by=isc_user, is_confirmed=p.is_confirmed)
+        for p in Permission.objects.filter(directory__children='', permission=1): #Download
+            if not Permission.objects.filter(directory=p.directory, user=p.user, permission=1024).exists(): #Append
+                print(f'{p.user.username} has DOWNLOAD access on {p.directory.relative_path} without APPEND')
+                if action:
+                    Permission.objects.create(permission=1024, user=p.user, directory=p.directory, created_by=isc_user, is_confirmed=p.is_confirmed)
+        for p in Permission.objects.filter(directory__children='', permission=4): #Create
+            if not Permission.objects.filter(directory=p.directory, user=p.user, permission=0).exists(): #ApplyToSubfolder
+                print(f'{p.user.username} has CREATE access on {p.directory.relative_path} without APPLYTOSUBFOLDER')
+                if action:
+                    Permission.objects.create(permission=0, user=p.user, directory=p.directory, created_by=isc_user, is_confirmed=p.is_confirmed)
+        for p in Permission.objects.filter(directory__children='', permission=2): #Upload
+            if not Permission.objects.filter(directory=p.directory, user=p.user, permission=512).exists(): #Overwrite
+                print(f'{p.user.username} has UPLOAD access on {p.directory.relative_path} without OVERWRITE')
+                if action:
+                    Permission.objects.create(permission=512, user=p.user, directory=p.directory, created_by=isc_user, is_confirmed=p.is_confirmed)
+        for p in Permission.objects.filter(directory__children='', permission=32): #Modify
+            if not Permission.objects.filter(directory=p.directory, user=p.user, permission=8).exists(): #RenameFiles
+                print(f'{p.user.username} has MODIFY access on {p.directory.relative_path} without RENAME')
+                if action:
+                    Permission.objects.create(permission=8, user=p.user, directory=p.directory, created_by=isc_user, is_confirmed=p.is_confirmed)
     elif flag == 'mftuser':
         print('Cleanup mftusers.')
         for u in MftUser.objects.all():
