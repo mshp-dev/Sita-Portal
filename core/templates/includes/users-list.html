@@ -102,9 +102,18 @@
                 <a href="{% url 'mftuser-details' user.id %}" style="width: 100%" class="btn btn-success animate-up-1">مشاهده جزئیات</a>
               </div>
               {% else %}
+              {% if access == 'ADMIN' %}
+              <div class="col">
+                <a href="{% url 'mftuser-access' user.id %}" style="width: 100%" class="btn btn-warning animate-up-1">مشاهده همه مسیرها</a>
+              </div>
+              <div class="col">
+                <a href="{% url 'mftuser-directories' user.id user.id %}" style="width: 100%" class="btn btn-success animate-up-1">مشاهده دسترسی ها</a>
+              </div>
+              {% else %}
               <div class="col">
                 <a href="{% url 'mftuser-access' user.id %}" style="width: 105%" class="btn btn-warning animate-up-1">مشاهده دسترسی ها</a>
               </div>
+              {% endif %}
               {% endif %}
               {% endif %} {% comment %} {% if admin_view and not user.is_confirmed %}
               <div class="col">

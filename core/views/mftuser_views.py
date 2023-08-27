@@ -427,7 +427,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
 
 
 @login_required(login_url="/login/")
-def mftuser_access_view(request, uid, pid=-1, dir_name="", *args, **kwargs):
+def mftuser_access_view(request, uid, rid=-1, dir_name="", *args, **kwargs):
     isc_user = IscUser.objects.get(user=request.user)
     mftuser = get_object_or_404(MftUser, pk=uid)
     bic = BankIdentifierCode.objects.get(code=mftuser.organization.code)
@@ -503,7 +503,14 @@ def mftuser_access_view(request, uid, pid=-1, dir_name="", *args, **kwargs):
             return JsonResponse(data=response, safe=False)
 
     if isc_user.role.code == 'ADMIN':
-        elements = get_all_dirs(isc_user)
+        if rid != -1:
+            buss = list(mftuser.business.all())
+            u_buss_perms = Permission.objects.filter(~Q(directory__business__in=buss), directory__parent=0, user=mftuser).values('directory__business')
+            for ubp in u_buss_perms:
+                buss.append(BusinessCode.objects.get(code=ubp['directory__business']))
+            elements = get_specific_root_dir(buss, bic)
+        else:
+            elements = get_all_dirs(isc_user)
     else:
         buss = []
         if isc_user.role.code == 'OPERATION':
@@ -1040,7 +1047,7 @@ def transfer_permissions_view(request, *args, **kwargs):
             orig_user = MftUser.objects.get(username=form.cleaned_data.get("origin_mftuser"))
             dest_user = MftUser.objects.get(username=form.cleaned_data.get("destination_mftuser"))
             old_permissions = Permission.objects.filter(user=dest_user)
-            confirmed_permissions = old_permissions.filter(is_confirmed=True)
+            confirmed_permissions = list(old_permissions.filter(is_confirmed=True).values_list('directory', flat=True, named=False).distinct())
             # confirmed_permissions_path = confirmed_permissions.filter(is_confirmed=True).values('directory__relative_path').distinct()
             # confirmed_permissions_path_list = [cpp['directory__relative_path'] for cpp in confirmed_permissions_path]
             old_permissions.delete()
@@ -1052,7 +1059,7 @@ def transfer_permissions_view(request, *args, **kwargs):
                     user=dest_user,
                     directory=perm.directory,
                     permission=perm.permission,
-                    is_confirmed=True if confirmed_permissions.filter(directory=perm.directory, permission=perm.permission).exists() else False
+                    is_confirmed=True if perm.directory.id in confirmed_permissions else False
                 )
                 logger.info(f'permission of directory {perm.directory.absolute_path} for mftuser {dest_user.username} changed to {perm.permission} by {isc_user.user.username}.')
             # Permission.objects.filter(user=dest_user, directory__relative_path__in=confirmed_permissions_path_list).update(is_confirmed=True)
