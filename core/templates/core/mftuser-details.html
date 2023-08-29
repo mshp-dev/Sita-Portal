@@ -41,6 +41,16 @@
         }
       );
     });
+
+    $("#id_unlimited_sessions").change(function () {
+      if (this.checked) {
+        $("#confirm-modal").modal("show");
+      }
+    });
+
+    $(":button[btn-func='close']").click(function () {
+      $("#id_unlimited_sessions").prop("checked", false);
+    });
   });
 </script>
 {% endif %} {% endblock javascripts %} {% block content %}
@@ -228,6 +238,16 @@
                         {{ form.description }}
                       </div>
                     </div> {% endcomment %}
+                    <div class="form-group mb-4" style="direction: rtl">
+                      <label for="unlimited_sessions">اتصال نامحدود به صورت همزمان</label>
+                      <div class="input-group">
+                        {{ form.unlimited_sessions }}
+                        <span class="h6 me-2"
+                          >این کاربر <strong class="text-danger"><u>فقط به صورت سیستمی</u></strong> و با تعداد
+                          <strong class="text-danger"><u>اتصال نامحدود</u></strong> مورد استفاده قرار می گیرد.
+                        </span>
+                      </div>
+                    </div>
                     <br />
                     <div class="d-grid px-5 py-2">
                       <button
@@ -253,6 +273,31 @@
           </div> {% endcomment %}
         </div>
       </div>
+      <div class="row">
+        <div class="col md-2">
+          <div class="modal fade" id="confirm-modal" role="dialog" aria-labelledby="confirm-modal" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content" style="direction: rtl">
+                <div class="modal-header">
+                  <h2 class="h6 modal-title">توجه</h2>
+                  <button type="button" class="btn-close ms-0" btn-func="close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="direction: rtl">
+                  <p style="text-align: justify">
+                    لطفاً توجه داشته باشید فقط در صورتیکه قرار است این کاربر به صورت سیستمی مورد استفاده قرار گیرد
+                    و به تعداد اتصال های همزمان بیش از 2 مورد نیاز است، این گزینه را انتخاب نمائید؛
+                    لازم به ذکر است که ارسال پیش نویس شماره 307 در چارگون برای این مورد، می بایست به همراه تأیید امنیت باشد.
+                  </p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary ms-auto" btn-func="ok" data-bs-dismiss="modal">بله</button>
+                  <button type="button" class="btn btn-link ms-0" btn-func="close" data-bs-dismiss="modal">خیر</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       {% if access == 'ADMIN' %}
       <div class="row mb-3">
         {% comment %} <input
@@ -265,13 +310,16 @@
         /> {% endcomment %}
         <a href="{% url 'mftuser-delete' mftuser.id %}" style="width: 50%" class="btn btn-danger mx-auto">حذف موقت کاربر</a>
       </div>
+      <div class="row mb-3">
+        <a href="{% url 'mftuser-directories' mftuser.id mftuser.id %}" style="width: 50%" class="btn btn-info mx-auto">مشاهده دسترسی های کاربر</a>
+      </div>
       {% comment %} {% elif access != 'ADMIN' and not confirmed %}
       <div class="row mb-3">
         <input type="button" style="width: 50%" class="btn btn-primary mx-auto" value="تبدیل به فرم چارگون" onClick="makeInvoice();" />
       </div> {% endcomment %}
       {% endif %}
       <div class="row mb-3">
-        <a href="{% url 'mftuser-access' mftuser.id %}" style="width: 50%" class="btn btn-warning mx-auto">مشاهده دسترسی های کاربر</a>
+        <a href="{% url 'mftuser-access' mftuser.id %}" style="width: 50%" class="btn btn-warning mx-auto">مشاهده همه دسترسی ها</a>
       </div>
       <div class="row mb-6">
         <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="goBack();" />
@@ -287,6 +335,10 @@
     org.value = parseInt(orgParent.getAttribute("org-id"));
 
     //$("#right-business option[value=88]").attr("style", "font-style: italic; font-size: 1.5rem; color: orangered;");
+    var max_sessions = "{{ mftuser.max_sessions }}";
+    if (max_sessions == "-1") {
+      $("#id_unlimited_sessions").prop("checked", true);
+    }
 
     $("option").each(function () {
       $(this).attr("is_selected", "false");

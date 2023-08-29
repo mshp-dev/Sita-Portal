@@ -72,8 +72,12 @@ def mftuser_create_view(request, *args, **kwargs):
             # mftuser.home_dir = mftuser.business.code #/f'{}{mftuser.organization.directory_name}'
             mftuser.created_by = isc_user
             mftuser.created_at = timezone.now()
+            max_sessions = ''
+            if form.cleaned_data.get('unlimited_sessions'):
+                mftuser.set_max_sessions_unlimited()
+                max_sessions = ' with unlimited max sessions'
             mftuser.save()
-            logger.info(f'mftuser {mftuser.username} created by {isc_user.user.username}.')
+            logger.info(f'mftuser {mftuser.username} created by {isc_user.user.username}{max_sessions}.')
             bus_error = ''
             no_project_bus = BusinessCode.objects.get(code='NO_PROJECT')
             if str(no_project_bus.id) in form.cleaned_data.get('business'):
@@ -292,6 +296,12 @@ def mftuser_details_view(request, id, *args, **kwargs):
         if form.is_valid():
             # form.save()
             mftuser = form.save(commit=False)
+            max_sessions = ''
+            if form.cleaned_data.get('unlimited_sessions'):
+                mftuser.set_max_sessions_unlimited()
+                max_sessions = ' with unlimited max sessions'
+            else:
+                mftuser.max_sessions = 2
             mftuser_origin = MftUser.objects.get(username=mftuser.username)
             if not MftUserTemp.objects.filter(username=mftuser_origin.username).exists():
                 mftuser_temp = MftUserTemp(
@@ -307,30 +317,32 @@ def mftuser_details_view(request, id, *args, **kwargs):
                     # business=mftuser_origin.business,
                     # home_dir=mftuser_origin.home_dir,
                     ipaddr=mftuser_origin.ipaddr,
+                    max_sessions=mftuser_origin.max_sessions,
                     # disk_quota=mftuser_origin.disk_quota,
                     alias=mftuser_origin.alias,
                     created_by=isc_user
                 )
             else:
                 mftuser_temp = MftUserTemp.objects.get(username=mftuser_origin.username)
-                # mftuser_temp.description=mftuser_origin.description
-                # mftuser_temp.username=mftuser_origin.username,
-                # mftuser_temp.password=mftuser_origin.password,
-                # mftuser_temp.firstname=mftuser_origin.firstname,
-                # mftuser_temp.lastname=mftuser_origin.lastname,
-                mftuser_temp.email=mftuser_origin.email,
-                mftuser_temp.officephone=mftuser_origin.officephone
-                mftuser_temp.mobilephone=mftuser_origin.mobilephone
-                # mftuser_temp.organization=mftuser_origin.organization,
-                # mftuser_temp.business=mftuser_origin.business,
-                # mftuser_temp.home_dir=mftuser_origin.home_dir,
-                mftuser_temp.ipaddr=mftuser_origin.ipaddr
-                # mftuser_temp.created_by=mftuser_origin.created_by,
-                # mftuser_temp.disk_quota=mftuser_origin.disk_quota,
-                mftuser_temp.alias=mftuser_origin.alias
+                # mftuser_temp.description = mftuser_origin.description
+                # mftuser_temp.username = mftuser_origin.username,
+                # mftuser_temp.password = mftuser_origin.password,
+                # mftuser_temp.firstname = mftuser_origin.firstname,
+                # mftuser_temp.lastname = mftuser_origin.lastname,
+                mftuser_temp.email = mftuser_origin.email
+                mftuser_temp.officephone = mftuser_origin.officephone
+                mftuser_temp.mobilephone = mftuser_origin.mobilephone
+                # mftuser_temp.organization = mftuser_origin.organization,
+                # mftuser_temp.business = mftuser_origin.business,
+                # mftuser_temp.home_dir = mftuser_origin.home_dir,
+                mftuser_temp.ipaddr = mftuser_origin.ipaddr
+                mftuser_temp.max_sessions = mftuser_origin.max_sessions
+                # mftuser_temp.created_by = mftuser_origin.created_by,
+                # mftuser_temp.disk_quota = mftuser_origin.disk_quota,
+                mftuser_temp.alias = mftuser_origin.alias
                 mftuser_temp.business.clear()
             mftuser_temp.save()
-            logger.info(f'mftuser {mftuser_origin.username} edited by {isc_user.user.username}.')
+            logger.info(f'mftuser {mftuser_origin.username} edited by {isc_user.user.username}{max_sessions}.')
             no_project_bus = BusinessCode.objects.get(code='NO_PROJECT')
             if str(no_project_bus.id) in form.cleaned_data.get('business'):
                 mftuser_temp.business.clear()
@@ -344,6 +356,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
                 mftuser_origin.mobilephone = mftuser.mobilephone
                 mftuser_origin.alias = mftuser.alias
                 mftuser_origin.ipaddr = mftuser.ipaddr
+                mftuser_origin.max_sessions = mftuser.max_sessions
                 # mftuser_origin.disk_quota=mftuser.disk_quota
                 mftuser_origin.modified_at = timezone.now()
                 mftuser_origin.save()
@@ -363,7 +376,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
                     bus = BusinessCode.objects.get(id=int(b))
                     if Directory.objects.filter(relative_path=f'{bus.code}/{mftuser_origin.organization.directory_name}').exists():
                         mftuser_origin.business.add(bus)
-                        logger.info(f'{isc_user.user.username} added business {bus} for mftuser {mftuser_origin.username}.')
+                        logger.info(f'{isc_user.user.username} added business {bus.code} for mftuser {mftuser_origin.username}.')
                         # create_default_permission(
                         #     isc_user=isc_user,
                         #     mftuser=mftuser_origin,
@@ -378,6 +391,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
                         mftuser_origin.mobilephone = mftuser.mobilephone
                         mftuser_origin.alias = mftuser.alias
                         mftuser_origin.ipaddr = mftuser.ipaddr
+                        mftuser_origin.max_sessions = mftuser.max_sessions
                         # mftuser_origin.disk_quota=mftuser.disk_quota
                         mftuser_origin.modified_at = timezone.now()
                         mftuser_origin.save()
@@ -391,6 +405,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
                         mftuser_origin.mobilephone = mftuser_temp.mobilephone
                         mftuser_origin.alias = mftuser_temp.alias
                         mftuser_origin.ipaddr = mftuser_temp.ipaddr
+                        mftuser_origin.max_sessions = mftuser_temp.max_sessions
                         # mftuser_origin.disk_quota=mftuser_temp.disk_quota
                         mftuser_origin.modified_at = mftuser_temp.modified_at
                         mftuser_origin.save()

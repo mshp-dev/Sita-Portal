@@ -58,7 +58,7 @@ class MftUserAdmin(admin.ModelAdmin):
 
 
 class MftUserTempAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'mobilephone', 'organization', 'get_used_business', 'get_owned_business', 'created_by', 'is_confirmed']
+    list_display = ['username', 'email', 'mobilephone', 'organization', 'get_owned_business', 'created_by', 'is_confirmed']
     list_filter = ['organization', 'business']
     search_fields = ['username', 'firstname', 'lastname']
     ordering = ['username']

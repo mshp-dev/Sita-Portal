@@ -151,6 +151,7 @@ class MftUser(models.Model):
     description      = models.TextField(max_length=1000, blank=True)
     # home_dir         = models.CharField(max_length=500, blank=True)
     ipaddr           = models.CharField(max_length=15, blank=True)
+    max_sessions     = models.IntegerField(blank=True, default=2)
     # disk_quota       = models.IntegerField(blank=False, default=100)
     created_by       = models.ForeignKey(IscUser, blank=False, default=User.objects.get(id=1).id, on_delete=models.CASCADE)
     created_at       = models.DateTimeField(default=timezone.now)
@@ -175,6 +176,9 @@ class MftUser(models.Model):
                 if Permission.objects.filter(user=self.id, directory=bus_dir.id).exists():
                     buss += f'{bus_dir.business.code},'
             return buss[:-1]
+    
+    def set_max_sessions_unlimited(self):
+        self.max_sessions = -1
 
     def __str__(self):
         return f'{self.username} ({self.organization})'
@@ -195,6 +199,7 @@ class MftUserTemp(models.Model):
     description      = models.TextField(max_length=1000, blank=True)
     # home_dir         = models.CharField(max_length=500, blank=True)
     ipaddr           = models.CharField(max_length=15, blank=True)
+    max_sessions     = models.IntegerField(blank=True, default=2)
     # disk_quota       = models.IntegerField(blank=False, default=100)
     created_by       = models.ForeignKey(IscUser, blank=False, default=User.objects.get(id=1).id, on_delete=models.CASCADE)
     created_at       = models.DateTimeField(default=timezone.now)
@@ -207,18 +212,6 @@ class MftUserTemp(models.Model):
         for b in bus_list:
             buss += f'{b.code},'
         return buss[:-1]
-
-    def get_used_business(self, obj=False):
-        bus_list = BusinessCode.objects.all().exclude(code__in=self.business.all().values('code')).values('code')
-        bus_dirs = Directory.objects.filter(parent=0, business__code__in=bus_list)
-        if obj:
-            return Permission.objects.filter(user=self.id, directory__parent=0, directory__business__code__in=bus_list).values('directory__business__description')
-        else:
-            buss = ""
-            for bus_dir in bus_dirs:
-                if Permission.objects.filter(user=self.id, directory=bus_dir.id).exists():
-                    buss += f'{bus_dir.business.code},'
-            return buss[:-1]
 
     def __str__(self):
         return f'{self.username} ({self.organization})'

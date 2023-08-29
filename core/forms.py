@@ -120,19 +120,19 @@ class TransferPermissionsForm(forms.ModelForm):
 
 
 class MftUserForm(forms.ModelForm):
-    username     = forms.CharField(max_length=101, required=True, label='username', error_messages={'required': 'تمام فیلدهای ستاره دار را تکمیل نمائید'}, widget=forms.TextInput(attrs={"placeholder": "به صورت خودکار تکمیل می گردد", "class": "form-control", "readonly": "readonly"}))
-    alias        = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={"placeholder": "برای استفاده به صورت سیستمی", "class": "form-control"}))
-    firstname    = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "First Name", "class": "form-control", "pattern": "[a-zA-Z].+"}))
-    lastname     = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "Last Name", "class": "form-control", "pattern": "[a-zA-Z].+"}))
-    email        = forms.EmailField(max_length=120, required=True, error_messages={'required': 'تمام فیلدهای ستاره دار را تکمیل نمائید'}, widget=forms.EmailInput(attrs={"placeholder": "username@mail.com", "class": "form-control"}))
-    officephone  = forms.DecimalField(max_digits=8, required=True, widget=forms.TextInput(attrs={"placeholder": "123456798", "maxlength": "8", "class": "form-control"}))
-    mobilephone  = forms.DecimalField(max_digits=11, required=True, widget=forms.TextInput(attrs={"placeholder": "09123456798", "maxlength": "11", "class": "form-control"}))
-    organization = forms.ChoiceField(required=True, error_messages={'invalid_choice': 'یک سازمان/بانک را انتخاب نمائید'}, widget=forms.Select(attrs={"class": "form-control form-select form-select-bg-left", "parent": "organization"}))
-    business     = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"size": 10, "parent": "business", "data-search": "true", "data-silent-initial-value-set": "true"}))
-    # business     = forms.MultipleChoiceField(required=True, widget=forms.CheckboxSelectMultiple(attrs={"style": "direction: rtl", "class": "form-control form-check", "parent": "business", "data-search": "true", "data-silent-initial-value-set": "true"}))
-    # ipaddr       = forms.CharField(max_length=15, required=False, widget=forms.TextInput(attrs={"placeholder": "123.123.123.123", "class": "form-control"}))
-    # disk_quota   = forms.IntegerField(max_value=100000000, min_value=100, help_text='کمک کمک کمک', required=True, widget=forms.TextInput(attrs={"placeholder": "حجم مورد نیاز در سیتا", "class": "form-control"}))
-    # description  = forms.CharField(max_length=250, required=True, widget=forms.Textarea(attrs={"name": "description", "rows":"5", "placeholder": "نام گروه کاربر در شرکت خدمات یا نام اداره، قسمت و یا ... کاربر در بانک، سازمان و ...", "class": "form-control"}))
+    username           = forms.CharField(max_length=101, required=True, label='username', error_messages={'required': 'تمام فیلدهای ستاره دار را تکمیل نمائید'}, widget=forms.TextInput(attrs={"placeholder": "به صورت خودکار تکمیل می گردد", "class": "form-control", "readonly": "readonly"}))
+    alias              = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={"placeholder": "برای استفاده به صورت سیستمی", "class": "form-control"}))
+    firstname          = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "First Name", "class": "form-control", "pattern": "[a-zA-Z].+"}))
+    lastname           = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "Last Name", "class": "form-control", "pattern": "[a-zA-Z].+"}))
+    email              = forms.EmailField(max_length=120, required=True, error_messages={'required': 'تمام فیلدهای ستاره دار را تکمیل نمائید'}, widget=forms.EmailInput(attrs={"placeholder": "username@mail.com", "class": "form-control"}))
+    officephone        = forms.DecimalField(max_digits=8, required=True, widget=forms.TextInput(attrs={"placeholder": "123456798", "maxlength": "8", "class": "form-control"}))
+    mobilephone        = forms.DecimalField(max_digits=11, required=True, widget=forms.TextInput(attrs={"placeholder": "09123456798", "maxlength": "11", "class": "form-control"}))
+    organization       = forms.ChoiceField(required=True, error_messages={'invalid_choice': 'یک سازمان/بانک را انتخاب نمائید'}, widget=forms.Select(attrs={"class": "form-control form-select form-select-bg-left", "parent": "organization"}))
+    business           = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"size": 10, "parent": "business", "data-search": "true", "data-silent-initial-value-set": "true"}))
+    unlimited_sessions = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={"class": "form-check", "style": "width: 1.5rem; height: 1.5rem"}))
+    # ipaddr             = forms.CharField(max_length=15, required=False, widget=forms.TextInput(attrs={"placeholder": "123.123.123.123", "class": "form-control"}))
+    # disk_quota         = forms.IntegerField(max_value=100000000, min_value=100, help_text='کمک کمک کمک', required=True, widget=forms.TextInput(attrs={"placeholder": "حجم مورد نیاز در سیتا", "class": "form-control"}))
+    # description        = forms.CharField(max_length=250, required=True, widget=forms.Textarea(attrs={"name": "description", "rows":"5", "placeholder": "نام گروه کاربر در شرکت خدمات یا نام اداره، قسمت و یا ... کاربر در بانک، سازمان و ...", "class": "form-control"}))
     
     class Meta:
         model = MftUser
@@ -146,6 +146,7 @@ class MftUserForm(forms.ModelForm):
             'mobilephone',
             'organization',
             'business',
+            'unlimited_sessions',
         ]
     
     def __init__(self, *args, **kwargs):
