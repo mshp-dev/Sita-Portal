@@ -1383,7 +1383,7 @@ def clean_up(flag='', action=False, *args, **kwargs):
         all_users = kwargs['all_users'] #MftUser.objects.all()
         for mftuser in all_users:
             print(f'mftuser {mftuser.username}:')
-            user_dirs = Permission.objects.filter(~Q(permission=256), user=mftuser, directory__children='', is_confirmed=True).values('directory').distinct()
+            user_dirs = Permission.objects.filter(~Q(permission=256), user=mftuser, directory__children='').values('directory').distinct()
             for dir_ in Directory.objects.filter(pk__in=[ud['directory'] for ud in user_dirs]):
                 current_dir = Directory.objects.get(pk=dir_.parent)
                 dir_index = int(current_dir.index_code.code)
@@ -1406,7 +1406,7 @@ def clean_up(flag='', action=False, *args, **kwargs):
     elif flag == 'perm4':
         print('Cleanup permissions v4.')
         isc_user = IscUser.objects.get(user__username='admin')
-        all_users = MftUser.objects.all()
+        all_users = kwargs['all_users'] #MftUser.objects.all()
         for mftuser in all_users:
             print(f'mftuser {mftuser.username}:')
             dirs_with_no_child = Permission.objects.filter(~Q(permission=256), directory__children='', user=mftuser).values('directory').distinct()

@@ -114,7 +114,7 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                     confirm_directory_tree(dirs_list, survey='BACKWARD')
                     invoice.confirm_or_reject = 'CONFIRMED'
                     invoice.status = 1
-                    invoice.managed_by = isc_user
+                    # invoice.managed_by = isc_user
                     invoice.save()
                     response = {
                         'result': 'success',
@@ -147,7 +147,7 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                     export_user_with_paths_v2(invoice.mftuser, isc_user)
                     invoice.confirm_or_reject = 'CONFIRMED'
                     invoice.status = 1
-                    invoice.managed_by = isc_user
+                    # invoice.managed_by = isc_user
                     invoice.save()
                     response = {
                         'result': 'success',
@@ -179,7 +179,7 @@ def invoice_reject_view(request, iid, *args, **kwargs):
             if isc_user.role.code == 'ADMIN':
                 invoice.confirm_or_reject = 'REJECTED'
                 invoice.status = -1
-                invoice.managed_by = isc_user
+                # invoice.managed_by = isc_user
                 invoice.description = request.POST.get('reason')
                 invoice.save()
                 response = {
@@ -212,7 +212,7 @@ def invoice_update_view(request, iid, *args, **kwargs):
             if isc_user.role.code == 'ADMIN':
                 invoice.confirm_or_reject = 'UNDEFINED'
                 invoice.status = 0
-                invoice.managed_by = isc_user
+                # invoice.managed_by = isc_user
                 invoice.save()
                 response = {
                     'result': 'success',
@@ -375,9 +375,13 @@ def invoices_list_view(request, *args, **kwargs):
                     'pre_invoices': []
                 }
                 if ',' in query:
-                    for inv in query.split(','):
-                        filtered_invs['invoices'].append(int(inv))
-                        filtered_invs['pre_invoices'].append(int(inv))
+                    inv_serials = [str(q) for q in query.split(',')]
+                    for inv in invoices:
+                        if inv.serial_number in inv_serials:
+                            filtered_invs['invoices'].append(int(inv.id))
+                    for inv in pre_invoices:
+                        if inv.serial_number in inv_serials:
+                            filtered_invs['pre_invoices'].append(int(inv.id))
                 else:
                     for inv in invoices:
                         # mftuser = inv.get_mftuser()

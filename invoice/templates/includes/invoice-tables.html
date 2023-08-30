@@ -30,6 +30,19 @@
               <th class="col-4" scope="col" id="alias-label">نام مستعار <span style="font-size: 0.5rem">(2)</span></th>
               <td class="col-4" scope="col" id="alias-value">{{ invoice.mftuser.alias }}</td>
             </tr>
+            {% if invoice.mftuser.is_max_sessions_unlimited %}
+            <tr>
+              <th class="col-4" scope="col" id="alias-label">
+                نوع کاربری 
+                <span style="font-size: 0.5rem">(</span><span style="font-size: 1rem" class="text-danger">*</span><span style="font-size: 0.5rem">)</span>
+              </th>
+              <td class="col-4" scope="col" id="alias-value">
+                <strong class="text-danger"><u>فقط به صورت سیستمی</u></strong>
+                 با تعداد
+                <strong class="text-danger"><u>اتصال نامحدود</u></strong>
+              </td>
+            </tr>
+            {% endif %}
             <tr>
               <th class="col-4" scope="col" id="email-label">ایمیل</th>
               <td class="col-4" scope="col" id="email-value">{{ invoice.mftuser.email }}</td>
@@ -108,6 +121,9 @@
       </div>
     </div>
     <div class="row justify-content-center"><div class="col mt-2" style="direction: rtl">
+      {% if invoice.mftuser.is_max_sessions_unlimited %}
+      <div class="mb-1" style="font-size: 0.8rem"><span style="font-size: 1rem" class="text-danger">*</span>) توجه داشته باشید که تأیید امنیت در خصوص اتصال این کاربر به صورت سیستمی و با تعداد اتصال های همزمان بیش از 2 مورد اخذ شده باشد .</div>
+      {% endif %}
       <div class="mb-1" style="font-size: 0.6rem">1) شناسه درخواست تولید شده می بایست هنگام ارسال درخواست درمتن نامه ثبت شده در سیستم اتوماسیون اداری (چارگون) درج شود.</div>
       <div class="mb-1" style="font-size: 0.6rem">2) کاربر میتواند علاوه بر نام کاربری خود ( ترکیب حرف ابتدایی نام و نام خانوادگی ) از نام مستعار تعیین شده جهت اتصال به سامانه استفاده نماید.</div>
       <div class="mb-1" style="font-size: 0.6rem">3) سامانه هایی که کاربر در آن فعالیت دارد.</div>

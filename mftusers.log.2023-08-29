@@ -1,0 +1,404 @@
+[2023-08-29 16:19:49] [INFO    ] (base.start) Scheduler started
+[2023-08-29 16:19:49] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:19:49] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 16:19:49] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 42010.483786 seconds)
+[2023-08-29 16:19:49] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:19:49] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 42010.483786 seconds)
+[2023-08-29 16:19:50] [INFO    ] (base.start) Scheduler started
+[2023-08-29 16:19:50] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:19:50] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 16:19:50] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 42009.111447 seconds)
+[2023-08-29 16:19:50] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:19:50] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 42009.111447 seconds)
+[2023-08-29 16:19:51] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 16:24:07] [INFO    ] (general_views.login_view) admin has logged in successfully.
+[2023-08-29 16:39:43] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\models.py changed, reloading.
+[2023-08-29 16:39:45] [INFO    ] (base.start) Scheduler started
+[2023-08-29 16:39:45] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:39:45] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 16:39:45] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 16:39:45] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:39:45] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 40814.930745 seconds)
+[2023-08-29 16:39:45] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 16:42:12] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\models.py changed, reloading.
+[2023-08-29 16:42:13] [INFO    ] (base.start) Scheduler started
+[2023-08-29 16:42:13] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:42:13] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 16:42:13] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 16:42:13] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:42:13] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 40666.497497 seconds)
+[2023-08-29 16:42:13] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 16:49:49] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\forms.py changed, reloading.
+[2023-08-29 16:49:50] [INFO    ] (base.start) Scheduler started
+[2023-08-29 16:49:50] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:49:50] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 16:49:50] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 16:49:50] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:49:50] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 40209.289892 seconds)
+[2023-08-29 16:49:51] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 16:50:05] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\forms.py changed, reloading.
+[2023-08-29 16:50:06] [INFO    ] (base.start) Scheduler started
+[2023-08-29 16:50:06] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:50:06] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 16:50:06] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 16:50:06] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:50:06] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 40193.563964 seconds)
+[2023-08-29 16:50:06] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 16:52:46] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\forms.py changed, reloading.
+[2023-08-29 16:52:47] [INFO    ] (base.start) Scheduler started
+[2023-08-29 16:52:47] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:52:47] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 16:52:47] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 16:52:47] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:52:47] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 40032.368854 seconds)
+[2023-08-29 16:52:47] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 16:54:02] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\forms.py changed, reloading.
+[2023-08-29 16:54:04] [INFO    ] (base.start) Scheduler started
+[2023-08-29 16:54:04] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:54:04] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 16:54:04] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 39955.905809 seconds)
+[2023-08-29 16:54:04] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:54:04] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 39955.904813 seconds)
+[2023-08-29 16:54:04] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 16:56:27] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\forms.py changed, reloading.
+[2023-08-29 16:56:28] [INFO    ] (base.start) Scheduler started
+[2023-08-29 16:56:28] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:56:28] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 16:56:28] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 39811.287794 seconds)
+[2023-08-29 16:56:28] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:56:28] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 39811.287794 seconds)
+[2023-08-29 16:56:29] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 16:56:50] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\forms.py changed, reloading.
+[2023-08-29 16:56:52] [INFO    ] (base.start) Scheduler started
+[2023-08-29 16:56:52] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:56:52] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 16:56:52] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 16:56:52] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:56:52] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 39787.973782 seconds)
+[2023-08-29 16:56:52] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 16:57:20] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\forms.py changed, reloading.
+[2023-08-29 16:57:21] [INFO    ] (base.start) Scheduler started
+[2023-08-29 16:57:21] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:57:21] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 16:57:21] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 39758.693896 seconds)
+[2023-08-29 16:57:21] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 16:57:21] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 39758.692900 seconds)
+[2023-08-29 16:57:21] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 16:58:21] [ERROR   ] (log.log_response) Internal Server Error: /mftusers/create-or-change/
+Traceback (most recent call last):
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\db\backends\utils.py", line 84, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column core_mftuser.max_sessions does not exist
+LINE 1: ..._mftuser"."description", "core_mftuser"."ipaddr", "core_mftu...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\contrib\auth\decorators.py", line 21, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "D:\SITA2\mftusers-deployed\core\views\mftuser_views.py", line 257, in mftusers_list_view
+    return render(request, "core/mftusers-list.html", context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\base.py", line 170, in render
+    return self._render(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\base.py", line 162, in _render
+    return self.nodelist.render(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\base.py", line 938, in render
+    bit = node.render_annotated(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\base.py", line 905, in render_annotated
+    return self.render(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\loader_tags.py", line 150, in render
+    return compiled_parent._render(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\base.py", line 162, in _render
+    return self.nodelist.render(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\base.py", line 938, in render
+    bit = node.render_annotated(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\base.py", line 905, in render_annotated
+    return self.render(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\loader_tags.py", line 62, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\base.py", line 938, in render
+    bit = node.render_annotated(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\base.py", line 905, in render_annotated
+    return self.render(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\loader_tags.py", line 195, in render
+    return template.render(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\base.py", line 162, in _render
+    return self.nodelist.render(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\base.py", line 938, in render
+    bit = node.render_annotated(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\base.py", line 905, in render_annotated
+    return self.render(context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\template\defaulttags.py", line 314, in render
+    if match:
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\db\models\query.py", line 284, in __bool__
+    self._fetch_all()
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\db\models\query.py", line 1324, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\db\models\query.py", line 51, in __iter__
+    results = compiler.execute_sql(chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\db\models\sql\compiler.py", line 1175, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\db\backends\utils.py", line 98, in execute
+    return super().execute(sql, params)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\db\backends\utils.py", line 66, in execute
+    return self._execute_with_wrappers(sql, params, many=False, executor=self._execute)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\db\backends\utils.py", line 75, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\db\backends\utils.py", line 84, in _execute
+    return self.cursor.execute(sql, params)
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\db\utils.py", line 90, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\M_Shokripasha\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django\db\backends\utils.py", line 84, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column core_mftuser.max_sessions does not exist
+LINE 1: ..._mftuser"."description", "core_mftuser"."ipaddr", "core_mftu...
+                                                             ^
+
+[2023-08-29 17:00:28] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:00:28] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:00:28] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 17:00:28] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:00:28] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:00:28] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 39571.349128 seconds)
+[2023-08-29 17:00:35] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:00:35] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:00:35] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 17:00:35] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:00:35] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:00:35] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 39564.066704 seconds)
+[2023-08-29 17:00:43] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:00:43] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:00:43] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:00:43] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 39556.808315 seconds)
+[2023-08-29 17:00:43] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:00:43] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 39556.807290 seconds)
+[2023-08-29 17:00:44] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:00:44] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:00:44] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 17:00:44] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:00:44] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:00:44] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 39555.486842 seconds)
+[2023-08-29 17:00:44] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:11:13] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\forms.py changed, reloading.
+[2023-08-29 17:11:14] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:11:14] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:11:14] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:11:14] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 38925.179953 seconds)
+[2023-08-29 17:11:14] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:11:14] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 38925.178956 seconds)
+[2023-08-29 17:11:15] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:13:04] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\forms.py changed, reloading.
+[2023-08-29 17:13:06] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:13:06] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:13:06] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:13:06] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 38813.686897 seconds)
+[2023-08-29 17:13:06] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:13:06] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 38813.685911 seconds)
+[2023-08-29 17:13:06] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:14:58] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\forms.py changed, reloading.
+[2023-08-29 17:15:00] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:15:00] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:15:00] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:15:00] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 38699.866406 seconds)
+[2023-08-29 17:15:00] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:15:00] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 38699.865409 seconds)
+[2023-08-29 17:15:00] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:17:34] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\forms.py changed, reloading.
+[2023-08-29 17:17:35] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:17:35] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:17:35] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 17:17:35] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:17:35] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:17:35] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 38544.740726 seconds)
+[2023-08-29 17:17:35] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:18:39] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\forms.py changed, reloading.
+[2023-08-29 17:18:41] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:18:41] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:18:41] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:18:41] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 38478.638095 seconds)
+[2023-08-29 17:18:41] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:18:41] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 38478.638095 seconds)
+[2023-08-29 17:18:41] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:29:02] [INFO    ] (general_views.logout_view) admin has logged out successfully.
+[2023-08-29 17:29:17] [INFO    ] (general_views.login_view) admin has logged in successfully.
+[2023-08-29 17:32:48] [INFO    ] (mftuser_views.mftuser_create_view) mftuser f.dfsghjkhhgfdsa created by admin.
+[2023-08-29 17:35:11] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\views\mftuser_views.py changed, reloading.
+[2023-08-29 17:35:12] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:35:12] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:35:12] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 17:35:12] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:35:12] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:35:12] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 37487.275949 seconds)
+[2023-08-29 17:35:13] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:37:12] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\views\mftuser_views.py changed, reloading.
+[2023-08-29 17:37:13] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:37:13] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:37:13] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:37:13] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 37366.310744 seconds)
+[2023-08-29 17:37:13] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:37:13] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 37366.310744 seconds)
+[2023-08-29 17:37:14] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:37:22] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\models.py changed, reloading.
+[2023-08-29 17:37:23] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:37:23] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:37:23] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:37:23] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 37356.642094 seconds)
+[2023-08-29 17:37:23] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:37:23] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 37356.642094 seconds)
+[2023-08-29 17:37:23] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:37:35] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\models.py changed, reloading.
+[2023-08-29 17:37:37] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:37:37] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:37:37] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 17:37:37] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:37:37] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:37:37] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 37342.888150 seconds)
+[2023-08-29 17:37:37] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:39:19] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\models.py changed, reloading.
+[2023-08-29 17:39:20] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:39:20] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:39:20] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 17:39:20] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:39:20] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:39:20] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 37239.632138 seconds)
+[2023-08-29 17:39:20] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:42:55] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\views\mftuser_views.py changed, reloading.
+[2023-08-29 17:42:56] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:42:56] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:42:56] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:42:56] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 37023.562448 seconds)
+[2023-08-29 17:42:56] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:42:56] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 37023.561479 seconds)
+[2023-08-29 17:42:56] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:43:21] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\admin.py changed, reloading.
+[2023-08-29 17:43:22] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:43:22] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:43:22] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:43:22] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 36997.452628 seconds)
+[2023-08-29 17:43:22] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:43:22] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 36997.451631 seconds)
+[2023-08-29 17:43:22] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:45:29] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\views\mftuser_views.py changed, reloading.
+[2023-08-29 17:45:30] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:45:30] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:45:30] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:45:30] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 36869.341356 seconds)
+[2023-08-29 17:45:30] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:45:30] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 36869.341356 seconds)
+[2023-08-29 17:45:30] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:47:26] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\views\mftuser_views.py changed, reloading.
+[2023-08-29 17:47:27] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:47:27] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:47:27] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:47:27] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 36752.464855 seconds)
+[2023-08-29 17:47:27] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:47:27] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 36752.464855 seconds)
+[2023-08-29 17:47:27] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:55:40] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\views\mftuser_views.py changed, reloading.
+[2023-08-29 17:55:41] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:55:41] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:55:41] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:55:41] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 36258.122236 seconds)
+[2023-08-29 17:55:41] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:55:41] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 36258.121267 seconds)
+[2023-08-29 17:55:42] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 17:59:45] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\views\mftuser_views.py changed, reloading.
+[2023-08-29 17:59:46] [INFO    ] (base.start) Scheduler started
+[2023-08-29 17:59:46] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:59:46] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 17:59:46] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 17:59:46] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 17:59:46] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 36013.155045 seconds)
+[2023-08-29 17:59:47] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 18:03:07] [INFO    ] (mftuser_views.mftuser_create_view) mftuser t_test created by admin with unlimited max sessions.
+[2023-08-29 18:03:07] [INFO    ] (mftuser_views.mftuser_create_view) access on business NAHAB for t_test has been created.
+[2023-08-29 18:10:48] [WARNING ] (log.log_response) Not Found: /mftuser/327/
+[2023-08-29 18:10:50] [WARNING ] (log.log_response) Not Found: /mftuser/325/
+[2023-08-29 18:11:01] [WARNING ] (log.log_response) Not Found: /mftuser/327/
+[2023-08-29 18:12:28] [INFO    ] (mftuser_views.mftuser_details_view) mftuser t_test edited by admin with unlimited max sessions.
+[2023-08-29 18:13:52] [INFO    ] (mftuser_views.mftuser_details_view) mftuser t_test edited by admin.
+[2023-08-29 18:14:59] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\views\mftuser_views.py changed, reloading.
+[2023-08-29 18:15:01] [INFO    ] (base.start) Scheduler started
+[2023-08-29 18:15:01] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 18:15:01] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 18:15:01] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 35098.878444 seconds)
+[2023-08-29 18:15:01] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 18:15:01] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 35098.878444 seconds)
+[2023-08-29 18:15:01] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 18:15:09] [INFO    ] (mftuser_views.mftuser_details_view) mftuser t_test edited by admin.
+[2023-08-29 18:15:47] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\views\mftuser_views.py changed, reloading.
+[2023-08-29 18:15:48] [INFO    ] (base.start) Scheduler started
+[2023-08-29 18:15:48] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 18:15:48] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 18:15:48] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 18:15:48] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 18:15:48] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 35051.737345 seconds)
+[2023-08-29 18:15:48] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 18:15:55] [INFO    ] (mftuser_views.mftuser_details_view) mftuser t_test edited by admin.
+[2023-08-29 18:17:52] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\views\mftuser_views.py changed, reloading.
+[2023-08-29 18:17:53] [INFO    ] (base.start) Scheduler started
+[2023-08-29 18:17:53] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 18:17:53] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 18:17:53] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 34926.022509 seconds)
+[2023-08-29 18:17:53] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 18:17:53] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 34926.022509 seconds)
+[2023-08-29 18:17:54] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 18:17:59] [INFO    ] (mftuser_views.mftuser_details_view) mftuser t_test edited by admin.
+[2023-08-29 18:17:59] [INFO    ] (mftuser_views.mftuser_details_view) admin added business NAHAB for mftuser t_test.
+[2023-08-29 18:19:08] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\views\mftuser_views.py changed, reloading.
+[2023-08-29 18:19:09] [INFO    ] (base.start) Scheduler started
+[2023-08-29 18:19:09] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 18:19:09] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 18:19:09] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 18:19:09] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 18:19:09] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 34850.280050 seconds)
+[2023-08-29 18:19:10] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 18:19:22] [INFO    ] (mftuser_views.mftuser_details_view) mftuser t_test edited by admin.
+[2023-08-29 18:19:22] [INFO    ] (mftuser_views.mftuser_details_view) admin added business NAHAB for mftuser t_test.
+[2023-08-29 18:20:03] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\views\mftuser_views.py changed, reloading.
+[2023-08-29 18:20:04] [INFO    ] (base.start) Scheduler started
+[2023-08-29 18:20:04] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 18:20:04] [DEBUG   ] (base._process_jobs) No jobs; waiting until a job is added
+[2023-08-29 18:20:04] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 18:20:04] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 18:20:04] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 34795.081910 seconds)
+[2023-08-29 18:20:05] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 18:20:17] [INFO    ] (mftuser_views.mftuser_details_view) mftuser t_test edited by admin.
+[2023-08-29 18:20:17] [INFO    ] (mftuser_views.mftuser_details_view) admin added business NAHAB for mftuser t_test.
+[2023-08-29 18:21:07] [INFO    ] (mftuser_views.mftuser_create_view) mftuser t_test1 created by admin.
+[2023-08-29 18:21:07] [INFO    ] (mftuser_views.mftuser_create_view) access on business NAHAB for t_test1 has been created.
+[2023-08-29 18:21:47] [INFO    ] (mftuser_views.mftuser_details_view) mftuser t_test1 edited by admin with unlimited max sessions.
+[2023-08-29 18:21:47] [INFO    ] (mftuser_views.mftuser_details_view) admin added business NAHAB for mftuser t_test1.
+[2023-08-29 18:23:35] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\views\mftuser_views.py changed, reloading.
+[2023-08-29 18:23:36] [INFO    ] (base.start) Scheduler started
+[2023-08-29 18:23:36] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 18:23:36] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 18:23:36] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 34583.027924 seconds)
+[2023-08-29 18:23:36] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 18:23:36] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 34583.027924 seconds)
+[2023-08-29 18:23:37] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 18:23:45] [INFO    ] (autoreload.trigger_reload) D:\SITA2\mftusers-deployed\core\views\mftuser_views.py changed, reloading.
+[2023-08-29 18:23:46] [INFO    ] (base.start) Scheduler started
+[2023-08-29 18:23:46] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 18:23:46] [INFO    ] (base._real_add_job) Added job "DeleteOldInvoicesJob.job" to job store "default"
+[2023-08-29 18:23:46] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 34573.216504 seconds)
+[2023-08-29 18:23:46] [DEBUG   ] (base._process_jobs) Looking for jobs to run
+[2023-08-29 18:23:46] [DEBUG   ] (base._process_jobs) Next wakeup is due at 2023-08-29 23:30:00+00:00 (in 34573.216504 seconds)
+[2023-08-29 18:23:47] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-08-29 18:23:58] [INFO    ] (mftuser_views.mftuser_details_view) mftuser t_test edited by admin.
+[2023-08-29 18:23:58] [INFO    ] (mftuser_views.mftuser_details_view) admin added business NAHAB for mftuser t_test.
+[2023-08-29 18:52:29] [INFO    ] (general_views.logout_view) admin has logged out successfully.

@@ -179,6 +179,12 @@ class MftUser(models.Model):
     
     def set_max_sessions_unlimited(self):
         self.max_sessions = -1
+    
+    def is_max_sessions_unlimited(self):
+        if self.max_sessions == -1:
+            return True
+        else:
+            return False
 
     def __str__(self):
         return f'{self.username} ({self.organization})'
