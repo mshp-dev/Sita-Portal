@@ -299,10 +299,8 @@
         },
         function (response) {
           if (response.result == "success") {
-            //document.getElementById(response.type + "inv-" + response.deleted + "-parent").remove();
-            $("#" + response.type + "inv-" + response.deleted + "-parent")
-              .parent()
-              .appendTo("#tabs-deleted-invoices");
+            $("#" + response.type + "inv-" + response.deleted + "-parent").remove();
+            //$("#" + response.type + "inv-" + response.deleted + "-parent").parent().appendTo("#tabs-deleted-invoices");
           } else if (response.result == "error") {
             alert(response.message);
           }

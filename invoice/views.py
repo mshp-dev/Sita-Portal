@@ -134,15 +134,19 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                     mftuser = MftUser.objects.get(pk=invoice.mftuser.id)
                     mftuser.is_confirmed = True
                     mftuser.modified_at = timezone.now()
+                    if invoice_type.code == 'INVUNLS':
+                        mftuser.set_max_sessions_unlimited()
+                        mftuser.password_expiration_interval = invoice.used_business
+                    else:
+                        perms_list = [int(p) for p in invoice.permissions_list.split(',')[:-1]]
+                        perms_list_exists = []
+                        for p in perms_list:
+                            if Permission.objects.filter(pk=p).exists():
+                                perms_list_exists.append(p)
+                            else:
+                                logger.warn(f'permission with id {p} does not exists.')
+                        Permission.objects.filter(pk__in=perms_list_exists).update(is_confirmed=True)
                     mftuser.save()
-                    perms_list = [int(p) for p in invoice.permissions_list.split(',')[:-1]]
-                    perms_list_exists = []
-                    for p in perms_list:
-                        if Permission.objects.filter(pk=p).exists():
-                            perms_list_exists.append(p)
-                        else:
-                            logger.warn(f'permission with id {p} does not exists.')
-                    Permission.objects.filter(pk__in=perms_list_exists).update(is_confirmed=True)
                     # export_user_with_paths(invoice.mftuser, isc_user)
                     export_user_with_paths_v2(invoice.mftuser, isc_user)
                     invoice.confirm_or_reject = 'CONFIRMED'

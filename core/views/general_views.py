@@ -287,7 +287,7 @@ def profile_view(request, *args, **kwargs):
     }
     profile_form = UserProfileForm(request=request, initial=isc_user_dict)
     business_form = BusinessSelectionForm()
-    organization_form = OrganizationSelectionForm()
+    organization_form = OrganizationSelectionForm(request=request)
     if isc_user.role.code == 'OPERATION':
         user_businesses = OperationBusiness.objects.filter(user=isc_user) # , owned_by_user=True .values('access_on_bus').distinct()
         o_buss = [bus for bus in user_businesses.filter(owned_by_user=True)]
@@ -360,7 +360,7 @@ def profile_view(request, *args, **kwargs):
                 business_form.fields['owned_business'].choices = [(bus.id, bus) for bus in BusinessCode.objects.exclude(code__in=used_by_user).order_by('description')]
                 business_form.fields['used_business'].choices = [(bus.id, bus) for bus in BusinessCode.objects.exclude(code__in=owned_by_user).order_by('description')]
         elif request.POST.get("form-type") == "organization-form": # update iscuser list of organizations
-            organization_form = OrganizationSelectionForm(request.POST)
+            organization_form = OrganizationSelectionForm(request.POST, request=request)
             organization_form.fields['organizations'].choices = [(org.id, org) for org in BankIdentifierCode.objects.all().order_by('description')]
             if organization_form.is_valid():
                 CustomerBank.objects.filter(user=isc_user).delete()

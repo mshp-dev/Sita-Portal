@@ -25,6 +25,7 @@
         var parentId = document.getElementById("parent-id");
         var currentDirId = document.getElementById("current-dir-id");
         var currentDirName = document.getElementById("current-dir-name");
+        var currentDirPath = document.getElementById("current-dir-path");
         var indexCode = document.getElementById("index-code");
         var subDirPermCheck = document.getElementById("subDirPermCheck");
 
@@ -41,6 +42,7 @@
         absolutePath1.innerHTML = path + '/{<span class="text-danger">NEW</span>}';
         absolutePath2.innerHTML = path;
         absolutePath3.innerHTML = path;
+        currentDirPath.innerHTML = path;
         var paths = path.split("/");
         renameInput.value = paths[paths.length - 1];
 
@@ -267,7 +269,8 @@
                 /><span class="input-group-text" id="basic-addon"><span id="search-icon" class="fas fa-search"></span></span>
               </div>
             </div>
-            <p><span class="h5 text-danger" style="font-weight: 400" id="current-dir-name"></span> : دایرکتوری انتخاب شده</p>
+            <p style="display: none"><span class="h5 text-danger" style="font-weight: 400" id="current-dir-name"></span> : دایرکتوری انتخاب شده</p>
+            <p><span class="h5 text-danger" style="font-weight: 400" id="current-dir-path"></span> : دایرکتوری انتخاب شده</p>
             <div style="display: none">
               <p id="current-dir-id"></p>
               <p id="parent-id"></p>

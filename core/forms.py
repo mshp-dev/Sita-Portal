@@ -6,6 +6,12 @@ from django.core.exceptions import ValidationError
 from .models import *
 
 
+PASSWORD_EXPIRATION_INTERVAL_CHOICES = (
+    (1, "مدت زمان پیش فرض سیستم"),
+    (6, "6/شش ماه"),
+)
+
+
 class AddBusinessForm(forms.ModelForm):
     code            = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "کد سامانه/پروژه", "class": "form-control"}))
     description     = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "نام کامل (فارسی)", "class": "form-control"}))
@@ -120,19 +126,21 @@ class TransferPermissionsForm(forms.ModelForm):
 
 
 class MftUserForm(forms.ModelForm):
-    username           = forms.CharField(max_length=101, required=True, label='username', error_messages={'required': 'تمام فیلدهای ستاره دار را تکمیل نمائید'}, widget=forms.TextInput(attrs={"placeholder": "به صورت خودکار تکمیل می گردد", "class": "form-control", "readonly": "readonly"}))
-    alias              = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={"placeholder": "برای استفاده به صورت سیستمی", "class": "form-control"}))
-    firstname          = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "First Name", "class": "form-control", "pattern": "[a-zA-Z].+"}))
-    lastname           = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "Last Name", "class": "form-control", "pattern": "[a-zA-Z].+"}))
-    email              = forms.EmailField(max_length=120, required=True, error_messages={'required': 'تمام فیلدهای ستاره دار را تکمیل نمائید'}, widget=forms.EmailInput(attrs={"placeholder": "username@mail.com", "class": "form-control"}))
-    officephone        = forms.DecimalField(max_digits=8, required=True, widget=forms.TextInput(attrs={"placeholder": "123456798", "maxlength": "8", "class": "form-control"}))
-    mobilephone        = forms.DecimalField(max_digits=11, required=True, widget=forms.TextInput(attrs={"placeholder": "09123456798", "maxlength": "11", "class": "form-control"}))
-    organization       = forms.ChoiceField(required=True, error_messages={'invalid_choice': 'یک سازمان/بانک را انتخاب نمائید'}, widget=forms.Select(attrs={"class": "form-control form-select form-select-bg-left", "parent": "organization"}))
-    business           = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"size": 10, "parent": "business", "data-search": "true", "data-silent-initial-value-set": "true"}))
-    unlimited_sessions = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={"class": "form-check", "style": "width: 1.5rem; height: 1.5rem"}))
-    # ipaddr             = forms.CharField(max_length=15, required=False, widget=forms.TextInput(attrs={"placeholder": "123.123.123.123", "class": "form-control"}))
-    # disk_quota         = forms.IntegerField(max_value=100000000, min_value=100, help_text='کمک کمک کمک', required=True, widget=forms.TextInput(attrs={"placeholder": "حجم مورد نیاز در سیتا", "class": "form-control"}))
-    # description        = forms.CharField(max_length=250, required=True, widget=forms.Textarea(attrs={"name": "description", "rows":"5", "placeholder": "نام گروه کاربر در شرکت خدمات یا نام اداره، قسمت و یا ... کاربر در بانک، سازمان و ...", "class": "form-control"}))
+    username                     = forms.CharField(max_length=101, required=True, label='username', error_messages={'required': 'تمام فیلدهای ستاره دار را تکمیل نمائید'}, widget=forms.TextInput(attrs={"placeholder": "به صورت خودکار تکمیل می گردد", "class": "form-control", "readonly": "readonly"}))
+    alias                        = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={"placeholder": "برای استفاده به صورت سیستمی", "class": "form-control"}))
+    firstname                    = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "First Name", "class": "form-control", "pattern": "[a-zA-Z].+"}))
+    lastname                     = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={"placeholder": "Last Name", "class": "form-control", "pattern": "[a-zA-Z].+"}))
+    email                        = forms.EmailField(max_length=120, required=True, error_messages={'required': 'تمام فیلدهای ستاره دار را تکمیل نمائید'}, widget=forms.EmailInput(attrs={"placeholder": "username@mail.com", "class": "form-control"}))
+    officephone                  = forms.DecimalField(max_digits=8, required=True, widget=forms.TextInput(attrs={"placeholder": "123456798", "maxlength": "8", "class": "form-control"}))
+    mobilephone                  = forms.DecimalField(max_digits=11, required=True, widget=forms.TextInput(attrs={"placeholder": "09123456798", "maxlength": "11", "class": "form-control"}))
+    organization                 = forms.ChoiceField(required=True, error_messages={'invalid_choice': 'یک سازمان/بانک را انتخاب نمائید'}, widget=forms.Select(attrs={"class": "form-control form-select form-select-bg-left", "parent": "organization"}))
+    business                     = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"size": 10, "parent": "business", "data-search": "true", "data-silent-initial-value-set": "true"}))
+    unlimited_sessions           = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={"class": "form-check", "style": "width: 1.5rem; height: 1.5rem"}))
+    security_license             = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={"placeholder": "I/1234/1400/678 :شماره نامه چارگونی مانند", "class": "form-control", "pattern": "I/[0-9].+/[0-9].+/[0-9].+"}))
+    password_expiration_interval = forms.ChoiceField(required=False, choices=PASSWORD_EXPIRATION_INTERVAL_CHOICES, widget=forms.Select(attrs={"class": "form-control form-select form-select-bg-left", "parent": "password-expiration"}))
+    # ipaddr                       = forms.CharField(max_length=15, required=False, widget=forms.TextInput(attrs={"placeholder": "123.123.123.123", "class": "form-control"}))
+    # disk_quota                   = forms.IntegerField(max_value=100000000, min_value=100, help_text='کمک کمک کمک', required=True, widget=forms.TextInput(attrs={"placeholder": "حجم مورد نیاز در سیتا", "class": "form-control"}))
+    # description                  = forms.CharField(max_length=250, required=True, widget=forms.Textarea(attrs={"name": "description", "rows":"5", "placeholder": "نام گروه کاربر در شرکت خدمات یا نام اداره، قسمت و یا ... کاربر در بانک، سازمان و ...", "class": "form-control"}))
     
     class Meta:
         model = MftUser
@@ -147,6 +155,8 @@ class MftUserForm(forms.ModelForm):
             'organization',
             'business',
             'unlimited_sessions',
+            'security_license',
+            'password_expiration_interval',
         ]
     
     def __init__(self, *args, **kwargs):
@@ -227,6 +237,24 @@ class MftUserForm(forms.ModelForm):
         if len(phone_number) < 8 or len(phone_number) > 8:
             raise ValidationError('شماره همراه وارد شده صحیح نیست.')
         return phone_number
+    
+    def clean_security_license(self):
+        sec_lic = ''
+        if self.cleaned_data.get('unlimited_sessions'):
+            sec_lic = str(self.cleaned_data.get('security_license'))
+            if sec_lic == '':
+                raise ValidationError('شماره نامه چارگونی را وارد نمایید.')
+            if len(sec_lic.split('/')) <= 2:
+                raise ValidationError('شماره نامه چارگونی را به طور صحیح وارد نمایید.')
+        return sec_lic
+    
+    def clean_password_expiration_interval(self):
+        pei = int(self.cleaned_data.get('password_expiration_interval'))
+        if pei == 6:
+            pei *= 30
+        else:
+            pei = -1
+        return pei
     
     # def clean_ipaddr(self):
     #     ip = str(self.cleaned_data.get('ipaddr'))
@@ -427,9 +455,18 @@ class OrganizationSelectionForm(forms.Form):
             'organizations'
         )
     
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(OrganizationSelectionForm, self).__init__(*args, **kwargs)
+    
     def clean_organizations(self):
         organizations = self.cleaned_data.get('organizations')
+        print(organizations)
+        isc = BankIdentifierCode.objects.get(code='ISC')
+        print(isc.id)
         if not organizations or organizations == []:
             raise ValidationError('باید حداقل یک سازمان/بانک انتخاب کنید.')
-        # organization = BankIdentifierCode.objects.get(id=self.cleaned_data.get('organization'))
+        if IscUser.objects.get(user=self.request.user).role.code != 'ADMIN':
+            if str(isc.id) in organizations:
+                raise ValidationError("شما مجاز به انتخاب 'شرکت خدمات انفورماتیک' نیستید.")
         return organizations

@@ -61,6 +61,23 @@
                   >پروژه/سامانه(ها)ی تحت اختیار:
                   <span class="display-6 text-info"><strong>{{ invoice.mftuser.business.all|get_businesses }}</strong></span></span
                 >
+                {% elif invoice.invoice_type.code == 'INVUNLS' %}
+                <span>
+                  مدت زمان منقضی شدن کلمه عبور:
+                  <strong id="exp-content-{{ invoice.id }}"></strong>
+                  <script type="text/javascript">
+                    $(function () {
+                      var exp = "{{ invoice.used_business }}";
+                      var id = "{{ invoice.id }}";
+                      console.log(exp);
+                      if (exp == "-1") {
+                        $("#exp-content-" + id).html("پیش فرض سیستم (60/شصت روز)");
+                      } else {
+                        $("#exp-content-" + id).html(exp + " روز" + " (6/شش ماه)");
+                      }
+                    });
+                  </script>
+                </span>
                 {% endif %}
                 <span
                   >شماره تلفن همراه: <span class="display-6 text-info"><strong> {{ invoice.mftuser.mobilephone }}</strong></span></span
@@ -68,13 +85,18 @@
                 <span
                   >شماره تلفن محل کار: <span class="display-6 text-info"><strong> {{ invoice.mftuser.officephone }}</strong></span></span
                 >
+                {% if invoice.invoice_type.code != 'INVUNLS' %}
                 <p id="permission-list-{{ invoice.id }}" class="h5 mt-4" style="direction: rtl"></p>
-                {% comment %} {% for access in invoice.get_list_of_permissions %}
+                {% else %}
+                <span
+                  >شماره فرم چارگونی اخد تأیید امنیت: <span class="display-6 text-info"><strong> {{ invoice.permissions_list }}</strong></span></span
+                >
+                {% endif%} {% comment %} {% for access in invoice.get_list_of_permissions %}
                 <span class="display-6 text-tertiary mb-2">({{ access.perms }}) بر روی {{ access.dir }}</span>
                 {% endfor %} {% endcomment %}
               </div>
-              {% if pre_invoice.confirm_or_reject != 'CONFIRMED' %}
-              <div class="col-6">
+              {% if invoice.confirm_or_reject != 'CONFIRMED' %}
+              <div class="col">
                 <input
                   type="button"
                   role="invoice-delete-btn"
@@ -86,12 +108,13 @@
                 />
                 {% comment %}<a href="{% url 'invoice-delete' invoice.id %}" class="btn btn-danger animate-up-1"></a>{% endcomment %}
               </div>
-              {% endif %}
-              <div class="col-6">
+              {% endif %} {% if invoice.invoice_type.code != 'INVUNLS' %}
+              <div class="col">
                 <a href="{% url 'invoice-details' invoice.id %}" style="width: 100%" class="btn btn-warning animate-up-1"
                   >مشاهده سطح دسترسی درخواست شده</a
                 >
               </div>
+              {% endif %}
             </div>
           </div>
         </div>

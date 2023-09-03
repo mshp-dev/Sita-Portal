@@ -266,6 +266,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
     mftuser = get_object_or_404(MftUser, pk=id)
     bic = BankIdentifierCode.objects.get(code=mftuser.organization.code)
     # bus = BusinessCode.objects.filter(code=mftuser.business.all())
+    max_sessions = inv_sn = ''
     msg = None
     
     #  if mftuser.organization.code == '_ISC' else get_specific_root_dir(mftuser.organization.code)
@@ -296,12 +297,21 @@ def mftuser_details_view(request, id, *args, **kwargs):
         if form.is_valid():
             # form.save()
             mftuser = form.save(commit=False)
-            max_sessions = ''
             if form.cleaned_data.get('unlimited_sessions'):
-                mftuser.set_max_sessions_unlimited()
+                security_license = form.cleaned_data.get('security_license')
+                password_expiration_interval = form.cleaned_data.get('password_expiration_interval')
+                inv_sn = make_invoice_for_unlimited_sessions(
+                    iscuser=isc_user,
+                    mftuser=MftUser.objects.get(username=mftuser.username),
+                    sec_lic=security_license,
+                    pass_exp=password_expiration_interval
+                )
                 max_sessions = ' with unlimited max sessions'
-            else:
-                mftuser.max_sessions = 2
+                epx_msg = ' and default (2/two months) expiration interval'
+                if password_expiration_interval != -1:
+                    epx_msg = ' and 6/six months expiration interval'
+                max_sessions += epx_msg
+            mftuser.max_sessions = 2
             mftuser_origin = MftUser.objects.get(username=mftuser.username)
             if not MftUserTemp.objects.filter(username=mftuser_origin.username).exists():
                 mftuser_temp = MftUserTemp(
@@ -413,8 +423,10 @@ def mftuser_details_view(request, id, *args, **kwargs):
                         msg = '<strong>امکان تغییر پروژه/سامانه کاربر نمی باشد</strong>'
         else:
             msg = form.errors
-    # else:
-    #     if MftUserTemp.objects.filter(username=mftuser.username).exists():
+
+    if inv_sn != '':
+        msg += f'<br /><strong>یک درخواست با شناسه <span class="text-success">{inv_sn}</span> برای این کاربر ایجاد شد،<br /> \
+            برای تأیید و اعمال این تغییر در سامانه سیتا با مدیر سیستم تماس بگیرید.</strong>'
 
     confirmed = False
     if mftuser.is_confirmed:

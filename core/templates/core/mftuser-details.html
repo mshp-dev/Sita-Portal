@@ -12,7 +12,7 @@
 <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
 {% endcomment %}
 <script src="{% static 'assets/js/jquery-3.4.1.min.js' %}"></script>
-{% if access == 'ADMIN' %}
+{% comment %} {% if access == 'ADMIN' %} {% endcomment %}
 <script type="text/javascript">
   $(function () {
     $("input[role='confirm-btn']").click(function () {
@@ -45,7 +45,19 @@
     $("#id_unlimited_sessions").change(function () {
       if (this.checked) {
         $("#confirm-modal").modal("show");
+      } else {
+        $("#security-license").hide();
+        $("#password-expiration").hide();
+        $("#submit-button").removeAttr("disabled");
+        $("#submit-button").html("بروزرسانی مشخصات");
       }
+    });
+
+    $(":button[btn-func='ok']").click(function () {
+      $("#security-license").show();
+      $("#password-expiration").show();
+      $("#submit-button").prop("disabled", "disabled");
+      $("#submit-button").html("بروزرسانی و ارسال درخواست تغییر برای این کاربر");
     });
 
     $(":button[btn-func='close']").click(function () {
@@ -53,7 +65,7 @@
     });
   });
 </script>
-{% endif %} {% endblock javascripts %} {% block content %}
+{% comment %} {% endif %} {% endcomment %} {% endblock javascripts %} {% block content %}
 
 <!-- prettier-ignore -->
 <main>
@@ -184,7 +196,7 @@
                     </div>
                     <div class="form-group mb-4" style="direction: rtl">
                       <label for="business">سامانه/پروژه های تحت اختیار</label>
-                      <p class="text-danger" style="font-size: 0.7rem">* با نگهداشتن کلید CTRL می توانید چند سامانه را انتخاب نمایید</p>
+                      {% comment %} <p class="text-danger" style="font-size: 0.7rem">* با نگهداشتن کلید CTRL می توانید چند سامانه را انتخاب نمایید</p> {% endcomment %}
                       <div class="input-group mb-2">
                         <input
                           type="text"
@@ -224,7 +236,7 @@
                         </ul>
                       </div>
                     </div>
-                    <div class="form-group mb-4" style="direction: rtl">
+                    <div class="form-group mb-6" style="direction: rtl">
                       <label for="organization">سازمان/بانک</label>
                       <div class="input-group" style="direction: ltr">
                         {{ form.organization }}
@@ -248,9 +260,24 @@
                         </span>
                       </div>
                     </div>
+                    <div id="security-license" class="form-group mb-4" style="direction: rtl; display: none">
+                      <label for="security-license">شماره نامه چارگونی (فرم 308) اخذ تأیید امنیت</label>
+                      <div class="input-group" style="direction: ltr">
+                        <span class="input-group-text" id="form-number"><span class="fas fa-envelope-open"></span></span>
+                        {{ form.security_license }}
+                      </div>
+                    </div>
+                    <div id="password-expiration" class="form-group mb-4" style="direction: rtl; display: none">
+                      <label for="password-expiration">مدت زمان منقضی شدن کلمه عبور</label>
+                      <div class="input-group" style="direction: ltr">
+                        {{ form.password_expiration_interval }}
+                        <span class="input-group-text" id="form-number"><span class="fas fa-unlock-alt"></span></span>
+                      </div>
+                    </div>
                     <br />
                     <div class="d-grid px-5 py-2">
                       <button
+                        id="submit-button"
                         type="submit"
                         class="btn btn-tertiary"
                         {% comment %} {% if not mftuser.is_confirmed %}disabled{% endif %} {% endcomment %}
@@ -286,7 +313,8 @@
                   <p style="text-align: justify">
                     لطفاً توجه داشته باشید فقط در صورتیکه قرار است این کاربر به صورت سیستمی مورد استفاده قرار گیرد
                     و به تعداد اتصال های همزمان بیش از 2 مورد نیاز است، این گزینه را انتخاب نمائید؛
-                    لازم به ذکر است که ارسال پیش نویس شماره 307 در چارگون برای این مورد، می بایست به همراه تأیید امنیت باشد.
+                    در صورت نیاز به زمان بیشتر از مدت پیش فرض سیستم (60 روز) برای منقضی شدن کلمه عبور گزینه مدت زمان را تغییر دهید.
+                    لازم به ذکر است که ارسال پیش نویس شماره <strong><u>308</u></strong> در چارگون برای این مورد، می بایست به همراه تأیید امنیت باشد.
                   </p>
                 </div>
                 <div class="modal-footer">
@@ -338,6 +366,13 @@
     var max_sessions = "{{ mftuser.max_sessions }}";
     if (max_sessions == "-1") {
       $("#id_unlimited_sessions").prop("checked", true);
+      $("#security-license").show();
+    }
+
+    var password_expiration_interval = "{{ mftuser.password_expiration_interval }}";
+    if (password_expiration_interval != "-1") {
+      $("#id_unlimited_sessions").prop("checked", true);
+      $("#password-expiration").show();
     }
 
     $("option").each(function () {
@@ -470,6 +505,17 @@
     event.currentTarget.value = ph;
   });
 
+  var sec_lic = document.getElementById("id_security_license");
+  sec_lic.addEventListener("change", function (event) {
+    var sl = cleanInputValue(event.currentTarget.value, "lic");
+    event.currentTarget.value = sl;
+    if (sl == "") {
+      $("#submit-button").prop("disabled", "disabled");
+    } else if (sl != "") {
+      $("#submit-button").removeAttr("disabled");
+    }
+  });
+
   var mobile = document.getElementById("id_mobilephone");
   mobile.addEventListener("change", function (event) {
     var mb = cleanInputValue(event.currentTarget.value, "number");
@@ -498,6 +544,18 @@
       input = input.replace(/\-/g, "");
       input = input.replace(/\@/g, "");
       input = input.replace(/\./g, "");
+    } else if (type == "lic") {
+      input = input.replace(/[a-z]/g, "");
+      input = input.replace(/[A-H]/g, "");
+      input = input.replace(/[J-Z]/g, "");
+      input = input.replace(/\_/g, "");
+      input = input.replace(/\-/g, "");
+      input = input.replace(/\@/g, "");
+      input = input.replace(/\./g, "");
+      input = input.replace(/[\u0600-\u06FF]/g, "");
+    }
+    if (type != "lic") {
+      input = input.replace(/\//g, "");
     }
     input = input.replace(/\#/g, "");
     input = input.replace(/\!/g, "");
@@ -514,7 +572,6 @@
     input = input.replace(/\}/g, "");
     input = input.replace(/\+/g, "");
     input = input.replace(/\=/g, "");
-    input = input.replace(/\//g, "");
     input = input.replace(/\\/g, "");
     input = input.replace(/\|/g, "");
     input = input.replace(/\~/g, "");
@@ -527,6 +584,8 @@
     input = input.replace(/\:/g, "");
     input = input.replace(/\>/g, "");
     input = input.replace(/\</g, "");
+    input = input.replace(/\»/g, "");
+    input = input.replace(/\«/g, "");
     return input;
   }
 </script>
