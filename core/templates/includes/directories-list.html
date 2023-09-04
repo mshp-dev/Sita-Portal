@@ -44,8 +44,16 @@
                   alert("یک دایرکتوری را انتخاب نمائید!");
                   $("#subDirPermCheck").prop("checked", false);
                 } else {
-                  if (this.checked) {
-                    $("#confirm-modal").modal("show");
+                  console.log($("#readPermCheck").prop("checked"));
+                  console.log($("#writePermCheck").prop("checked"));
+                  console.log($("#deleteFilesPermCheck").prop("checked"));
+                  if ($("#readPermCheck").prop("checked") || $("#writePermCheck").prop("checked") || $("#deleteFilesPermCheck").prop("checked")) {
+                    if (this.checked) {
+                      $("#confirm-modal").modal("show");
+                    }
+                  } else {
+                    alert("باید حداقل یک دسترسی غیر از ایجاد پوشه اعمال نمائید.");
+                    $("#subDirPermCheck").prop("checked", false);
                   }
                 }
               });
@@ -106,7 +114,11 @@
               });
             });
           </script>
-          <p><span class="h5 text-danger" style="font-weight: 400" id="current-dir-name"></span> : دایرکتوری انتخاب شده</p>
+          <p style="display: none"><span class="h5 text-danger" style="font-weight: 400" id="current-dir-name"></span> : دایرکتوری انتخاب شده</p>
+          <p>
+            :دایرکتوری انتخاب شده<br />
+            <span class="h5 text-danger" style="font-weight: 400" id="current-dir-path"></span>
+          </p>
           <div class="mb-3">
             <div class="input-group">
               <input

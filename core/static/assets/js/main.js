@@ -31,6 +31,7 @@ function addTreeItemsFunctionality() {
       var parentId = document.getElementById("parent-id");
       var currentDirId = document.getElementById("current-dir-id");
       var currentDirName = document.getElementById("current-dir-name");
+      var currentDirPath = document.getElementById("current-dir-path");
       var indexCode = document.getElementById("index-code");
       var subDirPermCheck = document.getElementById("subDirPermCheck");
 
@@ -54,6 +55,7 @@ function addTreeItemsFunctionality() {
       }
       absolutePath1.innerHTML = path + '/{<span class="text-danger">NEW</span>}';
       absolutePath2.innerHTML = path;
+      currentDirPath.innerHTML = path;
       getPermissions(uid);
 
       event.stopPropagation();

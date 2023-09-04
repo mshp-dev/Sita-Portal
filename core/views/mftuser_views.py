@@ -862,9 +862,9 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                         elif pv == 256: #List
                             Permission.objects.filter(user=mftuser, directory=directory, permission=128).delete()   #Checksum
                         remaining_perms = Permission.objects.filter(user=mftuser, directory=directory)
-                        if remaining_perms.count() <= 2:
+                        if remaining_perms.count() <= 3:
                             remaining_perms_list = [p['permission'] for p in remaining_perms.values('permission').distinct()]
-                            if '128' in remaining_perms_list or '256' in remaining_perms_list: # if just List or Append or both remained
+                            if 0 in remaining_perms_list or 128 in remaining_perms_list or 256 in remaining_perms_list: # if just List or Append or Apply or all ot them remained
                                 remaining_perms.delete()
                     logger.info(f'permission {splited} of directory {directory.absolute_path} for mftuser {mftuser.username} removed by {isc_user.user.username}.')
                 elif action == 'add':
