@@ -249,11 +249,13 @@ class MftUserForm(forms.ModelForm):
         return sec_lic
     
     def clean_password_expiration_interval(self):
-        pei = int(self.cleaned_data.get('password_expiration_interval'))
-        if pei == 6:
-            pei *= 30
-        else:
-            pei = -1
+        pei = -1
+        if 'password_expiration_interval' in self.cleaned_data and self.cleaned_data.get('password_expiration_interval') != '':
+            pei = int(self.cleaned_data.get('password_expiration_interval'))
+            if pei == 6:
+                pei *= 30
+            else:
+                pei = -1
         return pei
     
     # def clean_ipaddr(self):

@@ -1,39 +1,42 @@
 from django.utils import timezone
+from django_cron import CronJobBase, Schedule
 
 from .models import Invoice
 
-from pytz import utc
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
 from datetime import timedelta, datetime as dt
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class DeleteOldInvoicesJob():
-    code = 'invoice.delete_old_invoices_cron'
+class DeleteOldInvoicesJob(CronJobBase):
+    RUN_EVERY_MINS = 1440 # every 24 hours
+    RUN_AT_TIMES = ['23:00'] # on 23:00 every day
 
-    def start(self):
-        scheduler = BackgroundScheduler(timezone=utc)
-        scheduler.start()
-        trigger = CronTrigger(
-            year="*",
-            month="*",
-            day="*",
-            hour="23",
-            minute="30",
-            second="0",
-            timezone=utc
-        )
-        scheduler.add_job(
-            self.job,
-            trigger=trigger,
-            max_instances=1,
-            id=self.code
-        )
+    # schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    schedule = Schedule(run_at_times=RUN_AT_TIMES)
+    code = 'invoice.delete_old_invoice_job'
 
-    def job(self):
+    # def start(self):
+        # scheduler = BackgroundScheduler(timezone=utc)
+        # scheduler.start()
+        # trigger = CronTrigger(
+        #     year="*",
+        #     month="*",
+        #     day="*",
+        #     hour="23",
+        #     minute="30",
+        #     second="0",
+        #     timezone=utc
+        # )
+        # scheduler.add_job(
+        #     self.job,
+        #     trigger=trigger,
+        #     max_instances=1,
+        #     id=self.code
+        # )
+
+    def do(self):
         try:
             thirty_days_ago = timezone.now() - timedelta(days=30)
             logger.info(f'daily job of delete UNDEFINED invoices older than {thirty_days_ago} started.')

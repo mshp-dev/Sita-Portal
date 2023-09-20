@@ -297,6 +297,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
         if form.is_valid():
             # form.save()
             mftuser = form.save(commit=False)
+            unlimited_sessions_is_disabled = False
             if form.cleaned_data.get('unlimited_sessions'):
                 security_license = form.cleaned_data.get('security_license')
                 password_expiration_interval = form.cleaned_data.get('password_expiration_interval')
@@ -311,6 +312,8 @@ def mftuser_details_view(request, id, *args, **kwargs):
                 if password_expiration_interval != -1:
                     epx_msg = ' and 6/six months expiration interval'
                 max_sessions += epx_msg
+            else:
+                unlimited_sessions_is_disabled = True
             mftuser.max_sessions = 2
             mftuser_origin = MftUser.objects.get(username=mftuser.username)
             if not MftUserTemp.objects.filter(username=mftuser_origin.username).exists():
@@ -366,7 +369,9 @@ def mftuser_details_view(request, id, *args, **kwargs):
                 mftuser_origin.mobilephone = mftuser.mobilephone
                 mftuser_origin.alias = mftuser.alias
                 mftuser_origin.ipaddr = mftuser.ipaddr
-                mftuser_origin.max_sessions = mftuser.max_sessions
+                mftuser_origin.max_sessions = mftuser.max_sessions #2 if unlimited_sessions_is_disabled else 
+                # if unlimited_sessions_is_disabled :
+                #     mftuser_origin.password_expiration_interval = -1
                 # mftuser_origin.disk_quota=mftuser.disk_quota
                 mftuser_origin.modified_at = timezone.now()
                 mftuser_origin.save()
@@ -401,7 +406,9 @@ def mftuser_details_view(request, id, *args, **kwargs):
                         mftuser_origin.mobilephone = mftuser.mobilephone
                         mftuser_origin.alias = mftuser.alias
                         mftuser_origin.ipaddr = mftuser.ipaddr
-                        mftuser_origin.max_sessions = mftuser.max_sessions
+                        mftuser_origin.max_sessions = mftuser.max_sessions #2 if unlimited_sessions_is_disabled else 
+                        # if unlimited_sessions_is_disabled :
+                        #     mftuser_origin.password_expiration_interval = -1
                         # mftuser_origin.disk_quota=mftuser.disk_quota
                         mftuser_origin.modified_at = timezone.now()
                         mftuser_origin.save()
@@ -868,12 +875,12 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                                 remaining_perms.delete()
                     logger.info(f'permission {splited} of directory {directory.absolute_path} for mftuser {mftuser.username} removed by {isc_user.user.username}.')
                 elif action == 'add':
-                    # check_parents_permission(
-                    #     isc_user=isc_user,
-                    #     mftuser=mftuser,
-                    #     parent=directory.parent
-                    #     # permission=perm.value,
-                    # )
+                    check_parents_permission(
+                        isc_user=isc_user,
+                        mftuser=mftuser,
+                        parent=directory.parent
+                        # permission=perm.value,
+                    )
                     for pv in splited:
                         if not Permission.objects.filter(user=mftuser, directory=directory, permission=pv).exists():
                             perm = Permission(

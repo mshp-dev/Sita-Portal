@@ -283,6 +283,8 @@ def export_data_view(request, *args, **kwargs):
             exported_user.number_of_downloads += 1
             exported_user.save()
             logger.info(f'mftuser {exported_user.mftuser.username} exported successfully.')
+            logger.info(f'export current confirmed directory tree started.')
+            export_current_confirmed_directory_tree()
             response = {'result': 'success', 'deleted': exported_user.mftuser.username.replace('.', '')}
             return JsonResponse(data=response, safe=False)
         elif request.method == 'GET':
@@ -317,14 +319,14 @@ def sftp_user_view(request, id, *args, **kwargs):
         try:
             files_list = [re.webuser.path for re in rtes]
             if len(files_list) > 1:
-                export_users_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
+                export_files_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
                 logger.info(f'all mftusers exported with sftp by {isc_user.user.username} successfully.')
             else:
                 mftuser = MftUser.objects.get(pk=rtes.first().mftuser.id)
                 if mftuser.organization.sub_domain == DomainName.objects.get(code='nibn.ir'):
-                    export_users_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
+                    export_files_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
                 else:
-                    export_users_with_sftp(files_list=files_list, dest=settings.SFTP_EXTERNAL_USERS_PATH)
+                    export_files_with_sftp(files_list=files_list, dest=settings.SFTP_EXTERNAL_USERS_PATH)
                 logger.info(f'mftuser with id {rtes.first().mftuser.id} exported with sftp by {isc_user.user.username} successfully.')
             response = {'result': 'success'}
         except Exception as e:

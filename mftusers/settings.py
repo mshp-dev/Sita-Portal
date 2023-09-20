@@ -41,7 +41,9 @@ SFTP_PORT = 9022
 SFTP_USERNAME = 'sita2'
 SFTP_PASSWORD = 'Sita2@Sita32022'
 SFTP_DEFAULT_PATH = 'Imported_WebUser'
+SFTP_PORTAL_DIRECTORIES_PATH = 'Sita_Portal_Directories'
 SFTP_EXTERNAL_USERS_PATH = 'Setad_Imported_WebUser'
+SFTP_EXTERNAL_DIRECTORIES_PATH = 'Setad_Directories'
 
 # Application definition
 
@@ -53,6 +55,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    "django_cron",
+
     'core.apps.CoreConfig',
     'invoice.apps.InvoiceConfig',
 ]
@@ -70,6 +74,11 @@ MIDDLEWARE = [
 FILE_UPLOAD_HANDLERS = [
     'django.core.files.uploadhandler.MemoryFileUploadHandler',
     'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+]
+
+CRON_CLASSES = [
+    "invoice.jobs.DeleteOldInvoicesJob",
+    # "core.jobs.ExportCurrentConfirmedDirectoryTreeJob",
 ]
 
 APPEND_SLASH = True

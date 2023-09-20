@@ -7,14 +7,12 @@ from pathlib import Path
 from core.models import *
 from invoice.models import *
 
+from jdatetime import datetime as jdt
 from tempfile import NamedTemporaryFile as ntf
 from lxml import etree as ET
 from lxml import html
-import os, random, zipfile, csv, pdfkit, sys, paramiko
+import os, random, zipfile, csv, pdfkit, sys, paramiko, logging
 
-from jdatetime import datetime as jdt
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -488,30 +486,22 @@ def check_directories_minimum_permissions(isc_user, mftuser, is_confirmed=False)
 
 def check_parents_permission(isc_user, mftuser, parent): #, permission
     directory = None
-    while parent != 0:
-        directory = Directory.objects.get(pk=parent)
-        if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
-            perm = Permission(
+    current_dir = Directory.objects.get(pk=parent)
+    dir_index = int(current_dir.index_code.code)
+    while dir_index <= 0:
+        if not Permission.objects.filter(user=mftuser, directory=current_dir, permission=256).exists():
+            Permission.objects.create(
                 user=mftuser,
-                directory=directory,
+                directory=current_dir,
                 permission=256, # List (مشاهده)
                 created_by=isc_user
             )
-            perm.save()
-            # Permission.objects.create(
-            #     user=mftuser,
-            #     directory=parent,
-            #     permission=128, #Checksum
-            #     created_by=isc_user
-            # )
-        parent = directory.parent
-    if not Permission.objects.filter(user=mftuser, directory=directory, permission=256).exists():
-        Permission.objects.create(
-            user=mftuser,
-            directory=directory,
-            permission=256, # List (مشاهده)
-            created_by=isc_user
-        )
+        if int(current_dir.index_code.code) == 0:
+            # break
+            dir_index = 1
+        else:
+            current_dir = Directory.objects.get(pk=current_dir.parent)
+            dir_index = int(current_dir.index_code.code)
 
 
 def delete_dir_and_clean_sub_directories(dir_):
@@ -797,15 +787,16 @@ def export_user_with_paths_v2(mftuser, isc_user):
     virtualFile = template.xpath('//webUsers/webUser/virtualFile')
     virtual_files = template.xpath('//webUsers/webUser/virtualFile/virtualFiles')
     # for bus in mftuser.business.all():
-    #     if not Permission.objects.filter(user=mftuser, directory__parent=0, directory__business=bus).exists():
-    #         Permission.objects.create(
-    #             user=mftuser,
-    #             directory=Directory.objects.get(business=bus, parent=0),
-    #             permission=256, # List (مشاهده)
-    #             created_by=isc_user,
-    #             is_confirmed=True
-    #         )
-    # check_directory_tree_permission(isc_user=isc_user, mftuser=mftuser, is_confirmed=True)
+        # if not Permission.objects.filter(user=mftuser, directory__parent=0, directory__business=bus).exists():
+        #     Permission.objects.create(
+        #         user=mftuser,
+        #         directory=Directory.objects.get(business=bus, parent=0),
+        #         permission=256, # List (مشاهده)
+        #         created_by=isc_user,
+        #         is_confirmed=True
+        #     )
+    check_directory_tree_permission(isc_user=isc_user, mftuser=mftuser, is_confirmed=True)
+    check_directories_minimum_permissions(isc_user=isc_user, mftuser=mftuser, is_confirmed=True)
     permissions = Permission.objects.filter(user=mftuser, is_confirmed=True).exclude(directory__index_code__code='-1', directory__children='')
     for item in permissions.filter(directory__index_code__code='-1'):
         if not permissions.filter(directory__id__in=[int(i) for i in item.directory.children.split(',')[:-1]]).exists():
@@ -927,14 +918,17 @@ def make_report_in_csv_format(dir_default_depth, name='report'):
     return os.path.join(os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv'))
 
 
-def export_users_with_sftp(files_list, dest):
+def export_files_with_sftp(files_list, dest, name=None):
     tp = paramiko.Transport((settings.SFTP_HOST, int(settings.SFTP_PORT)))
     tp.connect(username=settings.SFTP_USERNAME, password=settings.SFTP_PASSWORD)
     sftp_client = paramiko.SFTPClient.from_transport(tp)
     sftp_client.chdir(dest)
     for file in files_list:
         # split by '/' in linux
-        sftp_client.put(file, file.split('/')[-1])
+        if name:
+            sftp_client.put(file, name)
+        else:
+            sftp_client.put(file, file.split('/')[-1])
         # split by '\' in windows
         # sftp_client.put(file, file.split('\\')[-1])
     sftp_client.close()
@@ -954,6 +948,35 @@ def make_invoice_for_unlimited_sessions(iscuser, mftuser, sec_lic, pass_exp):
     invoice.save()
     logger.info(f'invoice for unlimited sessions {epx_msg} with serial number {invoice.serial_number} generated by system (action of {iscuser.user.username}).')
     return invoice.serial_number
+
+
+def export_current_confirmed_directory_tree():
+    try:
+        all_confirmed_dirs = Directory.objects.filter(is_confirmed=True).order_by('relative_path')
+        all_buss_dirs = Directory.objects.filter(business__code__in=[buss['business'] for buss in all_confirmed_dirs.values('business').distinct()], parent=0).order_by('relative_path')
+        external_confirmed_dirs = all_confirmed_dirs.filter(bic__sub_domain__code='amaliat.local').order_by('relative_path')
+        external_buss_dirs = Directory.objects.filter(business__code__in=[buss['business'] for buss in external_confirmed_dirs.values('business').distinct()], parent=0).order_by('relative_path')
+        portal_dirs_path = os.path.join(settings.MEDIA_ROOT, 'sita_portal_dirs.txt')
+        with open(portal_dirs_path, mode='w') as portal_path_file:
+            for abd in all_buss_dirs:
+                portal_path_file.write(f'{abd.absolute_path}\n')
+            for acd in all_confirmed_dirs:
+                if acd.bic.sub_domain.code == 'nibn.ir':
+                    portal_path_file.write(f'{acd.absolute_path}\n')
+                elif acd.bic.sub_domain.code == 'amaliat.local':
+                    portal_path_file.write(f'{acd.remote_path}\n')
+        export_files_with_sftp(files_list=[portal_dirs_path,], dest=settings.SFTP_PORTAL_DIRECTORIES_PATH, name='current_directories_in_portal.txt')
+        logger.info(f'all confirmed directories path saved in media/sita_portal_dirs.txt by system and exported with sftp.')
+        setad_dirs_path = os.path.join(settings.MEDIA_ROOT, 'setad_dirs.txt')
+        with open(setad_dirs_path, mode='w') as txt_path_file:
+            for ebd in external_buss_dirs:
+                txt_path_file.write(f'{ebd.foreign_path}\n')
+            for ecd in external_confirmed_dirs:
+                txt_path_file.write(f'{ecd.foreign_path}\n')
+        export_files_with_sftp(files_list=[setad_dirs_path,], dest=settings.SFTP_EXTERNAL_DIRECTORIES_PATH, name='current_directories_in_portal.txt')
+        logger.info(f'external confirmed directories path saved in media/setad_dirs.txt by system and exported with sftp.')
+    except Exception as e:
+        logger.error(e)
 
 
 def make_form_from_invoice(invoice, contents):
