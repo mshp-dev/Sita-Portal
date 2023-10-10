@@ -136,9 +136,9 @@ class MftUserForm(forms.ModelForm):
     organization                 = forms.ChoiceField(required=True, error_messages={'invalid_choice': 'یک سازمان/بانک را انتخاب نمائید'}, widget=forms.Select(attrs={"class": "form-control form-select form-select-bg-left", "parent": "organization"}))
     business                     = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"size": 10, "parent": "business", "data-search": "true", "data-silent-initial-value-set": "true"}))
     unlimited_sessions           = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={"class": "form-check", "style": "width: 1.5rem; height: 1.5rem"}))
-    security_license             = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={"placeholder": "I/1234/1400/678 :شماره نامه چارگونی مانند", "class": "form-control", "pattern": "I/[0-9].+/[0-9].+/[0-9].+"}))
+    # security_license             = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={"placeholder": "I/1234/1400/678 :شماره نامه چارگونی مانند", "class": "form-control", "pattern": "I/[0-9].+/[0-9].+/[0-9].+"}))
     password_expiration_interval = forms.ChoiceField(required=False, choices=PASSWORD_EXPIRATION_INTERVAL_CHOICES, widget=forms.Select(attrs={"class": "form-control form-select form-select-bg-left", "parent": "password-expiration"}))
-    # ipaddr                       = forms.CharField(max_length=15, required=False, widget=forms.TextInput(attrs={"placeholder": "123.123.123.123", "class": "form-control"}))
+    ipaddr                       = forms.CharField(max_length=15, required=False, widget=forms.TextInput(attrs={"placeholder": "123.123.123.123", "class": "form-control"}))
     # disk_quota                   = forms.IntegerField(max_value=100000000, min_value=100, help_text='کمک کمک کمک', required=True, widget=forms.TextInput(attrs={"placeholder": "حجم مورد نیاز در سیتا", "class": "form-control"}))
     # description                  = forms.CharField(max_length=250, required=True, widget=forms.Textarea(attrs={"name": "description", "rows":"5", "placeholder": "نام گروه کاربر در شرکت خدمات یا نام اداره، قسمت و یا ... کاربر در بانک، سازمان و ...", "class": "form-control"}))
     
@@ -155,7 +155,7 @@ class MftUserForm(forms.ModelForm):
             'organization',
             'business',
             'unlimited_sessions',
-            'security_license',
+            'ipaddr',
             'password_expiration_interval',
         ]
     
@@ -238,15 +238,15 @@ class MftUserForm(forms.ModelForm):
             raise ValidationError('شماره همراه وارد شده صحیح نیست.')
         return phone_number
     
-    def clean_security_license(self):
-        sec_lic = ''
-        if self.cleaned_data.get('unlimited_sessions'):
-            sec_lic = str(self.cleaned_data.get('security_license'))
-            if sec_lic == '':
-                raise ValidationError('شماره نامه چارگونی را وارد نمایید.')
-            if len(sec_lic.split('/')) <= 2:
-                raise ValidationError('شماره نامه چارگونی را به طور صحیح وارد نمایید.')
-        return sec_lic
+    # def clean_security_license(self):
+    #     sec_lic = ''
+    #     if self.cleaned_data.get('unlimited_sessions'):
+    #         sec_lic = str(self.cleaned_data.get('security_license'))
+    #         if sec_lic == '':
+    #             raise ValidationError('شماره نامه چارگونی را وارد نمایید.')
+    #         if len(sec_lic.split('/')) <= 2:
+    #             raise ValidationError('شماره نامه چارگونی را به طور صحیح وارد نمایید.')
+    #     return sec_lic
     
     def clean_password_expiration_interval(self):
         pei = -1
@@ -258,19 +258,19 @@ class MftUserForm(forms.ModelForm):
                 pei = -1
         return pei
     
-    # def clean_ipaddr(self):
-    #     ip = str(self.cleaned_data.get('ipaddr'))
-    #     if ip == '':
-    #         return ''
-    #     if len(ip) < 7:
-    #         raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
-    #     if len(ip.split('.')) < 4:
-    #         raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
-    #     if '..' in ip or '...' in ip:
-    #         raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
-    #     if ip.startswith('.') or ip.endswith('.'):
-    #         raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
-    #     return ip
+    def clean_ipaddr(self):
+        ip = ''
+        if self.cleaned_data.get('unlimited_sessions'):
+            ip = str(self.cleaned_data.get('ipaddr'))
+            if len(ip) < 7:
+                raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
+            if len(ip.split('.')) < 4:
+                raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
+            if '..' in ip or '...' in ip:
+                raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
+            if ip.startswith('.') or ip.endswith('.'):
+                raise ValidationError('آدرس آی پی وارد شده صحیح نیست.')
+        return ip
 
 
 class LoginForm(forms.Form):

@@ -197,7 +197,7 @@ LOGGING = {
             'format': '[%(asctime)s] %(levelname)s: %(message)s',
         },
         'detailed': {
-            'format': (u'%(asctime)s [%(levelname)-8s] (%(module)s.%(funcName)s) %(message)s'),
+            'format': (u'%(asctime)s [%(levelname)-8s] (%(name)s) %(message)s'),
             'datefmt': '[%Y-%m-%d %H:%M:%S]',
         },
     },

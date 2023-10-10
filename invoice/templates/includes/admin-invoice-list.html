@@ -60,7 +60,7 @@
                   >پروژه/سامانه(ها)ی تحت اختیار:
                   <span class="display-6 text-info"><strong>{{ invoice.mftuser.business.all|get_businesses }}</strong></span></span
                 >
-                {% elif invoice.invoice_type.code == 'INVUNLS' %}
+                {% comment %} {% elif invoice.invoice_type.code == 'INVUNLS' %}
                 <span>
                   مدت زمان منقضی شدن کلمه عبور:
                   <span class="display-6 text-info">
@@ -78,7 +78,7 @@
                       });
                     </script>
                   </span>
-                </span>
+                </span> {% endcomment %}
                 {% endif %}
                 <span
                   >شماره تلفن همراه: <span class="display-6 text-info"><strong> {{ invoice.mftuser.mobilephone }}</strong></span></span
@@ -90,7 +90,7 @@
                 <p id="permission-list-{{ invoice.id }}" class="h5 mt-4" style="direction: rtl"></p>
                 {% else %}
                 <span
-                  >شماره فرم چارگونی اخد تأیید امنیت: <span class="display-6 text-info"><strong> {{ invoice.permissions_list }}</strong></span></span
+                  >آدرس آی پی سرور/ سازمان: <span class="display-6 text-info"><strong> {{ invoice.permissions_list }}</strong></span></span
                 >
                 {% endif%} {% comment %} {% for access in invoice.get_list_of_permissions %}
                 <span class="display-6 text-tertiary mb-2">({{ access.perms }}) بر روی {{ access.dir }}</span>

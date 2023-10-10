@@ -775,15 +775,15 @@ def export_user_with_paths_v2(mftuser, isc_user):
     name[0].text = mftuser.username
     max_sessions = template.xpath('//webUsers/webUser/maxSessions')
     max_sessions[0].text = str(mftuser.max_sessions)
+    ipFilterEnabled = template.xpath('//webUsers/webUser/ipFilterEnabled')
+    if mftuser.max_sessions == -1:
+        ipFilterEnabled[0].text = 'true'
+    else:
+        ipFilterEnabled[0].text = 'false'
     pass_exp_int = template.xpath('//webUsers/webUser/passwordExpirationInterval')
     pass_exp_int[0].text = str(mftuser.password_expiration_interval)
-    # <ipFilterEntries>
-    #     <ipFilterEntry>
-    #         <address></address>
-    #     </ipFilterEntry>
-    # </ipFilterEntries>
-    # ip = template.xpath('//webUsers/webUser/ipFilterEntries/ipFilterEntry/address')
-    # ip[0].text = mftuser.ipaddr
+    ip = template.xpath('//webUsers/webUser/ipFilterEntries/ipFilterEntry/address')
+    ip[0].text = mftuser.ipaddr
     virtualFile = template.xpath('//webUsers/webUser/virtualFile')
     virtual_files = template.xpath('//webUsers/webUser/virtualFile/virtualFiles')
     # for bus in mftuser.business.all():
@@ -934,7 +934,7 @@ def export_files_with_sftp(files_list, dest, name=None):
     sftp_client.close()
 
 
-def make_invoice_for_unlimited_sessions(iscuser, mftuser, sec_lic, pass_exp):
+def make_invoice_for_unlimited_sessions(iscuser, mftuser, ipaddr, pass_exp):
     epx_msg = 'and default (2/two months) expiration interval'
     if pass_exp != -1:
         epx_msg = 'and 6/six months expiration interval'
@@ -942,7 +942,7 @@ def make_invoice_for_unlimited_sessions(iscuser, mftuser, sec_lic, pass_exp):
         invoice_type=InvoiceType.objects.get(code='INVUNLS'),
         mftuser=mftuser,
         used_business=pass_exp,
-        permissions_list=sec_lic,
+        permissions_list=ipaddr,
         created_by=iscuser
     )
     invoice.save()

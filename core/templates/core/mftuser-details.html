@@ -46,7 +46,7 @@
       if (this.checked) {
         $("#confirm-modal").modal("show");
       } else {
-        $("#security-license").hide();
+        $("#ip_address").hide();
         $("#password-expiration").hide();
         $("#submit-button").removeAttr("disabled");
         $("#submit-button").html("بروزرسانی مشخصات");
@@ -54,7 +54,7 @@
     });
 
     $(":button[btn-func='ok']").click(function () {
-      $("#security-license").show();
+      $("#ip_address").show();
       $("#password-expiration").show();
       $("#submit-button").prop("disabled", "disabled");
       $("#submit-button").html("بروزرسانی و ارسال درخواست تغییر برای این کاربر");
@@ -260,20 +260,20 @@
                         </span>
                       </div>
                     </div>
-                    <div id="security-license" class="form-group mb-4" style="direction: rtl; display: none">
-                      <label for="security-license">شماره نامه چارگونی (فرم 308) اخذ تأیید امنیت</label>
+                    <div id="ip_address" class="form-group mb-4" style="direction: rtl; display: none">
+                      <label for="ip_address">آدرس آی پی سرور/سازمان جهت اتصال نامحدود</label>
                       <div class="input-group" style="direction: ltr">
-                        <span class="input-group-text" id="form-number"><span class="fas fa-envelope-open"></span></span>
-                        {{ form.security_license }}
+                        <span class="input-group-text" id="form-number"><span class="fa fa-hashtag"></span></span>
+                        {{ form.ipaddr }}
                       </div>
                     </div>
-                    <div id="password-expiration" class="form-group mb-4" style="direction: rtl; display: none">
+                    {% comment %} <div id="password-expiration" class="form-group mb-4" style="direction: rtl; display: none">
                       <label for="password-expiration">مدت زمان منقضی شدن کلمه عبور</label>
                       <div class="input-group" style="direction: ltr">
                         {{ form.password_expiration_interval }}
                         <span class="input-group-text" id="form-number"><span class="fas fa-unlock-alt"></span></span>
                       </div>
-                    </div>
+                    </div> {% endcomment %}
                     <br />
                     <div class="d-grid px-5 py-2">
                       <button
@@ -312,9 +312,9 @@
                 <div class="modal-body" style="direction: rtl">
                   <p style="text-align: justify">
                     لطفاً توجه داشته باشید فقط در صورتیکه قرار است این کاربر به صورت سیستمی مورد استفاده قرار گیرد
-                    و به تعداد اتصال های همزمان بیش از 2 مورد نیاز است، این گزینه را انتخاب نمائید؛
-                    در صورت نیاز به زمان بیشتر از مدت پیش فرض سیستم (60 روز) برای منقضی شدن کلمه عبور گزینه مدت زمان را تغییر دهید.
-                    لازم به ذکر است که ارسال پیش نویس شماره <strong><u>308</u></strong> در چارگون برای این مورد، می بایست به همراه تأیید امنیت باشد.
+                    و به تعداد اتصال های همزمان بیش از 2 مورد از سوی سرورهای عملیاتی نیاز است، این گزینه را انتخاب نمائید؛
+                    {% comment %} در صورت نیاز به زمان بیشتر از مدت پیش فرض سیستم (60 روز) برای منقضی شدن کلمه عبور گزینه مدت زمان را تغییر دهید. {% endcomment %}
+                    لازم به ذکر است که ارسال <strong><u>آدرس آی پی</u></strong> نهایی سرور عملیاتی/سازمان مدنظر که از شبکه قابل دریافت می باشد ضروری است.
                   </p>
                 </div>
                 <div class="modal-footer">
@@ -366,7 +366,7 @@
     var max_sessions = "{{ mftuser.max_sessions }}";
     if (max_sessions == "-1") {
       $("#id_unlimited_sessions").prop("checked", true);
-      $("#security-license").show();
+      $("#ip_address").show();
     }
 
     var password_expiration_interval = "{{ mftuser.password_expiration_interval }}";
@@ -505,13 +505,13 @@
     event.currentTarget.value = ph;
   });
 
-  var sec_lic = document.getElementById("id_security_license");
+  var sec_lic = document.getElementById("id_ipaddr");
   sec_lic.addEventListener("change", function (event) {
-    var sl = cleanInputValue(event.currentTarget.value, "lic");
-    event.currentTarget.value = sl;
-    if (sl == "") {
+    var ip = cleanInputValue(event.currentTarget.value, "ip");
+    event.currentTarget.value = ip;
+    if (ip == "") {
       $("#submit-button").prop("disabled", "disabled");
-    } else if (sl != "") {
+    } else if (ip != "") {
       $("#submit-button").removeAttr("disabled");
     }
   });
@@ -544,14 +544,12 @@
       input = input.replace(/\-/g, "");
       input = input.replace(/\@/g, "");
       input = input.replace(/\./g, "");
-    } else if (type == "lic") {
+    } else if (type == "ip") {
       input = input.replace(/[a-z]/g, "");
-      input = input.replace(/[A-H]/g, "");
-      input = input.replace(/[J-Z]/g, "");
+      input = input.replace(/[A-Z]/g, "");
       input = input.replace(/\_/g, "");
       input = input.replace(/\-/g, "");
       input = input.replace(/\@/g, "");
-      input = input.replace(/\./g, "");
       input = input.replace(/[\u0600-\u06FF]/g, "");
     }
     if (type != "lic") {

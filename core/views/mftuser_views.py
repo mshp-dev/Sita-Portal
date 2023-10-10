@@ -299,12 +299,12 @@ def mftuser_details_view(request, id, *args, **kwargs):
             mftuser = form.save(commit=False)
             unlimited_sessions_is_disabled = False
             if form.cleaned_data.get('unlimited_sessions'):
-                security_license = form.cleaned_data.get('security_license')
+                ip_address = form.cleaned_data.get('ipaddr')
                 password_expiration_interval = form.cleaned_data.get('password_expiration_interval')
                 inv_sn = make_invoice_for_unlimited_sessions(
                     iscuser=isc_user,
                     mftuser=MftUser.objects.get(username=mftuser.username),
-                    sec_lic=security_license,
+                    ipaddr=ip_address,
                     pass_exp=password_expiration_interval
                 )
                 max_sessions = ' with unlimited max sessions'
