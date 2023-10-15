@@ -29,7 +29,7 @@ def get_not_confirmed_dirs(dirs):
 
 def get_specific_root_dir(buss, bic):
     root_dirs = Directory.objects.filter(parent=0, business__in=buss).order_by('name')
-    if bic.code == 'ISC':
+    if bic.code == 'ISC' or bic.code == 'PSPFRDS':
         all_dirs = []
         for rd in root_dirs:
             bank_dirs = Directory.objects.filter(parent=rd.id, is_confirmed=True).order_by('name') # business=rd.business, 
