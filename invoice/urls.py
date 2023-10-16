@@ -15,6 +15,7 @@ from .views import *
 urlpatterns = [
     path('create/', invoice_create_view, name='invoice-create'),
     path('confirm/<int:iid>/', invoice_confirm_view, name='invoice-confirm'),
+    path('bulk-confirm/', invoice_bulk_confirm_view, name='invoice-bulk-confirm'),
     path('reject/<int:iid>/', invoice_reject_view, name='invoice-reject'),
     path('delete/<int:iid>/', invoice_delete_view, name='invoice-delete'),
     path('update/<int:iid>/', invoice_update_view, name='invoice-update'),

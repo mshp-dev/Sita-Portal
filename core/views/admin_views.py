@@ -46,7 +46,6 @@ def add_data_view(request, *args, **kwargs):
     organization_form.fields['sub_domain'].choices = [(dn.id, dn) for dn in DomainName.objects.all().order_by('description')]
     
     if request.method == 'POST':
-        print(request.POST.get("form-type"))
         if request.POST.get("form-type") == "organization-form":
             organization_form = AddOrganizationForm(request.POST)
             organization_form.fields['organization_type'].choices = [(org_type.id, org_type) for org_type in OrganizationType.objects.all().order_by('description')]
@@ -304,6 +303,25 @@ def export_data_view(request, *args, **kwargs):
 
 
 @login_required(login_url="/login/")
+def bulk_confirm_export_view(request, *args, **kwargs):
+    isc_user          = IscUser.objects.get(user=request.user)
+    username          = str(isc_user.user.username)
+    access            = str(isc_user.role.code)
+    
+    if not isc_user.user.is_staff:
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        return redirect('/error/401/')
+
+    context = {
+        'username': username,
+        'admin_view': True,
+        'access': access,
+    }
+
+    return render(request, "core/bulk-confirm-export.html", context)
+
+
+@login_required(login_url="/login/")
 def sftp_user_view(request, id, *args, **kwargs):
     isc_user = IscUser.objects.get(user=request.user)
     rtes     = ReadyToExport.objects.all() if id == 0 else ReadyToExport.objects.filter(pk=id)
@@ -315,25 +333,82 @@ def sftp_user_view(request, id, *args, **kwargs):
     if request.is_ajax():
         if request.method == 'POST':
             response = {}
-        files_list = []
-        try:
-            files_list = [re.webuser.path for re in rtes]
-            if len(files_list) > 1:
-                export_files_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
-                logger.info(f'all mftusers exported with sftp by {isc_user.user.username} successfully.')
-            else:
-                mftuser = MftUser.objects.get(pk=rtes.first().mftuser.id)
-                if mftuser.organization.sub_domain == DomainName.objects.get(code='nibn.ir'):
+            files_list = []
+            try:
+                files_list = [re.webuser.path for re in rtes]
+                if len(files_list) > 1:
                     export_files_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
+                    logger.info(f'all mftusers exported with sftp by {isc_user.user.username} successfully.')
                 else:
-                    export_files_with_sftp(files_list=files_list, dest=settings.SFTP_EXTERNAL_USERS_PATH)
-                logger.info(f'mftuser with id {rtes.first().mftuser.id} exported with sftp by {isc_user.user.username} successfully.')
-            response = {'result': 'success'}
-        except Exception as e:
-            logger.error(e)
-            response = {'result': 'error'}
-        finally:
-            return JsonResponse(data=response, safe=False)
+                    mftuser = MftUser.objects.get(pk=rtes.first().mftuser.id)
+                    if mftuser.organization.sub_domain == DomainName.objects.get(code='nibn.ir'):
+                        export_files_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
+                    else:
+                        export_files_with_sftp(files_list=files_list, dest=settings.SFTP_EXTERNAL_USERS_PATH)
+                    logger.info(f'mftuser with id {rtes.first().mftuser.id} exported with sftp by {isc_user.user.username} successfully.')
+                response = {'result': 'success'}
+            except Exception as e:
+                logger.error(e)
+                response = {'result': 'error'}
+            finally:
+                return JsonResponse(data=response, safe=False)
+
+
+@login_required(login_url="/login/")
+def bulk_sftp_user_view(request, *args, **kwargs):
+    isc_user = IscUser.objects.get(user=request.user)
+    
+    if not isc_user.user.is_staff:
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        return redirect('/error/401/')
+
+    if request.is_ajax():
+        if request.method == 'POST':
+            response = {}
+            try:
+                users_list = [str(user.replace('\n', '')) for user in request.POST.get('users_list').split(',')]
+                rtes = ReadyToExport.objects.filter(mftuser__username__in=users_list)
+                for rte in rtes:
+                    files_list = [rte.webuser.path,]
+                    mftuser = MftUser.objects.get(pk=rte.mftuser.id)
+                    if mftuser.organization.sub_domain == DomainName.objects.get(code='nibn.ir'):
+                        export_files_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
+                    else:
+                        export_files_with_sftp(files_list=files_list, dest=settings.SFTP_EXTERNAL_USERS_PATH)
+                    logger.info(f'mftuser with id {rte.mftuser.id} exported with sftp by {isc_user.user.username} successfully.')
+                    rte.number_of_downloads += 1
+                    rte.save()
+                    logger.info(f'mftuser {rte.mftuser.username} exported successfully.')
+                # nibn_users_files_list = []
+                # non_nibn_users_files_list = []
+                # for rte in rtes:
+                #     # files_list = [rte.webuser.path,]
+                #     mftuser = MftUser.objects.get(pk=rte.mftuser.id)
+                #     if mftuser.organization.sub_domain == DomainName.objects.get(code='nibn.ir'):
+                #         nibn_users_files_list.append(rte.webuser.path)
+                #     else:
+                #         non_nibn_users_files_list.append(rte.webuser.path)
+                #     logger.info(f'mftuser with id {rte.mftuser.id} exported with sftp by {isc_user.user.username} successfully.')
+                #     rte.number_of_downloads += 1
+                #     rte.save()
+                #     logger.info(f'mftuser {rte.mftuser.username} exported successfully.')
+                # export_files_with_sftp(files_list=nibn_users_files_list, dest=settings.SFTP_DEFAULT_PATH)
+                # export_files_with_sftp(files_list=non_nibn_users_files_list, dest=settings.SFTP_EXTERNAL_USERS_PATH)
+                logger.info(f'export current confirmed directory tree started.')
+                export_current_confirmed_directory_tree()
+                response = {
+                    'result': 'success',
+                    'users': users_list,
+                    'message': 'استخراج کاربران با موفقیت انجام شد.'
+                }
+            except Exception as e:
+                logger.error(e)
+                response = {
+                    'result': 'error',
+                    'message': 'خطایی رخ داده است، با مدیر سیستم تماس بگیرید!'
+                }
+            finally:
+                return JsonResponse(data=response, safe=False)
 
 
 @login_required(login_url="/login/")
@@ -631,7 +706,7 @@ def mftuser_restore_or_delete_view(request, id, *args, **kwargs):
                 mftuser.delete()
                 return JsonResponse(data=response, safe=False)
             except Exception as e:
-                print(e)
+                logger.error(e)
                 response = {'result': 'error'}
                 return JsonResponse(data=response, safe=False)
 
@@ -660,7 +735,7 @@ def rename_directory_view(request, did, *args, **kwargs):
                 else:
                     response = {'result': 'failed'}
             except Exception as e:
-                print(e)
+                logger.error(e)
                 response = {'result': 'error'}
             
             return JsonResponse(data=response, safe=False)

@@ -169,6 +169,68 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
 
 
 @login_required(login_url='/login/')
+def invoice_bulk_confirm_view(request, *args, **kwargs):
+    isc_user = IscUser.objects.get(user=request.user)
+
+    if not isc_user.user.is_staff:
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        return redirect('/error/401/')
+
+    if request.is_ajax():
+        if request.method == 'POST':
+            response = {}
+            try:
+                invoices_list = [str(inv.replace('\n', '')) for inv in request.POST.get('invoices_list').split(',')]
+                invoices = Invoice.objects.filter(serial_number__in=invoices_list)
+                if isc_user.role.code == 'ADMIN':
+                    confirmed_list = []
+                    for invoice in invoices:
+                        # if invoice.confirm_or_reject == 'UNDEFINED':
+                        #     mftuser = MftUser.objects.get(pk=invoice.mftuser.id)
+                        #     mftuser.is_confirmed = True
+                        #     mftuser.modified_at = timezone.now()
+                        #     if invoice_type.code == 'INVUNLS':
+                        #         mftuser.set_max_sessions_unlimited()
+                        #         mftuser.password_expiration_interval = invoice.used_business
+                        #     else:
+                        #         perms_list = [int(p) for p in invoice.permissions_list.split(',')[:-1]]
+                        #         perms_list_exists = []
+                        #         for p in perms_list:
+                        #             if Permission.objects.filter(pk=p).exists():
+                        #                 perms_list_exists.append(p)
+                        #             else:
+                        #                 logger.warn(f'permission with id {p} does not exists.')
+                        #         Permission.objects.filter(pk__in=perms_list_exists).update(is_confirmed=True)
+                        #     mftuser.save()
+                        #     # export_user_with_paths(invoice.mftuser, isc_user)
+                        #     export_user_with_paths_v2(invoice.mftuser, isc_user)
+                        #     invoice.confirm_or_reject = 'CONFIRMED'
+                        #     invoice.status = 1
+                        #     # invoice.managed_by = isc_user
+                        #     invoice.save()
+                        #     logger.info(f'invoice with serial number {invoice.serial_number} confirmed by {isc_user.user.username}.')
+                        confirmed_list.append(invoice.mftuser.username)
+                    response = {
+                        'result': 'success',
+                        'confirmed_list': confirmed_list
+                    }
+                else:
+                    logger.critical(f'unauthorized trying confirm of invoice with serial number {invoice.serial_number} by {isc_user.user.username}.')
+                    response = {
+                        'result': 'error',
+                        'message': 'شما مجاز به انجام این کار نیستید'
+                    }
+            except Exception as e:
+                logger.error(e)
+                response = {
+                    'result': 'error',
+                    'message': 'خطایی رخ داده است، با مدیر سیستم تماس بگیرید.'
+                }
+            finally:
+                return JsonResponse(data=response, safe=False)
+
+
+@login_required(login_url='/login/')
 def invoice_reject_view(request, iid, *args, **kwargs):
     isc_user = IscUser.objects.get(user=request.user)
 

@@ -1,0 +1,142 @@
+{% extends "layouts/base.html" %} {% block title %} تأیید و استخراج دسته ای {% endblock %} {% load static %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+{% endblock javascripts %}
+
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <div class="section-header pb-6 bg-primary text-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-10 text-center" style="direction: rtl">
+          <h1 class="display-3 mb-4">تأیید و استخراج دسته ای</h1>
+          <p class="lead">برای تأیید و استخراج دسته ای از فرم زیر استفاده نمائید.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section section-md">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col d-flex align-items-center justify-content-center">
+          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-700">
+            <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
+              <h1 class="mb-0 h3">استخراج دسته ای کاربران</h1>
+            </div>
+            <div class="form-group mb-4" style="direction: rtl">
+              <label for="users">لیست نام های کاربری را وارد کنید:</label>
+              <div class="input-group">
+                <textarea class="form-control" id="users" rows="10" style="direction: ltr"></textarea>
+              </div>
+            </div>
+            <br />
+            <div class="d-grid">
+              <button id="export-btn" type="confirm" class="btn btn-primary" disabled>استخراج</button>
+            </div>
+          </div>
+        </div>
+        <div class="col d-flex align-items-center justify-content-center">
+          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-700">
+            <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
+              <h1 class="mb-0 h3">تأیید دسته ای فرم های چارگونی</h1>
+            </div>
+            <div class="form-group mb-4" style="direction: rtl">
+              <label for="invoices">لیست شناسه ها را وارد کنید:</label>
+              <div class="input-group">
+                <textarea class="form-control" id="invoices" rows="10" style="direction: ltr"></textarea>
+              </div>
+            </div>
+            <br />
+            <div class="d-grid">
+              <button id="confirm-btn" type="confirm" class="btn btn-primary" disabled>تأیید</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row mt-8 mb-5">
+        <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="goBack();" />
+      </div>
+    </div>
+  </div>
+</main>
+
+<script type="text/javascript">
+  function goBack() {
+    var url = "/dashboard/";
+    window.location = url;
+  }
+
+  $(function () {
+    $("#confirm-btn").click(function () {
+      var csrf = "{{ csrf_token }}";
+      var invs_list = $("#invoices").val();
+      $.post(
+        "/invoices/bulk-confirm/",
+        {
+          csrfmiddlewaretoken: csrf,
+          invoices_list: invs_list,
+        },
+        function (response) {
+          console.log(response.result);
+          if (response.result == "success") {
+            var users = "";
+            $.each(response.confirmed_list, function(index, item) {
+              users += item + ",\n";
+            });
+            $("#users").val(users)
+          } else if (response.result == "error") {
+            alert(response.message);
+          }
+        }
+      );
+    });
+
+    
+    $("#export-btn").click(function () {
+      var csrf = "{{ csrf_token }}";
+      var usrs_list = $("#users").val();
+      $.post(
+        "/bulk-export-data/",
+        {
+          csrfmiddlewaretoken: csrf,
+          users_list: usrs_list,
+        },
+        function (response) {
+          console.log(response.result);
+          if (response.result == "success") {
+            alert(response.message);
+            console.log(response.users);
+          } else if (response.result == "error") {
+            alert(response.message);
+          }
+        }
+      );
+    });
+  });
+
+  var invoices = document.getElementById("invoices");
+  invoices.addEventListener("change", function (event) {
+    if (event.currentTarget.value == "") {
+      $("#confirm-btn").prop("disabled", "disabled");
+    } else if (event.currentTarget.value != "") {
+      $("#confirm-btn").removeAttr("disabled");
+    }
+  });
+
+  var users = document.getElementById("users");
+  users.addEventListener("change", function (event) {
+    if (event.currentTarget.value == "") {
+      $("#export-btn").prop("disabled", "disabled");
+    } else if (event.currentTarget.value != "") {
+      $("#export-btn").removeAttr("disabled");
+    }
+  });
+</script>
+{% include "includes/footer.html" %} {% endblock content %}

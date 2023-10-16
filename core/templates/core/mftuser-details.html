@@ -505,8 +505,8 @@
     event.currentTarget.value = ph;
   });
 
-  var sec_lic = document.getElementById("id_ipaddr");
-  sec_lic.addEventListener("change", function (event) {
+  var id_ipaddr = document.getElementById("id_ipaddr");
+  id_ipaddr.addEventListener("change", function (event) {
     var ip = cleanInputValue(event.currentTarget.value, "ip");
     event.currentTarget.value = ip;
     if (ip == "") {
