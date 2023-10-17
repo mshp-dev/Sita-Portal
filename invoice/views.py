@@ -185,31 +185,31 @@ def invoice_bulk_confirm_view(request, *args, **kwargs):
                 if isc_user.role.code == 'ADMIN':
                     confirmed_list = []
                     for invoice in invoices:
-                        # if invoice.confirm_or_reject == 'UNDEFINED':
-                        #     mftuser = MftUser.objects.get(pk=invoice.mftuser.id)
-                        #     mftuser.is_confirmed = True
-                        #     mftuser.modified_at = timezone.now()
-                        #     if invoice_type.code == 'INVUNLS':
-                        #         mftuser.set_max_sessions_unlimited()
-                        #         mftuser.password_expiration_interval = invoice.used_business
-                        #     else:
-                        #         perms_list = [int(p) for p in invoice.permissions_list.split(',')[:-1]]
-                        #         perms_list_exists = []
-                        #         for p in perms_list:
-                        #             if Permission.objects.filter(pk=p).exists():
-                        #                 perms_list_exists.append(p)
-                        #             else:
-                        #                 logger.warn(f'permission with id {p} does not exists.')
-                        #         Permission.objects.filter(pk__in=perms_list_exists).update(is_confirmed=True)
-                        #     mftuser.save()
-                        #     # export_user_with_paths(invoice.mftuser, isc_user)
-                        #     export_user_with_paths_v2(invoice.mftuser, isc_user)
-                        #     invoice.confirm_or_reject = 'CONFIRMED'
-                        #     invoice.status = 1
-                        #     # invoice.managed_by = isc_user
-                        #     invoice.save()
-                        #     logger.info(f'invoice with serial number {invoice.serial_number} confirmed by {isc_user.user.username}.')
-                        confirmed_list.append(invoice.mftuser.username)
+                        if invoice.confirm_or_reject == 'UNDEFINED':
+                            mftuser = MftUser.objects.get(pk=invoice.mftuser.id)
+                            mftuser.is_confirmed = True
+                            mftuser.modified_at = timezone.now()
+                            if invoice.invoice_type.code == 'INVUNLS':
+                                mftuser.set_max_sessions_unlimited()
+                                mftuser.password_expiration_interval = invoice.used_business
+                            else:
+                                perms_list = [int(p) for p in invoice.permissions_list.split(',')[:-1]]
+                                perms_list_exists = []
+                                for p in perms_list:
+                                    if Permission.objects.filter(pk=p).exists():
+                                        perms_list_exists.append(p)
+                                    else:
+                                        logger.warn(f'permission with id {p} does not exists.')
+                                Permission.objects.filter(pk__in=perms_list_exists).update(is_confirmed=True)
+                            mftuser.save()
+                            # export_user_with_paths(invoice.mftuser, isc_user)
+                            export_user_with_paths_v2(invoice.mftuser, isc_user)
+                            invoice.confirm_or_reject = 'CONFIRMED'
+                            invoice.status = 1
+                            # invoice.managed_by = isc_user
+                            invoice.save()
+                            logger.info(f'invoice with serial number {invoice.serial_number} confirmed by {isc_user.user.username}.')
+                            confirmed_list.append(invoice.mftuser.username)
                     response = {
                         'result': 'success',
                         'confirmed_list': confirmed_list
