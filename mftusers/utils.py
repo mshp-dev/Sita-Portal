@@ -967,8 +967,14 @@ def export_current_confirmed_directory_tree():
                     portal_path_file.write(f'{acd.remote_path}\n')
         export_files_with_sftp(files_list=[portal_dirs_path,], dest=settings.SFTP_PORTAL_DIRECTORIES_PATH, name='current_directories_in_portal.txt')
         logger.info(f'all confirmed directories path saved in media/sita_portal_dirs.txt by system and exported with sftp.')
+        setad_base_dirs_path = os.path.join(settings.MEDIA_ROOT, 'setad_base_dirs.txt')
         setad_dirs_path = os.path.join(settings.MEDIA_ROOT, 'setad_dirs.txt')
         with open(setad_dirs_path, mode='w') as txt_path_file:
+            with open(setad_base_dirs_path, mode='r') as base_path_file:
+                base_paths = base_path_file.read().split('\n')
+                for path in base_paths:
+                    if path != '':
+                        txt_path_file.write(f'{path}\n')
             for ebd in external_buss_dirs:
                 txt_path_file.write(f'{ebd.foreign_path}\n')
             for ecd in external_confirmed_dirs:
