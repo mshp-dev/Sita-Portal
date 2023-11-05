@@ -56,7 +56,7 @@ def register_user_view(request):
                 }
             except Exception as e:
                 print(e)
-                logger.info(f'{e}.')
+                logger.info(e, request)
                 response = {
                     "result": "error",
                     "message": "مشکلی پیش آمده است، با مدیر سیستم تماس بگیرید."
@@ -92,12 +92,12 @@ def register_user_view(request):
                 mobilephone=form.cleaned_data.get("mobilephone")
             )
             isc_user.save()
-            logger.info(f'{isc_user.user.username} registered successfully.')
+            logger.info(f'{isc_user.user.username} registered successfully.', request)
             bus_msg = ''
             if user_role.code == 'OPERATION':
                 no_project_bus = BusinessCode.objects.get(code='NO_PROJECT')
                 if str(no_project_bus.id) in businesses:
-                    logger.info(f'user {isc_user.user.username} has NO_PROJECT access.')
+                    logger.info(f'user {isc_user.user.username} has NO_PROJECT access.', request)
                 else:
                     for bus in businesses:
                         bus_code = BusinessCode.objects.get(id=int(bus))
@@ -106,9 +106,9 @@ def register_user_view(request):
                         udl = [IscDepartmentCode.objects.get(code=ud['department']) for ud in user_depts]
                         if user_depts.count() == 0 or isc_user.department in udl:
                             OperationBusiness.objects.create(user=isc_user, access_on_bus=BusinessCode.objects.get(id=int(bus)))
-                            logger.info(f'access on {bus_code.code} for {isc_user.user.username} has beeen given.')
+                            logger.info(f'access on {bus_code.code} for {isc_user.user.username} has beeen given.', request)
                         else:
-                            logger.warning(f'access on {bus_code.code} for {isc_user.user.username} has not beeen given.')
+                            logger.warning(f'access on {bus_code.code} for {isc_user.user.username} has not beeen given.', request)
                             bus_msg += f'دسترسی به سامانه/پروژه {bus_code.code} ایجاد نشد. متعلق به گروه دیگری می باشد.\n'
             elif user_role.code == 'CUSTOMER':
                 for org in organizations:
@@ -117,13 +117,13 @@ def register_user_view(request):
                        user=isc_user,
                        access_on_bic=organization
                     )
-                    logger.info(f'access on {organization.code} for {isc_user.user.username} has beeen given.')
+                    logger.info(f'access on {organization.code} for {isc_user.user.username} has beeen given.', request)
             msg = f'<p>کاربری {user.username} ایجاد گردید،<br />برای فعالسازی آن لطفاً با 29985700 تماس بگیرید.</p><br ><p>{bus_msg}</p>'
             success = True
             # return redirect("/login/")
         else:
             # 'اطلاعات ورودی صحیح نیست!'
-            print(form.errors)
+            logger.error(form.errors, request)
             msg = form.errors
             access_type = form.cleaned_data.get("department").access_type.code
 
@@ -159,7 +159,7 @@ def login_view(request, *args, **kwargs):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                logger.info(f'{username} has logged in successfully.')
+                logger.info(f'{username} has logged in successfully.', request)
                 return redirect(next_)
             else:
                 msg = 'نام کاربری یا کلمه عبور اشتباه است'
@@ -172,7 +172,7 @@ def login_view(request, *args, **kwargs):
 
 
 def logout_view(request, *args, **kwargs):
-    logger.info(f'{request.user.username} has logged out successfully.')
+    logger.info(f'{request.user.username} has logged out successfully.', request)
     logout(request)
     return redirect('/')
 
@@ -242,7 +242,7 @@ def change_password_view(request, *args, **kwargs):
                     login(request, user)
                     msg = "کلمه عبور با موفقیت تغییر یافت"
                     success = True
-                    logger.info(f'{user.username} has changed his/her password.')
+                    logger.info(f'{user.username} has changed his/her password.', request)
                     # return redirect('/')
                 else:
                     msg = 'تکرار کلمه عبور جدید صحیح وارد نشده است'
@@ -320,7 +320,7 @@ def profile_view(request, *args, **kwargs):
                 iscuser.mobilephone = profile_form.cleaned_data['mobilephone']
                 iscuser.officephone = profile_form.cleaned_data['officephone']
                 iscuser.save()
-                logger.info(f'isc_user {user.username} edited his/her profile.')
+                logger.info(f'isc_user {user.username} edited his/her profile.', request)
                 submit_error = False
                 profile_msg = 'مشخصات شما بروزرسانی شد، برای تأیید تغییرات با مدیر سیستم تماس بگیرید.'
             else:
@@ -351,7 +351,7 @@ def profile_view(request, *args, **kwargs):
                 user = User.objects.get(username=isc_user.user.username)
                 user.is_active = False
                 user.save()
-                logger.info(f'isc_user {isc_user.user.username} edited his/her list of projects.')
+                logger.info(f'isc_user {isc_user.user.username} edited his/her list of projects.', request)
                 submit_error = False
                 bus_msg = 'لیست سامانه/پروژه های شما بروزرسانی شد. برای تأیید تغییرات با مدیر سیستم تماس بگیرید.'
             else:
@@ -373,7 +373,7 @@ def profile_view(request, *args, **kwargs):
                 user = User.objects.get(username=isc_user.user.username)
                 user.is_active = False
                 user.save()
-                logger.info(f'isc_user {isc_user.user.username} edited his/her list of bics.')
+                logger.info(f'isc_user {isc_user.user.username} edited his/her list of bics.', request)
                 submit_error = False
                 org_msg = 'لیست سازمان/بانک های شما بروزرسانی شد. برای تأیید تغییرات با مدیر سیستم تماس بگیرید.'
             else:

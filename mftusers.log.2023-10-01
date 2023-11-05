@@ -1,0 +1,4 @@
+[2023-10-01 09:31:41] [INFO    ] (autoreload.run_with_reloader) Watching for file changes with StatReloader
+[2023-10-01 09:32:02] [INFO    ] (general_views.login_view) admin has logged in successfully.
+[2023-10-01 09:33:39] [INFO    ] (mftuser_views.mftuser_details_view) mftuser a_abbasy edited by admin.
+[2023-10-01 09:33:39] [INFO    ] (mftuser_views.mftuser_details_view) admin added business BANKIRAN for mftuser a_abbasy.

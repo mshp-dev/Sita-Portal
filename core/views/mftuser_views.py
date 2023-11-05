@@ -77,11 +77,11 @@ def mftuser_create_view(request, *args, **kwargs):
                 mftuser.set_max_sessions_unlimited()
                 max_sessions = ' with unlimited max sessions'
             mftuser.save()
-            logger.info(f'mftuser {mftuser.username} created by {isc_user.user.username}{max_sessions}.')
+            logger.info(f'mftuser {mftuser.username} created by {isc_user.user.username}{max_sessions}.', request)
             bus_error = ''
             no_project_bus = BusinessCode.objects.get(code='NO_PROJECT')
             if str(no_project_bus.id) in form.cleaned_data.get('business'):
-                logger.info(f'mftuser {mftuser.username} has NO_PROJECT access.')
+                logger.info(f'mftuser {mftuser.username} has NO_PROJECT access.', request)
                 mftuser.description = 'بدون پروژه/سامانه'
             else:
                 for b in form.cleaned_data.get('business'):
@@ -95,10 +95,10 @@ def mftuser_create_view(request, *args, **kwargs):
                         #     business=bus,
                         #     home_dir=True
                         # )
-                        logger.info(f'access on business {bus.code} for {mftuser.username} has been created.')
+                        logger.info(f'access on business {bus.code} for {mftuser.username} has been created.', request)
                     else:
                         bus_error += f'<p>اختصاص پروژه/سامانه {bus.code} میسر نیست.<p>'
-                        logger.warning(f'access on business {bus.code} for {mftuser.username} has not been created.')
+                        logger.warning(f'access on business {bus.code} for {mftuser.username} has not been created.', request)
                 
                 # if mftuser.organization.code == 'ISC':
                     # mftuser.description = str(isc_user.department)
@@ -135,7 +135,7 @@ def directories_list_view(request, *args, **kwargs):
     context = {}
 
     if isc_user.role.code == 'CUSTOMER':
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.is_ajax():
@@ -158,7 +158,7 @@ def directories_list_view(request, *args, **kwargs):
                 new_dir.save()
                 #TODO: if parent dir did not have any children old
                 #      permissions more than list should be delete
-                logger.info(f'directory {new_dir.absolute_path} by {isc_user.user.username} has been created.')
+                logger.info(f'directory {new_dir.absolute_path} by {isc_user.user.username} has been created.', request)
                 parent.children = f'{parent.children}{new_dir.id},'
                 parent.save()
                 serialized_data = {
@@ -272,7 +272,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
     #  if mftuser.organization.code == '_ISC' else get_specific_root_dir(mftuser.organization.code)
     
     if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=mftuser.business.all()).exists() and mftuser.created_by != isc_user:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if isc_user.role.code == 'CUSTOMER':
@@ -355,13 +355,13 @@ def mftuser_details_view(request, id, *args, **kwargs):
                 mftuser_temp.alias = mftuser_origin.alias
                 mftuser_temp.business.clear()
             mftuser_temp.save()
-            logger.info(f'mftuser {mftuser_origin.username} edited by {isc_user.user.username}{max_sessions}.')
+            logger.info(f'mftuser {mftuser_origin.username} edited by {isc_user.user.username}{max_sessions}.', request)
             no_project_bus = BusinessCode.objects.get(code='NO_PROJECT')
             if str(no_project_bus.id) in form.cleaned_data.get('business'):
                 mftuser_temp.business.clear()
                 Permission.objects.filter(directory__parent=0).delete()
                 mftuser_origin.business.clear()
-                logger.info(f'mftuser {mftuser.username} has NO_PROJECT access.')
+                logger.info(f'mftuser {mftuser.username} has NO_PROJECT access.', request)
                 mftuser_origin.is_confirmed = False
                 mftuser_origin.email = mftuser.email
                 mftuser_origin.description = mftuser.description
@@ -391,7 +391,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
                     bus = BusinessCode.objects.get(id=int(b))
                     if Directory.objects.filter(relative_path=f'{bus.code}/{mftuser_origin.organization.directory_name}').exists():
                         mftuser_origin.business.add(bus)
-                        logger.info(f'{isc_user.user.username} added business {bus.code} for mftuser {mftuser_origin.username}.')
+                        logger.info(f'{isc_user.user.username} added business {bus.code} for mftuser {mftuser_origin.username}.', request)
                         # create_default_permission(
                         #     isc_user=isc_user,
                         #     mftuser=mftuser_origin,
@@ -415,7 +415,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
                         msg = '<strong>اطلاعات کاربر بروزرسانی شد</strong>'
                         success = True
                     else:
-                        logger.error(f'directory in {bus.code}/{mftuser_origin.organization.directory_name} does not exists.')
+                        logger.error(f'directory in {bus.code}/{mftuser_origin.organization.directory_name} does not exists.', request)
                         mftuser_origin.email = mftuser_temp.email
                         mftuser_origin.description = mftuser_temp.description
                         mftuser_origin.officephone = mftuser_temp.officephone
@@ -472,7 +472,7 @@ def mftuser_access_view(request, uid, rid=-1, dir_name="", *args, **kwargs):
     used_buss = None
     
     if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=owned_buss).exists() and mftuser.created_by != isc_user:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.is_ajax():
@@ -589,7 +589,7 @@ def mftuser_used_business_access_view(request, uid, bid=-1, *args, **kwargs):
     elements = None
     
     if not isc_user.user.is_staff and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=used_buss).exists():
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if isc_user.role.code != 'OPERATION':
@@ -627,7 +627,7 @@ def mftuser_permissions_view(request, uid, did, *args, **kwargs):
     # bus = BusinessCode.objects.get(code=mftuser.business.code)
 
     if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=mftuser.business.all()).exists():
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.is_ajax():
@@ -832,7 +832,7 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
     bic = BankIdentifierCode.objects.get(code=mftuser.organization.code)
 
     if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=mftuser.business.all()).exists():
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.is_ajax():
@@ -843,8 +843,8 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                 splited = [int(t) for t in permissions.split(',')[:-1]]
                 action = request.POST.get('action')
                 if directory.children != '':
-                    logger.warn(f'{isc_user.user.username} trying to change permission of directory {directory.absolute_path} for mftuser {mftuser.username}.')
-                    logger.error(f'permission of directory {directory.absolute_path} (with children) could not be more than list.')
+                    logger.warn(f'{isc_user.user.username} trying to change permission of directory {directory.absolute_path} for mftuser {mftuser.username}.', request)
+                    logger.error(f'permission of directory {directory.absolute_path} (with children) could not be more than list.', request)
                     response = {
                         'result': 'error',
                         'message': 'به علت وجود پوشه داخل این دایرکتوری نمی توانید در این مسیر دسترسی خواندن/نوشتن/حذف فایل بدهید.'
@@ -873,7 +873,7 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                             remaining_perms_list = [p['permission'] for p in remaining_perms.values('permission').distinct()]
                             if 0 in remaining_perms_list or 128 in remaining_perms_list or 256 in remaining_perms_list: # if just List or Append or Apply or all ot them remained
                                 remaining_perms.delete()
-                    logger.info(f'permission {splited} of directory {directory.absolute_path} for mftuser {mftuser.username} removed by {isc_user.user.username}.')
+                    logger.info(f'permission {splited} of directory {directory.absolute_path} for mftuser {mftuser.username} removed by {isc_user.user.username}.', request)
                 elif action == 'add':
                     check_parents_permission(
                         isc_user=isc_user,
@@ -1047,11 +1047,11 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
                                     created_by=isc_user
                                 )
                                 perm.save()
-                    logger.info(f'permission of directory {directory.absolute_path} for mftuser {mftuser.username} changed to {splited} by {isc_user.user.username}.')
+                    logger.info(f'permission of directory {directory.absolute_path} for mftuser {mftuser.username} changed to {splited} by {isc_user.user.username}.', request)
                 response = {'result': 'success'}
             except Exception as e:
-                logger.error(e)
-                logger.error(f'permission change on directory {directory.absolute_path} to {splited} by {isc_user.user.username} encountered with error.')
+                logger.error(e, request)
+                logger.error(f'permission change on directory {directory.absolute_path} to {splited} by {isc_user.user.username} encountered with error.', request)
                 response = {'result': 'error', 'message': 'مشکلی پیش آمده است، با مدیر سیستم تماس بگیرید!'}
             finally:
                 return JsonResponse(data=response, safe=False)
@@ -1095,9 +1095,9 @@ def transfer_permissions_view(request, *args, **kwargs):
                     permission=perm.permission,
                     is_confirmed=True if perm.directory.id in confirmed_permissions else False
                 )
-                logger.info(f'permission of directory {perm.directory.absolute_path} for mftuser {dest_user.username} changed to {perm.permission} by {isc_user.user.username}.')
+                logger.info(f'permission of directory {perm.directory.absolute_path} for mftuser {dest_user.username} changed to {perm.permission} by {isc_user.user.username}.', request)
             # Permission.objects.filter(user=dest_user, directory__relative_path__in=confirmed_permissions_path_list).update(is_confirmed=True)
-            logger.info(f'all permissions of {orig_user} to {dest_user} transfered successfully by {isc_user.user.username}')
+            logger.info(f'all permissions of {orig_user} to {dest_user} transfered successfully by {isc_user.user.username}', request)
             msg = f'انتقال دسترسی های {form.cleaned_data.get("origin_mftuser")} به {form.cleaned_data.get("destination_mftuser")} با موفقیت انجام شد.'
             success = True
             # return redirect("/login/")
@@ -1123,7 +1123,7 @@ def delete_directory_view(request, did, *args, **kwargs):
     # bus = BusinessCode.objects.get(code=dir_.business.code)
 
     if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus=dir_.business).exists():
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.is_ajax():
@@ -1134,14 +1134,14 @@ def delete_directory_view(request, did, *args, **kwargs):
                         OperationBusiness.objects.filter(access_on_bus=dir_.business).delete()
                         bc = BusinessCode.objects.get(code=dir_.business.code)
                         bc.delete()
-                        logger.warning(f'business and directory of {bc.code} has been deleted by {isc_user.user.username}.')
+                        logger.warning(f'business and directory of {bc.code} has been deleted by {isc_user.user.username}.', request)
                     delete_dir_and_clean_sub_directories(dir_)
-                    logger.info(f'directory in {dir_.absolute_path} with all of it\'s children and permissions of them has been deleted by {isc_user.user.username}.')
+                    logger.info(f'directory in {dir_.absolute_path} with all of it\'s children and permissions of them has been deleted by {isc_user.user.username}.', request)
                     response = {'result': 'success', 'deleted_dir': did}
                 else:
                     response = {'result': 'failed'}
             except Exception as e:
-                logger.error(e)
+                logger.error(e, request)
                 response = {'result': 'error'}
             
             return JsonResponse(data=response, safe=False)

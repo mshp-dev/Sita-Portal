@@ -81,6 +81,10 @@ CRON_CLASSES = [
     # "core.jobs.ExportCurrentConfirmedDirectoryTreeJob",
 ]
 
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+# SECURE_HSTS_SECONDS = 1000000000
+
 APPEND_SLASH = True
 ROOT_URLCONF = 'mftusers.urls'
 LOGIN_REDIRECT_URL = "home"  # Route defined in home/urls.py
@@ -197,13 +201,14 @@ LOGGING = {
             'format': '[%(asctime)s] %(levelname)s: %(message)s',
         },
         'detailed': {
-            'format': (u'%(asctime)s [%(levelname)-8s] (%(name)s) %(message)s'),
+            'format': (u'%(asctime)s [%(ip)s] [%(levelname)-8s] (%(name)s) %(message)s'),
             'datefmt': '[%Y-%m-%d %H:%M:%S]',
         },
     },
     'handlers': {
         'file': {
-            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'class': 'mftusers.logger.PortalLoggingHandler',
+            # 'class': 'logging.handlers.TimedRotatingFileHandler',
             # 'filename': f'{LOGGING_PATH}/mftusers.log',
             'filename': 'mftusers.log',
             'when': 'midnight',

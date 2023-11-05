@@ -326,6 +326,8 @@ def check_directory_tree_permission(isc_user, mftuser, is_confirmed=False):
             non_list_perms = Permission.objects.filter(directory=current_dir, user=mftuser)
             if non_list_perms.filter(~Q(permission=256)).exists():
                 non_list_perms.delete()
+                pl = [p['permission'] for p in non_list_perms.values('permission')]
+                logger.info(f'permission {pl} of directory {directory.absolute_path} for mftuser {mftuser.username} removed by system.')
             if not non_list_perms.filter(permission=256).exists():
                 Permission.objects.create(
                     user=mftuser,
@@ -334,6 +336,7 @@ def check_directory_tree_permission(isc_user, mftuser, is_confirmed=False):
                     is_confirmed=is_confirmed,
                     created_by=isc_user
                 )
+                logger.info(f'permission [256] on directory {current_dir.absolute_path} for mftuser {mftuser.username} created by system.')
             if int(current_dir.index_code.code) == 0:
                 # break
                 dir_index = 1
@@ -496,6 +499,7 @@ def check_parents_permission(isc_user, mftuser, parent): #, permission
                 permission=256, # List (مشاهده)
                 created_by=isc_user
             )
+            logger.info(f'permission [256] on directory {current_dir.absolute_path} for mftuser {mftuser.username} created by system.')
         if int(current_dir.index_code.code) == 0:
             # break
             dir_index = 1

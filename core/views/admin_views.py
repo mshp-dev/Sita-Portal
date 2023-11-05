@@ -37,7 +37,7 @@ def add_data_view(request, *args, **kwargs):
     submit_error = False
 
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     organization_form = AddOrganizationForm()
@@ -60,12 +60,12 @@ def add_data_view(request, *args, **kwargs):
                     sub_domain=organization_form.cleaned_data.get("sub_domain")
                 )
                 bic.save()
-                logger.info(f'{isc_user.user.username} added {bic.code} organization.')
+                logger.info(f'{isc_user.user.username} added {bic.code} organization.', request)
                 for bus in BusinessCode.objects.all():
                     try:
                         bus_dir = Directory.objects.get(business=bus, parent=0)
                     except Exception as e:
-                        logger.error(e)
+                        logger.error(e, request)
                         continue
                     ch_dir = Directory(
                         name=bic.directory_name,
@@ -77,7 +77,7 @@ def add_data_view(request, *args, **kwargs):
                         created_by=isc_user
                     )
                     ch_dir.save()
-                    logger.info(f'a directory in {ch_dir.absolute_path} created.')
+                    logger.info(f'a directory in {ch_dir.absolute_path} created.', request)
                     bus_dir.children += f'{ch_dir.id},'
                     bus_dir.save()
                 org_msg = f'سازمان/بانک {bic.code} با موفقیت اضافه گردید.'
@@ -107,7 +107,7 @@ def add_data_view(request, *args, **kwargs):
                     created_by=isc_user
                 )
                 dir_.save()
-                logger.info(f'{isc_user.user.username} added {bus.code} business.')
+                logger.info(f'{isc_user.user.username} added {bus.code} business.', request)
                 for bic in BankIdentifierCode.objects.all():
                     ch_dir = Directory(
                         name=bic.directory_name,
@@ -119,7 +119,7 @@ def add_data_view(request, *args, **kwargs):
                         created_by=isc_user
                     )
                     ch_dir.save()
-                    logger.info(f'a directory in {ch_dir.absolute_path} created.')
+                    logger.info(f'a directory in {ch_dir.absolute_path} created.', request)
                     dir_.children += f'{ch_dir.id},'
                 dir_.save()
                 bus_msg = f'پروژه/سامانه {bus.code} با موفقیت اضافه گردید.'
@@ -149,7 +149,7 @@ def generate_report_view(request, *args, **kwargs):
     index_code        = request.GET.get('dd', '-2')
     
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
     
     all_buss = BusinessCode.objects.all().order_by('description')
@@ -192,7 +192,7 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
     # differences     = {}
 
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.is_ajax():
@@ -264,7 +264,7 @@ def export_data_view(request, *args, **kwargs):
     exported_mftusers = ReadyToExport.objects.all().order_by('-mftuser__modified_at') #-created_at
     
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     context = {
@@ -281,8 +281,8 @@ def export_data_view(request, *args, **kwargs):
             # exported_user.is_downloaded = True
             exported_user.number_of_downloads += 1
             exported_user.save()
-            logger.info(f'mftuser {exported_user.mftuser.username} exported successfully.')
-            logger.info(f'export current confirmed directory tree started.')
+            logger.info(f'mftuser {exported_user.mftuser.username} exported successfully.', request)
+            logger.info(f'export current confirmed directory tree started.', request)
             export_current_confirmed_directory_tree()
             response = {'result': 'success', 'deleted': exported_user.mftuser.username.replace('.', '')}
             return JsonResponse(data=response, safe=False)
@@ -309,7 +309,7 @@ def bulk_confirm_export_view(request, *args, **kwargs):
     access            = str(isc_user.role.code)
     
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     context = {
@@ -327,7 +327,7 @@ def sftp_user_view(request, id, *args, **kwargs):
     rtes     = ReadyToExport.objects.all() if id == 0 else ReadyToExport.objects.filter(pk=id)
     
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.is_ajax():
@@ -338,17 +338,17 @@ def sftp_user_view(request, id, *args, **kwargs):
                 files_list = [re.webuser.path for re in rtes]
                 if len(files_list) > 1:
                     export_files_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
-                    logger.info(f'all mftusers exported with sftp by {isc_user.user.username} successfully.')
+                    logger.info(f'all mftusers exported with sftp by {isc_user.user.username} successfully.', request)
                 else:
                     mftuser = MftUser.objects.get(pk=rtes.first().mftuser.id)
                     if mftuser.organization.sub_domain == DomainName.objects.get(code='nibn.ir'):
                         export_files_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
                     else:
                         export_files_with_sftp(files_list=files_list, dest=settings.SFTP_EXTERNAL_USERS_PATH)
-                    logger.info(f'mftuser with id {rtes.first().mftuser.id} exported with sftp by {isc_user.user.username} successfully.')
+                    logger.info(f'mftuser with id {rtes.first().mftuser.id} exported with sftp by {isc_user.user.username} successfully.', request)
                 response = {'result': 'success'}
             except Exception as e:
-                logger.error(e)
+                logger.error(e, request)
                 response = {'result': 'error'}
             finally:
                 return JsonResponse(data=response, safe=False)
@@ -359,7 +359,7 @@ def bulk_sftp_user_view(request, *args, **kwargs):
     isc_user = IscUser.objects.get(user=request.user)
     
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.is_ajax():
@@ -375,10 +375,10 @@ def bulk_sftp_user_view(request, *args, **kwargs):
                         export_files_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
                     else:
                         export_files_with_sftp(files_list=files_list, dest=settings.SFTP_EXTERNAL_USERS_PATH)
-                    logger.info(f'mftuser with id {rte.mftuser.id} exported with sftp by {isc_user.user.username} successfully.')
+                    logger.info(f'mftuser with id {rte.mftuser.id} exported with sftp by {isc_user.user.username} successfully.', request)
                     rte.number_of_downloads += 1
                     rte.save()
-                    logger.info(f'mftuser {rte.mftuser.username} exported successfully.')
+                    logger.info(f'mftuser {rte.mftuser.username} exported successfully.', request)
                 # nibn_users_files_list = []
                 # non_nibn_users_files_list = []
                 # for rte in rtes:
@@ -394,7 +394,7 @@ def bulk_sftp_user_view(request, *args, **kwargs):
                 #     logger.info(f'mftuser {rte.mftuser.username} exported successfully.')
                 # export_files_with_sftp(files_list=nibn_users_files_list, dest=settings.SFTP_DEFAULT_PATH)
                 # export_files_with_sftp(files_list=non_nibn_users_files_list, dest=settings.SFTP_EXTERNAL_USERS_PATH)
-                logger.info(f'export current confirmed directory tree started.')
+                logger.info(f'export current confirmed directory tree started.', request)
                 export_current_confirmed_directory_tree()
                 response = {
                     'result': 'success',
@@ -402,7 +402,7 @@ def bulk_sftp_user_view(request, *args, **kwargs):
                     'message': 'استخراج کاربران با موفقیت انجام شد.'
                 }
             except Exception as e:
-                logger.error(e)
+                logger.error(e, request)
                 response = {
                     'result': 'error',
                     'message': 'خطایی رخ داده است، با مدیر سیستم تماس بگیرید!'
@@ -418,7 +418,7 @@ def download_mftuser_view(request, id, *args, **kwargs):
     response     = None
     
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if downloadable:
@@ -426,7 +426,7 @@ def download_mftuser_view(request, id, *args, **kwargs):
         response = FileResponse(open(downloadable.generate_zip_file(name=downloadable.mftuser.username), 'rb'), as_attachment=True)#, content_type=mime_type)
         response['Content-Disposition'] = f"attachment; filename={downloadable.mftuser.username}.zip"
         response['Content-Type'] = "file/zip"
-        logger.info(f'{downloadable.mftuser.username}.zip downloaded by {isc_user.user.username}.')
+        logger.info(f'{downloadable.mftuser.username}.zip downloaded by {isc_user.user.username}.', request)
         # return response
     else:
         downloadable_url = zip_all_exported_users('export_sita_users')
@@ -434,7 +434,7 @@ def download_mftuser_view(request, id, *args, **kwargs):
         response = FileResponse(open(downloadable_url, 'rb'), as_attachment=True)#, content_type="application/zip")
         response['Content-Disposition'] = "attachment; filename=export_sita_users.zip"
         response['Content-Type'] = "file/zip"
-        logger.info(f'export_sita_users.zip downloaded by {isc_user.user.username}.')
+        logger.info(f'export_sita_users.zip downloaded by {isc_user.user.username}.', request)
         # response = {'result': 'success', 'url': downloadable_url}
     
     return response
@@ -445,14 +445,14 @@ def download_dirs_paths_view(request, *args, **kwargs):
     isc_user = IscUser.objects.get(user=request.user)
     
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     downloadable_url = make_csv_of_all_paths(name="sita_all_dirs_paths")
     response = FileResponse(open(downloadable_url, 'rb'), as_attachment=True)
     response['Content-Disposition'] = "attachment; filename=sita_all_dirs_paths.csv"
     response['Content-Type'] = "text/csv"
-    logger.info(f'sita_all_dirs_paths.csv downloaded by {isc_user.user.username}.')
+    logger.info(f'sita_all_dirs_paths.csv downloaded by {isc_user.user.username}.', request)
     
     return response
 
@@ -464,14 +464,14 @@ def download_report_view(request, dd, *args, **kwargs):
     response     = None
     
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     downloadable_url = make_report_in_csv_format(dir_default_depth=dd, name="sita_user_dirs_report")
     response = FileResponse(open(downloadable_url, 'rb'), as_attachment=True)
     response['Content-Disposition'] = "attachment; filename=sita_user_dirs_report.csv"
     response['Content-Type'] = "text/csv"
-    logger.info(f'sita_user_dirs_report.csv downloaded by {isc_user.user.username}.')
+    logger.info(f'sita_user_dirs_report.csv downloaded by {isc_user.user.username}.', request)
     
     return response
 
@@ -483,7 +483,7 @@ def entities_confirm_view(request, id, *args, **kwargs):
     bic = BankIdentifierCode.objects.get(code=mftuser.organization.code)
 
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.is_ajax():
@@ -498,7 +498,7 @@ def entities_confirm_view(request, id, *args, **kwargs):
                     if MftUserTemp.objects.filter(username=mftuser.username).exists():
                         MftUserTemp.objects.filter(username=mftuser.username).delete()
                     MftUser.objects.filter(pk=id).update(is_confirmed=True)
-                    logger.info(f'mftuser {mftuser.username} has been confirmed by {isc_user.user.username}.')
+                    logger.info(f'mftuser {mftuser.username} has been confirmed by {isc_user.user.username}.', request)
                     permissions = Permission.objects.filter(user=mftuser)
                     i = len(permissions)
                     confirmed = False
@@ -511,14 +511,14 @@ def entities_confirm_view(request, id, *args, **kwargs):
                     if confirmed:
                         # export_user(id=id, isc_user=isc_user)
                         export_user_with_paths(id=id, isc_user=isc_user)
-                        logger.info(f'export file of mftuser {mftuser.username} is ready to download.')
+                        logger.info(f'export file of mftuser {mftuser.username} is ready to download.', request)
                     response = {'result': 'success', 'confirmed': confirmed, 'mftuser': mftuser.username.replace('.', ''), 'id': mftuser.id}
                     # return JsonResponse(data=response, safe=False)
                 elif entity == "directory":
                     dir_ = Directory.objects.get(pk=id)
                     permissions = Permission.objects.filter(user=mftuser, directory=dir_)
                     permissions.update(is_confirmed=True)
-                    logger.info(f'all permissions of mftuser {mftuser.username} on {dir_.absolute_path} has been confirmed by {isc_user.user.username}.')
+                    logger.info(f'all permissions of mftuser {mftuser.username} on {dir_.absolute_path} has been confirmed by {isc_user.user.username}.', request)
                     # for perm in permissions.iterator():
                     #     perm.is_confirmed = True
                     #     perm.save()
@@ -536,15 +536,15 @@ def entities_confirm_view(request, id, *args, **kwargs):
                                 confirmed = True
                                 # export_user(id=mftuser.id, isc_user=isc_user)
                                 export_user_with_paths(id=id, isc_user=isc_user)
-                                logger.info(f'export file of mftuser {mftuser.username} is ready to download.')
+                                logger.info(f'export file of mftuser {mftuser.username} is ready to download.', request)
                     response = {'result': 'success', 'confirmed': confirmed, 'mftuser': mftuser.username.replace('.', ''), 'id': mftuser.id}
                     # return JsonResponse(data=response, safe=False)
             except Exception as e:
                 if entity == 'mftuser':
-                    logger.info(f'mftuser {mftuser.username} confirmation encountered error.')
+                    logger.info(f'mftuser {mftuser.username} confirmation encountered error.', request)
                 else:
-                    logger.info(f'confirmation of permissions of mftuser {mftuser.username} on {dir_.absolute_path} encountered error.')
-                logger.error(e)
+                    logger.info(f'confirmation of permissions of mftuser {mftuser.username} on {dir_.absolute_path} encountered error.', request)
+                logger.error(e, request)
                 status_code = 400
                 response = {'result': 'error'}
             finally:
@@ -557,7 +557,7 @@ def mftuser_dismiss_changes_view(request, id, *args, **kwargs):
     mftuser = get_object_or_404(MftUser, pk=id)
     
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.is_ajax():
@@ -599,7 +599,7 @@ def mftuser_delete_view(request, id, *args, **kwargs):
     bic = BankIdentifierCode.objects.get(code=mftuser.organization.code)
     
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.method == 'POST':
@@ -635,7 +635,7 @@ def mftuser_delete_view(request, id, *args, **kwargs):
         mftuser.business.clear()
         mftuser.delete()
         #TODO: delete invoices of this user
-        logger.info(f'mftuser {mftuser.username} deleted by {isc_user.user.username}.')
+        logger.info(f'mftuser {mftuser.username} deleted by {isc_user.user.username}.', request)
         success = True
         # return redirect("/mftusers/")
     else:
@@ -662,7 +662,7 @@ def mftuser_restore_or_delete_view(request, id, *args, **kwargs):
     action = request.POST.get('action')
     
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.is_ajax():
@@ -690,7 +690,7 @@ def mftuser_restore_or_delete_view(request, id, *args, **kwargs):
                         created_by=isc_user
                     )
                     mftuser_new.save()
-                    logger.info(f'mftuser {mftuser_new.username} restored by {isc_user.user.username}.')
+                    logger.info(f'mftuser {mftuser_new.username} restored by {isc_user.user.username}.', request)
                     for b in mftuser.business.all():
                         if Directory.objects.filter(relative_path=f'{b.code}/{mftuser_new.organization.directory_name}').exists():
                             mftuser_new.business.add(b)
@@ -706,7 +706,7 @@ def mftuser_restore_or_delete_view(request, id, *args, **kwargs):
                 mftuser.delete()
                 return JsonResponse(data=response, safe=False)
             except Exception as e:
-                logger.error(e)
+                logger.error(e, request)
                 response = {'result': 'error'}
                 return JsonResponse(data=response, safe=False)
 
@@ -717,7 +717,7 @@ def rename_directory_view(request, did, *args, **kwargs):
     dir_ = Directory.objects.get(pk=did)
 
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.is_ajax():
@@ -730,12 +730,12 @@ def rename_directory_view(request, did, *args, **kwargs):
                     dir_.relative_path = dir_.relative_path.replace(old_name, new_name)
                     dir_.save()
                     change_all_sub_directories_relative_path(dir_.children, dir_.relative_path)
-                    logger.info(f'directory with id {dir_.id} renamed from {old_name} to {new_name} by {isc_user.user.username}.')
+                    logger.info(f'directory with id {dir_.id} renamed from {old_name} to {new_name} by {isc_user.user.username}.', request)
                     response = {'result': 'success', 'renamed_dir': dir_.id}
                 else:
                     response = {'result': 'failed'}
             except Exception as e:
-                logger.error(e)
+                logger.error(e, request)
                 response = {'result': 'error'}
             
             return JsonResponse(data=response, safe=False)
@@ -746,7 +746,7 @@ def iscusers_list_view(request, *args, **kwargs):
     isc_user = IscUser.objects.get(user=request.user)
 
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     context = {
@@ -771,7 +771,7 @@ def iscusers_update_view(request, id, *args, **kwargs):
     isc_user = IscUser.objects.get(user=request.user)
 
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.is_ajax():
@@ -785,14 +785,14 @@ def iscusers_update_view(request, id, *args, **kwargs):
                     subject_user.user.is_active = True
                     subject_user.user.save()
                     subject_user.save()
-                    logger.info(f'iscuser {subject_user.user.username} activated by {isc_user.user.username}.')
+                    logger.info(f'iscuser {subject_user.user.username} activated by {isc_user.user.username}.', request)
                 elif action == 'deactivate':
                     subject_user.user.is_active = False
                     subject_user.user.save()
                     subject_user.save()
-                    logger.info(f'iscuser {subject_user.user.username} deactivated by {isc_user.user.username}.')
+                    logger.info(f'iscuser {subject_user.user.username} deactivated by {isc_user.user.username}.', request)
             except Exception as e:
-                logger.error(e)
+                logger.error(e, request)
                 status_code = 400
                 response = {'result': 'error'}
             finally:
@@ -806,7 +806,7 @@ def reset_password_view(request, *args, **kwargs):
     success = None
 
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     if request.method == "POST":
@@ -817,7 +817,7 @@ def reset_password_view(request, *args, **kwargs):
             user.save()
             msg = "کلمه عبور با موفقیت ریست شد."
             success = True
-            logger.info(f'{user.username} password has been reset by {isc_user.user.username}.')
+            logger.info(f'{user.username} password has been reset by {isc_user.user.username}.', request)
         else:
             msg = form.errors
     else:
@@ -837,7 +837,7 @@ def logs_list_view(request, *args, **kwargs):
     isc_user = IscUser.objects.get(user=request.user)
 
     if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.')
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
     logs = []
