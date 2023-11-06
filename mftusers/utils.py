@@ -321,6 +321,7 @@ def check_directory_tree_permission(isc_user, mftuser, is_confirmed=False):
     user_dirs = Permission.objects.filter(~Q(permission=256), user=mftuser, directory__children='').values('directory').distinct()
     for dir_ in Directory.objects.filter(pk__in=[ud['directory'] for ud in user_dirs]):
         current_dir = Directory.objects.get(pk=dir_.parent) #dir_
+        last_dir_is_confirm = current_dir.is_confirm
         dir_index = int(current_dir.index_code.code)
         while dir_index <= 0:
             non_list_perms = Permission.objects.filter(directory=current_dir, user=mftuser)
@@ -333,7 +334,7 @@ def check_directory_tree_permission(isc_user, mftuser, is_confirmed=False):
                     user=mftuser,
                     directory=current_dir,
                     permission=256,
-                    is_confirmed=is_confirmed,
+                    is_confirmed=current_dir.last_dir_is_confirm,
                     created_by=isc_user
                 )
                 logger.info(f'permission [256] on directory {current_dir.absolute_path} for mftuser {mftuser.username} created by system.')
