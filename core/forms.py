@@ -180,7 +180,7 @@ class MftUserForm(forms.ModelForm):
             if 'create' not in self.request.path:
                 id_ = int(self.request.path.split('/')[-2])
                 mftuser = MftUser.objects.get(pk=id_)
-                temp_user = MftUser.objects.get(email=email)
+                temp_user = MftUser.objects.filter(email=email).first()
                 if mftuser != temp_user:
                     raise ValidationError('این آدرس ایمیل قبلاً برای کاربری دیگر استفاده شده است.')
             else:

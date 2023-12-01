@@ -132,6 +132,11 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                 invoice = Invoice.objects.get(pk=iid)
                 if isc_user.role.code == 'ADMIN':
                     mftuser = MftUser.objects.get(pk=invoice.mftuser.id)
+                    buss = ''
+                    for bus in mftuser.business.all():
+                        buss += f'{str(bus)}،'
+                    project = "سامانه های" if mftuser.business.all().count() > 1 else "سامانه"
+                    mftuser.description = f'{project} {buss[:-1]}'
                     mftuser.is_confirmed = True
                     mftuser.modified_at = timezone.now()
                     if invoice_type.code == 'INVUNLS':
