@@ -60,6 +60,25 @@
           </div>
         </div>
       </div>
+      <div class="row justify-content-center mt-5">
+        <div class="col d-flex align-items-center justify-content-center">
+          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-700">
+            <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
+              <h1 class="mb-0 h3">تأیید و استخراج دسته ای کاربران</h1>
+            </div>
+            <div class="form-group mb-4" style="direction: rtl">
+              <label for="mftusers">لیست نام های کاربری را وارد کنید:</label>
+              <div class="input-group">
+                <textarea class="form-control" id="mftusers" rows="10" style="direction: ltr"></textarea>
+              </div>
+            </div>
+            <br />
+            <div class="d-grid">
+              <button id="confirm-export-btn" type="confirm" class="btn btn-primary" disabled>تأیید و استخراج</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="row mt-8 mb-5">
         <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="goBack();" />
       </div>
@@ -74,6 +93,26 @@
   }
 
   $(function () {
+    $("#confirm-export-btn").click(function () {
+      var csrf = "{{ csrf_token }}";
+      var usrs_list = $("#mftusers").val();
+      $.post(
+        "/bulk-confirm-export/",
+        {
+          csrfmiddlewaretoken: csrf,
+          users_list: usrs_list,
+        },
+        function (response) {
+          console.log(response.result);
+          if (response.result == "success") {
+            alert(response.message);
+          } else if (response.result == "error") {
+            alert(response.message);
+          }
+        }
+      );
+    });
+    
     $("#confirm-btn").click(function () {
       var csrf = "{{ csrf_token }}";
       var invs_list = $("#invoices").val();

@@ -311,6 +311,40 @@ def bulk_confirm_export_view(request, *args, **kwargs):
     if not isc_user.user.is_staff:
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
+    
+    if request.is_ajax():
+        if request.method == 'POST':
+            response = {}
+            users_list = []
+            try:
+                users_list = [str(user.replace('\n', '')) for user in request.POST.get('users_list').split(',')]
+                for user in users_list:
+                    undf_invs = Invoice.objects.filter(mftuser__username=user, confirm_or_reject='UNDEFINED')
+                    # Permission.objects.
+                if len(files_list) > 1:
+                    export_files_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
+                    logger.info(f'all mftusers exported with sftp by {isc_user.user.username} successfully.', request)
+                else:
+                    mftuser = MftUser.objects.get(pk=rtes.first().mftuser.id)
+                    if mftuser.organization.sub_domain == DomainName.objects.get(code='nibn.ir'):
+                        export_files_with_sftp(files_list=files_list, dest=settings.SFTP_DEFAULT_PATH)
+                    else:
+                        export_files_with_sftp(files_list=files_list, dest=settings.SFTP_EXTERNAL_USERS_PATH)
+                    logger.info(f'mftuser with id {rtes.first().mftuser.id} exported with sftp by {isc_user.user.username} successfully.', request)
+                logger.info(f'export current confirmed directory tree started.', request)
+                export_current_confirmed_directory_tree()
+                response = {
+                    'result': 'success',
+                    'message': 'تأیید و استخراج کاربران با موفقیت انجام شد.'
+                }
+            except Exception as e:
+                logger.error(e, request)
+                response = {
+                    'result': 'error',
+                    'message': 'خطایی رخ داده است، با مدیر سیستم تماس بگیرید!'
+                }
+            finally:
+                return JsonResponse(data=response, safe=False)
 
     context = {
         'username': username,

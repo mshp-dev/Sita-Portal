@@ -317,11 +317,11 @@ def create_default_permission(isc_user, mftuser, last_dir, business=None, home_d
             perm.save()
 
 
-def check_directory_tree_permission(isc_user, mftuser, is_confirmed=False):
+def check_directory_tree_permission(isc_user, mftuser):
     user_dirs = Permission.objects.filter(~Q(permission=256), user=mftuser, directory__children='').values('directory').distinct()
     for dir_ in Directory.objects.filter(pk__in=[ud['directory'] for ud in user_dirs]):
         current_dir = Directory.objects.get(pk=dir_.parent) #dir_
-        last_dir_is_confirm = current_dir.is_confirm
+        last_dir_is_confirmed = current_dir.is_confirmed
         dir_index = int(current_dir.index_code.code)
         while dir_index <= 0:
             non_list_perms = Permission.objects.filter(directory=current_dir, user=mftuser)
@@ -334,7 +334,7 @@ def check_directory_tree_permission(isc_user, mftuser, is_confirmed=False):
                     user=mftuser,
                     directory=current_dir,
                     permission=256,
-                    is_confirmed=current_dir.last_dir_is_confirm,
+                    is_confirmed=last_dir_is_confirmed,
                     created_by=isc_user
                 )
                 logger.info(f'permission [256] on directory {current_dir.absolute_path} for mftuser {mftuser.username} created by system.')
@@ -344,6 +344,27 @@ def check_directory_tree_permission(isc_user, mftuser, is_confirmed=False):
             else:
                 current_dir = Directory.objects.get(pk=current_dir.parent)
                 dir_index = int(current_dir.index_code.code)
+
+
+def create_default_permission_for_all_business(isc_user, mftuser, is_confirmed=False):
+    for bus in mftuser.owned_business.all():
+        if not Permission.objects.filter(directory__name=bus.code, directory__parent=0, user=mftuser, permission=256).exists():
+            Permission.objects.create(
+                user=mftuser,
+                directory=Directory.objects.get(name=bus.code, parent=0),
+                permission=256,
+                is_confirmed=is_confirmed,
+                created_by=isc_user
+            )
+    for bus in mftuser.used_business.all():
+        if not Permission.objects.filter(directory__name=bus.code, directory__parent=0, user=mftuser, permission=256).exists():
+            Permission.objects.create(
+                user=mftuser,
+                directory=Directory.objects.get(name=bus.code, parent=0),
+                permission=256,
+                is_confirmed=is_confirmed,
+                created_by=isc_user
+            )
 
 
 def check_directories_minimum_permissions(isc_user, mftuser, is_confirmed=False):
@@ -800,8 +821,8 @@ def export_user_with_paths_v2(mftuser, isc_user):
         #         created_by=isc_user,
         #         is_confirmed=True
         #     )
-    check_directory_tree_permission(isc_user=isc_user, mftuser=mftuser, is_confirmed=True)
     check_directories_minimum_permissions(isc_user=isc_user, mftuser=mftuser, is_confirmed=True)
+    check_directory_tree_permission(isc_user=isc_user, mftuser=mftuser, is_confirmed=True)
     permissions = Permission.objects.filter(user=mftuser, is_confirmed=True).exclude(directory__index_code__code='-1', directory__children='')
     for item in permissions.filter(directory__index_code__code='-1'):
         if not permissions.filter(directory__id__in=[int(i) for i in item.directory.children.split(',')[:-1]]).exists():

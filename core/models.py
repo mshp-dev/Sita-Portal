@@ -147,6 +147,8 @@ class MftUser(models.Model):
     officephone                  = models.DecimalField(max_digits=8, decimal_places=0, blank=False, default=12345678)
     mobilephone                  = models.DecimalField(max_digits=11, decimal_places=0, blank=False, default=9123456789)
     business                     = models.ManyToManyField(BusinessCode) #, to_field='code', blank=False, default='NAHAB', on_delete=models.CASCADE)
+    owned_business               = models.ManyToManyField(BusinessCode, related_name='owned_business')
+    used_business                = models.ManyToManyField(BusinessCode, related_name='used_business')
     organization                 = models.ForeignKey(BankIdentifierCode, to_field='code', blank=False, default='_ISC', on_delete=models.CASCADE)
     description                  = models.TextField(max_length=1000, blank=True)
     # home_dir                     = models.CharField(max_length=500, blank=True)
@@ -160,23 +162,34 @@ class MftUser(models.Model):
     is_confirmed                 = models.BooleanField(blank=False, default=False)
 
     def get_owned_business(self):
-        bus_list = [bus for bus in self.business.all()]
+        bus_list = [bus for bus in self.owned_business.all()]
         buss = ""
         for b in bus_list:
             buss += f'{b.code},'
         return buss[:-1]
 
     def get_used_business(self, obj=False):
-        bus_list = BusinessCode.objects.all().exclude(code__in=self.business.all().values('code')).values('code')
-        bus_dirs = Directory.objects.filter(parent=0, business__code__in=bus_list)
+        bus_list = [bus for bus in self.used_business.all()]
         if obj:
-            return Permission.objects.filter(user=self.id, directory__parent=0, directory__business__code__in=bus_list).values('directory__business__description')
+            return self.used_business.all().values('description')
         else:
             buss = ""
-            for bus_dir in bus_dirs:
-                if Permission.objects.filter(user=self.id, directory=bus_dir.id).exists():
-                    buss += f'{bus_dir.business.code},'
+            for b in bus_list:
+                buss += f'{b.code},'
             return buss[:-1]
+
+    def set_all_owned_business(self):
+        for bus in self.business.all():
+            self.owned_business.add(bus)
+        self.save()
+
+    def set_all_used_business(self):
+        bus_list = BusinessCode.objects.all().exclude(code__in=self.business.all().values('code')).values('code')
+        bus_dirs = Directory.objects.filter(parent=0, business__code__in=bus_list)
+        for bus_dir in bus_dirs:
+            if Permission.objects.filter(user=self.id, directory=bus_dir.id).exists():
+                self.used_business.add(bus_dir.business)
+        self.save()
     
     def set_max_sessions_unlimited(self):
         self.max_sessions = -1
@@ -202,6 +215,8 @@ class MftUserTemp(models.Model):
     officephone      = models.DecimalField(max_digits=8, decimal_places=0, blank=False, default=12345678)
     mobilephone      = models.DecimalField(max_digits=11, decimal_places=0, blank=False, default=9123456789)
     business         = models.ManyToManyField(BusinessCode) #, to_field='code', blank=False, default='NAHAB', on_delete=models.CASCADE)
+    owned_business   = models.ManyToManyField(BusinessCode, related_name='temp_owned_business')
+    used_business    = models.ManyToManyField(BusinessCode, related_name='temp_used_business')
     organization     = models.ForeignKey(BankIdentifierCode, to_field='code', blank=False, default='_ISC', on_delete=models.CASCADE)
     description      = models.TextField(max_length=1000, blank=True)
     # home_dir         = models.CharField(max_length=500, blank=True)
@@ -214,11 +229,43 @@ class MftUserTemp(models.Model):
     is_confirmed     = models.BooleanField(blank=False, default=False)
 
     def get_owned_business(self):
-        bus_list = [bus for bus in self.business.all()]
+        bus_list = [bus for bus in self.owned_business.all()]
         buss = ""
         for b in bus_list:
             buss += f'{b.code},'
         return buss[:-1]
+
+    def get_used_business(self, obj=False):
+        bus_list = [bus for bus in self.used_business.all()]
+        if obj:
+            return self.used_business.all().values('description')
+        else:
+            buss = ""
+            for b in bus_list:
+                buss += f'{b.code},'
+            return buss[:-1]
+
+    def set_all_owned_business(self):
+        for bus in self.business.all():
+            self.owned_business.add(bus)
+        self.save()
+
+    def set_all_used_business(self):
+        bus_list = BusinessCode.objects.all().exclude(code__in=self.business.all().values('code')).values('code')
+        bus_dirs = Directory.objects.filter(parent=0, business__code__in=bus_list)
+        for bus_dir in bus_dirs:
+            if Permission.objects.filter(user=self.id, directory=bus_dir.id).exists():
+                self.used_business.add(bus_dir.business)
+        self.save()
+    
+    def set_max_sessions_unlimited(self):
+        self.max_sessions = -1
+    
+    def is_max_sessions_unlimited(self):
+        if self.max_sessions == -1:
+            return True
+        else:
+            return False
 
     def __str__(self):
         return f'{self.username} ({self.organization})'

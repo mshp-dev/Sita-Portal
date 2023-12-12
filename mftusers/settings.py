@@ -215,6 +215,11 @@ LOGGING = {
             'backupCount': 2,
             'formatter': 'detailed',
         },
+        # 'console': {
+        #     'class': 'logging.StreamHandler',
+        #     'stream': sys.stdout,
+        #     'formatter': 'detailed',
+        # },
     },
     'root': {
         'handlers': ['file'],

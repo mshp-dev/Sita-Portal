@@ -353,7 +353,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
                 # mftuser_temp.created_by = mftuser_origin.created_by,
                 # mftuser_temp.disk_quota = mftuser_origin.disk_quota,
                 mftuser_temp.alias = mftuser_origin.alias
-                mftuser_temp.business.clear()
+                mftuser_temp.owned_business.clear()
             mftuser_temp.save()
             logger.info(f'mftuser {mftuser_origin.username} edited by {isc_user.user.username}{max_sessions}.', request)
             no_project_bus = BusinessCode.objects.get(code='NO_PROJECT')
@@ -378,19 +378,19 @@ def mftuser_details_view(request, id, *args, **kwargs):
                 msg = '<strong>اطلاعات کاربر بروزرسانی شد</strong>'
                 success = True
             else:
-                for bus in mftuser_origin.business.all():
-                    mftuser_temp.business.add(bus)
-                dirs = [Directory.objects.get(business=b, parent=0) for b in mftuser_temp.business.all()]
-                dirs_ = []
-                for d in dirs:
-                    dirs_.append(d)
-                    dirs_.append(Directory.objects.get(relative_path=f'{d.business.code}/{mftuser_origin.organization.directory_name}'))
-                Permission.objects.filter(directory__parent=0).delete()
-                mftuser_origin.business.clear()
+                for bus in mftuser_origin.owned_business.all():
+                    mftuser_temp.owned_business.add(bus)
+                # dirs = [Directory.objects.get(business=b, parent=0) for b in mftuser_temp.owned_business.all()]
+                # dirs_ = []
+                # for d in dirs:
+                #     dirs_.append(d)
+                #     dirs_.append(Directory.objects.get(relative_path=f'{d.business.code}/{mftuser_origin.organization.directory_name}'))
+                Permission.objects.filter(directory__parent=0, user=mftuser_origin).delete()
+                mftuser_origin.owned_business.clear()
                 for b in form.cleaned_data.get('business'):
                     bus = BusinessCode.objects.get(id=int(b))
                     if Directory.objects.filter(relative_path=f'{bus.code}/{mftuser_origin.organization.directory_name}').exists():
-                        mftuser_origin.business.add(bus)
+                        mftuser_origin.owned_business.add(bus)
                         logger.info(f'{isc_user.user.username} added business {bus.code} for mftuser {mftuser_origin.username}.', request)
                         # create_default_permission(
                         #     isc_user=isc_user,
