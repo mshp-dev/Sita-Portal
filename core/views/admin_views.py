@@ -214,7 +214,7 @@ def manage_data_view(request, uid=-1, *args, **kwargs):
                 else:
                     for inv in invoices:
                         # mftuser = inv.get_mftuser()
-                        buss = [bus.description for bus in inv.mftuser.business.all()]
+                        buss = [bus.description for bus in inv.mftuser.owned_business.all()]
                         if query in inv.mftuser.username or query in inv.mftuser.alias or query in inv.mftuser.organization.description or query in inv.serial_number or query in inv.created_by.user.username or query in inv.get_jalali_created_at() or query in buss:
                             filtered_invs['invoices'].append(inv.id)
                     for inv in pre_invoices:
@@ -529,8 +529,8 @@ def entities_confirm_view(request, id, *args, **kwargs):
             try:
                 entity = request.POST.get('entity')
                 if entity == "mftuser":
-                    if MftUserTemp.objects.filter(username=mftuser.username).exists():
-                        MftUserTemp.objects.filter(username=mftuser.username).delete()
+                    # if MftUserTemp.objects.filter(username=mftuser.username).exists():
+                    #     MftUserTemp.objects.filter(username=mftuser.username).delete()
                     MftUser.objects.filter(pk=id).update(is_confirmed=True)
                     logger.info(f'mftuser {mftuser.username} has been confirmed by {isc_user.user.username}.', request)
                     permissions = Permission.objects.filter(user=mftuser)
@@ -585,43 +585,43 @@ def entities_confirm_view(request, id, *args, **kwargs):
                 return JsonResponse(data=response, safe=False, status=status_code)
 
 
-@login_required(login_url="/login/")
-def mftuser_dismiss_changes_view(request, id, *args, **kwargs):
-    isc_user = IscUser.objects.get(user=request.user)
-    mftuser = get_object_or_404(MftUser, pk=id)
+# @login_required(login_url="/login/")
+# def mftuser_dismiss_changes_view(request, id, *args, **kwargs):
+#     isc_user = IscUser.objects.get(user=request.user)
+#     mftuser = get_object_or_404(MftUser, pk=id)
     
-    if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
-        return redirect('/error/401/')
+#     if not isc_user.user.is_staff:
+#         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
+#         return redirect('/error/401/')
 
-    if request.is_ajax():
-        if request.method == 'POST':
-            if MftUserTemp.objects.filter(username=mftuser.username).exists():
-                mftuser_orig = MftUserTemp.objects.get(username=mftuser.username)
-                mftuser.description = mftuser_orig.description
-                # mftuser.username = mftuser_orig.username
-                # mftuser.password = mftuser_orig.password
-                # mftuser.firstname = mftuser_orig.firstname
-                # mftuser.lastname = mftuser_orig.lastname
-                mftuser.email = mftuser_orig.email
-                mftuser.officephone = mftuser_orig.officephone
-                mftuser.mobilephone = mftuser_orig.mobilephone
-                # mftuser.organization = mftuser_orig.organization
-                # mftuser.business = mftuser_orig.business
-                # mftuser.home_dir = mftuser_orig.home_dir
-                mftuser.ipaddr = mftuser_orig.ipaddr
-                mftuser.alias = mftuser_orig.alias
-                mftuser.is_confirmed = mftuser_orig.is_confirmed
-                mftuser.created_by = isc_user
-                mftuser.save()
-                mftuser.business.clear()
-                for b in mftuser_orig.business.all():
-                    mftuser.business.add(b)
-                mftuser_orig.business.clear()
-                mftuser_orig.delete()
+#     if request.is_ajax():
+#         if request.method == 'POST':
+#             if MftUserTemp.objects.filter(username=mftuser.username).exists():
+#                 mftuser_orig = MftUserTemp.objects.get(username=mftuser.username)
+#                 mftuser.description = mftuser_orig.description
+#                 # mftuser.username = mftuser_orig.username
+#                 # mftuser.password = mftuser_orig.password
+#                 # mftuser.firstname = mftuser_orig.firstname
+#                 # mftuser.lastname = mftuser_orig.lastname
+#                 mftuser.email = mftuser_orig.email
+#                 mftuser.officephone = mftuser_orig.officephone
+#                 mftuser.mobilephone = mftuser_orig.mobilephone
+#                 # mftuser.organization = mftuser_orig.organization
+#                 # mftuser.business = mftuser_orig.business
+#                 # mftuser.home_dir = mftuser_orig.home_dir
+#                 mftuser.ipaddr = mftuser_orig.ipaddr
+#                 mftuser.alias = mftuser_orig.alias
+#                 mftuser.is_confirmed = mftuser_orig.is_confirmed
+#                 mftuser.created_by = isc_user
+#                 mftuser.save()
+#                 mftuser.business.clear()
+#                 for b in mftuser_orig.business.all():
+#                     mftuser.business.add(b)
+#                 mftuser_orig.business.clear()
+#                 mftuser_orig.delete()
             
-            response = {'result': 'success', 'dismissed': mftuser.username.replace('.', ''), 'id': mftuser.id}
-            return JsonResponse(data=response, safe=False)
+#             response = {'result': 'success', 'dismissed': mftuser.username.replace('.', ''), 'id': mftuser.id}
+#             return JsonResponse(data=response, safe=False)
 
 
 @login_required(login_url="/login/")
@@ -639,34 +639,35 @@ def mftuser_delete_view(request, id, *args, **kwargs):
     if request.method == 'POST':
         # CustomerAccess.objects.filter(user=isc_user, target_id=id).delete()
         # Permission.objects.filter(user=mftuser).delete()
-        if not MftUserTemp.objects.filter(username=mftuser.username).exists():
-            mftuser_temp = MftUserTemp(
-                description=f'{mftuser.description}%deleted%',
-                username=mftuser.username,
-                password=mftuser.password,
-                firstname=mftuser.firstname,
-                lastname=mftuser.lastname,
-                email=mftuser.email,
-                officephone=mftuser.officephone,
-                mobilephone=mftuser.mobilephone,
-                organization=mftuser.organization,
-                # business=mftuser.business,
-                ipaddr=mftuser.ipaddr,
-                # home_dir=mftuser.home_dir,
-                alias=mftuser.alias,
-                is_confirmed=mftuser.is_confirmed,
-                created_by=isc_user
-            )
-        else:
-            mftuser_temp = MftUserTemp.objects.get(username=mftuser.username)
-            mftuser_temp.description = f'{mftuser.description}%deleted%'
-            mftuser_temp.business.clear()
+        # if not MftUserTemp.objects.filter(username=mftuser.username).exists():
+        #     mftuser_temp = MftUserTemp(
+        #         description=f'{mftuser.description}%deleted%',
+        #         username=mftuser.username,
+        #         password=mftuser.password,
+        #         firstname=mftuser.firstname,
+        #         lastname=mftuser.lastname,
+        #         email=mftuser.email,
+        #         officephone=mftuser.officephone,
+        #         mobilephone=mftuser.mobilephone,
+        #         organization=mftuser.organization,
+        #         # business=mftuser.business,
+        #         ipaddr=mftuser.ipaddr,
+        #         # home_dir=mftuser.home_dir,
+        #         alias=mftuser.alias,
+        #         is_confirmed=mftuser.is_confirmed,
+        #         created_by=isc_user
+        #     )
+        # else:
+        #     mftuser_temp = MftUserTemp.objects.get(username=mftuser.username)
+        #     mftuser_temp.description = f'{mftuser.description}%deleted%'
+        #     mftuser_temp.business.clear()
         
-        mftuser_temp.save()
-        for b in mftuser.business.all():
-            mftuser_temp.business.add(b)
+        # mftuser_temp.save()
+        # for b in mftuser.business.all():
+        #     mftuser_temp.business.add(b)
         msg = f'کاربر {mftuser.username} موقتاً حذف شد، منتظر تأیید مدیر سیستم باشید.'
-        mftuser.business.clear()
+        mftuser.owned_business.clear()
+        mftuser.used_business.clear()
         mftuser.delete()
         #TODO: delete invoices of this user
         logger.info(f'mftuser {mftuser.username} deleted by {isc_user.user.username}.', request)
@@ -687,62 +688,62 @@ def mftuser_delete_view(request, id, *args, **kwargs):
     return render(request, "core/mftuser-form.html", context)
 
 
-@login_required(login_url="/login/")
-def mftuser_restore_or_delete_view(request, id, *args, **kwargs):
-    msg = None
-    success = False
-    isc_user = IscUser.objects.get(user=request.user)
-    mftuser = get_object_or_404(MftUserTemp, pk=id)
-    action = request.POST.get('action')
+# @login_required(login_url="/login/")
+# def mftuser_restore_or_delete_view(request, id, *args, **kwargs):
+#     msg = None
+#     success = False
+#     isc_user = IscUser.objects.get(user=request.user)
+#     mftuser = get_object_or_404(MftUserTemp, pk=id)
+#     action = request.POST.get('action')
     
-    if not isc_user.user.is_staff:
-        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
-        return redirect('/error/401/')
+#     if not isc_user.user.is_staff:
+#         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
+#         return redirect('/error/401/')
 
-    if request.is_ajax():
-        if request.method == 'POST':
-            try:
-                response = {'result': 'success', 'object': mftuser.username.replace('.', '')}
-                if action == 'restore':
-                    description = mftuser.description.replace("%deleted%", "")
-                    mftuser_new = MftUser(
-                        username=mftuser.username,
-                        password=mftuser.password,
-                        firstname=mftuser.firstname,
-                        lastname=mftuser.lastname,
-                        email=mftuser.email,
-                        officephone=mftuser.officephone,
-                        mobilephone=mftuser.mobilephone,
-                        organization=mftuser.organization,
-                        # business=mftuser.business,
-                        # home_dir=mftuser.home_dir,
-                        ipaddr=mftuser.ipaddr,
-                        # disk_quota=mftuser.disk_quota,
-                        alias=mftuser.alias,
-                        description=description,
-                        is_confirmed=mftuser.is_confirmed,
-                        created_by=isc_user
-                    )
-                    mftuser_new.save()
-                    logger.info(f'mftuser {mftuser_new.username} restored by {isc_user.user.username}.', request)
-                    for b in mftuser.business.all():
-                        if Directory.objects.filter(relative_path=f'{b.code}/{mftuser_new.organization.directory_name}').exists():
-                            mftuser_new.business.add(b)
-                            create_default_permission(
-                                isc_user=isc_user,
-                                mftuser=mftuser_new,
-                                last_dir=Directory.objects.get(relative_path=f'{b.code}/{mftuser_new.organization.directory_name}'),
-                                home_dir=True,
-                                business=b,
-                                preconfirmed=True
-                            )
-                mftuser.business.clear()
-                mftuser.delete()
-                return JsonResponse(data=response, safe=False)
-            except Exception as e:
-                logger.error(e, request)
-                response = {'result': 'error'}
-                return JsonResponse(data=response, safe=False)
+#     if request.is_ajax():
+#         if request.method == 'POST':
+#             try:
+#                 response = {'result': 'success', 'object': mftuser.username.replace('.', '')}
+#                 if action == 'restore':
+#                     description = mftuser.description.replace("%deleted%", "")
+#                     mftuser_new = MftUser(
+#                         username=mftuser.username,
+#                         password=mftuser.password,
+#                         firstname=mftuser.firstname,
+#                         lastname=mftuser.lastname,
+#                         email=mftuser.email,
+#                         officephone=mftuser.officephone,
+#                         mobilephone=mftuser.mobilephone,
+#                         organization=mftuser.organization,
+#                         # business=mftuser.business,
+#                         # home_dir=mftuser.home_dir,
+#                         ipaddr=mftuser.ipaddr,
+#                         # disk_quota=mftuser.disk_quota,
+#                         alias=mftuser.alias,
+#                         description=description,
+#                         is_confirmed=mftuser.is_confirmed,
+#                         created_by=isc_user
+#                     )
+#                     mftuser_new.save()
+#                     logger.info(f'mftuser {mftuser_new.username} restored by {isc_user.user.username}.', request)
+#                     for b in mftuser.business.all():
+#                         if Directory.objects.filter(relative_path=f'{b.code}/{mftuser_new.organization.directory_name}').exists():
+#                             mftuser_new.business.add(b)
+#                             create_default_permission(
+#                                 isc_user=isc_user,
+#                                 mftuser=mftuser_new,
+#                                 last_dir=Directory.objects.get(relative_path=f'{b.code}/{mftuser_new.organization.directory_name}'),
+#                                 home_dir=True,
+#                                 business=b,
+#                                 preconfirmed=True
+#                             )
+#                 mftuser.business.clear()
+#                 mftuser.delete()
+#                 return JsonResponse(data=response, safe=False)
+#             except Exception as e:
+#                 logger.error(e, request)
+#                 response = {'result': 'error'}
+#                 return JsonResponse(data=response, safe=False)
 
 
 @login_required(login_url="/login/")

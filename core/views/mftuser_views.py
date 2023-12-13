@@ -87,7 +87,7 @@ def mftuser_create_view(request, *args, **kwargs):
                 for b in form.cleaned_data.get('business'):
                     bus = BusinessCode.objects.get(id=int(b))
                     if Directory.objects.filter(relative_path=f'{bus.code}/{mftuser.organization.directory_name}').exists():
-                        mftuser.business.add(bus)
+                        mftuser.owned_business.add(bus)
                         # create_default_permission(
                         #     isc_user=isc_user,
                         #     mftuser=mftuser,
@@ -105,9 +105,9 @@ def mftuser_create_view(request, *args, **kwargs):
                 # else:
                     # mftuser.description = f'{mftuser.organization}'
                 buss = ''
-                for bus in mftuser.business.all():
+                for bus in mftuser.owned_business.all():
                     buss += f'{str(bus)}،'
-                project = "سامانه های" if mftuser.business.all().count() > 1 else "سامانه"
+                project = "سامانه های" if mftuser.owned_business.all().count() > 1 else "سامانه"
                 mftuser.description = f'{project} {buss[:-1]}'
             mftuser.save()
             msg = f'<p>کاربر {mftuser.username} ایجاد شد.<p><br >{bus_error}'
@@ -233,7 +233,7 @@ def mftusers_list_view(request, *args, **kwargs):
         if OperationBusiness.objects.filter(user=isc_user, owned_by_user=True).exists():
             accesses = OperationBusiness.objects.filter(user=isc_user, owned_by_user=True)
             u_buss = [a.access_on_bus for a in accesses]
-            mftusers = MftUser.objects.filter(business__in=u_buss).order_by('username').distinct()
+            mftusers = MftUser.objects.filter(owned_business__in=u_buss).order_by('username').distinct()
         else:
             mftusers = MftUser.objects.filter(created_by=isc_user).order_by('username')
     else:
@@ -271,7 +271,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
     
     #  if mftuser.organization.code == '_ISC' else get_specific_root_dir(mftuser.organization.code)
     
-    if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=mftuser.business.all()).exists() and mftuser.created_by != isc_user:
+    if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=mftuser.owned_business.all()).exists() and mftuser.created_by != isc_user:
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
@@ -316,118 +316,94 @@ def mftuser_details_view(request, id, *args, **kwargs):
                 unlimited_sessions_is_disabled = True
             mftuser.max_sessions = 2
             mftuser_origin = MftUser.objects.get(username=mftuser.username)
-            if not MftUserTemp.objects.filter(username=mftuser_origin.username).exists():
-                mftuser_temp = MftUserTemp(
-                    description=mftuser_origin.description,
-                    username=mftuser_origin.username,
-                    password=mftuser_origin.password,
-                    firstname=mftuser_origin.firstname,
-                    lastname=mftuser_origin.lastname,
-                    email=mftuser_origin.email,
-                    officephone=mftuser_origin.officephone,
-                    mobilephone=mftuser_origin.mobilephone,
-                    organization=mftuser_origin.organization,
-                    # business=mftuser_origin.business,
-                    # home_dir=mftuser_origin.home_dir,
-                    ipaddr=mftuser_origin.ipaddr,
-                    max_sessions=mftuser_origin.max_sessions,
-                    # disk_quota=mftuser_origin.disk_quota,
-                    alias=mftuser_origin.alias,
-                    created_by=isc_user
-                )
-            else:
-                mftuser_temp = MftUserTemp.objects.get(username=mftuser_origin.username)
-                # mftuser_temp.description = mftuser_origin.description
-                # mftuser_temp.username = mftuser_origin.username,
-                # mftuser_temp.password = mftuser_origin.password,
-                # mftuser_temp.firstname = mftuser_origin.firstname,
-                # mftuser_temp.lastname = mftuser_origin.lastname,
-                mftuser_temp.email = mftuser_origin.email
-                mftuser_temp.officephone = mftuser_origin.officephone
-                mftuser_temp.mobilephone = mftuser_origin.mobilephone
-                # mftuser_temp.organization = mftuser_origin.organization,
-                # mftuser_temp.business = mftuser_origin.business,
-                # mftuser_temp.home_dir = mftuser_origin.home_dir,
-                mftuser_temp.ipaddr = mftuser_origin.ipaddr
-                mftuser_temp.max_sessions = mftuser_origin.max_sessions
-                # mftuser_temp.created_by = mftuser_origin.created_by,
-                # mftuser_temp.disk_quota = mftuser_origin.disk_quota,
-                mftuser_temp.alias = mftuser_origin.alias
-                mftuser_temp.owned_business.clear()
-            mftuser_temp.save()
+            # if not MftUserTemp.objects.filter(username=mftuser_origin.username).exists():
+                #     mftuser_temp = MftUserTemp(
+                #         description=mftuser_origin.description,
+                #         username=mftuser_origin.username,
+                #         password=mftuser_origin.password,
+                #         firstname=mftuser_origin.firstname,
+                #         lastname=mftuser_origin.lastname,
+                #         email=mftuser_origin.email,
+                #         officephone=mftuser_origin.officephone,
+                #         mobilephone=mftuser_origin.mobilephone,
+                #         organization=mftuser_origin.organization,
+                #         # business=mftuser_origin.business,
+                #         # home_dir=mftuser_origin.home_dir,
+                #         ipaddr=mftuser_origin.ipaddr,
+                #         max_sessions=mftuser_origin.max_sessions,
+                #         # disk_quota=mftuser_origin.disk_quota,
+                #         alias=mftuser_origin.alias,
+                #         created_by=isc_user
+                #     )
+                # else:
+                #     mftuser_temp = MftUserTemp.objects.get(username=mftuser_origin.username)
+                #     # mftuser_temp.description = mftuser_origin.description
+                #     # mftuser_temp.username = mftuser_origin.username,
+                #     # mftuser_temp.password = mftuser_origin.password,
+                #     # mftuser_temp.firstname = mftuser_origin.firstname,
+                #     # mftuser_temp.lastname = mftuser_origin.lastname,
+                #     mftuser_temp.email = mftuser_origin.email
+                #     mftuser_temp.officephone = mftuser_origin.officephone
+                #     mftuser_temp.mobilephone = mftuser_origin.mobilephone
+                #     # mftuser_temp.organization = mftuser_origin.organization,
+                #     # mftuser_temp.business = mftuser_origin.business,
+                #     # mftuser_temp.home_dir = mftuser_origin.home_dir,
+                #     mftuser_temp.ipaddr = mftuser_origin.ipaddr
+                #     mftuser_temp.max_sessions = mftuser_origin.max_sessions
+                #     # mftuser_temp.created_by = mftuser_origin.created_by,
+                #     # mftuser_temp.disk_quota = mftuser_origin.disk_quota,
+                #     mftuser_temp.alias = mftuser_origin.alias
+                #     mftuser_temp.owned_business.clear()
+                # mftuser_temp.save()
             logger.info(f'mftuser {mftuser_origin.username} edited by {isc_user.user.username}{max_sessions}.', request)
             no_project_bus = BusinessCode.objects.get(code='NO_PROJECT')
+            owned_buss = [bus.code for bus in mftuser_origin.owned_business.all()]
+            Permission.objects.filter(directory__parent=0, directory__name__in=owned_buss, user=mftuser_origin).delete()
+            mftuser_origin.owned_business.clear()
+            mftuser_origin.is_confirmed = False
+            mftuser_origin.email = mftuser.email
+            mftuser_origin.description = mftuser.description
+            mftuser_origin.officephone = mftuser.officephone
+            mftuser_origin.mobilephone = mftuser.mobilephone
+            mftuser_origin.alias = mftuser.alias
+            mftuser_origin.ipaddr = mftuser.ipaddr
+            mftuser_origin.max_sessions = mftuser.max_sessions #2 if unlimited_sessions_is_disabled else 
+            # if unlimited_sessions_is_disabled :
+            #     mftuser_origin.password_expiration_interval = -1
+            # mftuser_origin.disk_quota=mftuser.disk_quota
+            mftuser_origin.modified_at = timezone.now()
+            mftuser_origin.save()
             if str(no_project_bus.id) in form.cleaned_data.get('business'):
-                mftuser_temp.business.clear()
-                Permission.objects.filter(directory__parent=0).delete()
-                mftuser_origin.business.clear()
+                # mftuser_temp.business.clear()
                 logger.info(f'mftuser {mftuser.username} has NO_PROJECT access.', request)
-                mftuser_origin.is_confirmed = False
-                mftuser_origin.email = mftuser.email
-                mftuser_origin.description = mftuser.description
-                mftuser_origin.officephone = mftuser.officephone
-                mftuser_origin.mobilephone = mftuser.mobilephone
-                mftuser_origin.alias = mftuser.alias
-                mftuser_origin.ipaddr = mftuser.ipaddr
-                mftuser_origin.max_sessions = mftuser.max_sessions #2 if unlimited_sessions_is_disabled else 
-                # if unlimited_sessions_is_disabled :
-                #     mftuser_origin.password_expiration_interval = -1
-                # mftuser_origin.disk_quota=mftuser.disk_quota
-                mftuser_origin.modified_at = timezone.now()
-                mftuser_origin.save()
                 msg = '<strong>اطلاعات کاربر بروزرسانی شد</strong>'
-                success = True
+                # success = True
             else:
-                for bus in mftuser_origin.owned_business.all():
-                    mftuser_temp.owned_business.add(bus)
+                # for bus in mftuser_origin.owned_business.all():
+                #     mftuser_temp.owned_business.add(bus)
                 # dirs = [Directory.objects.get(business=b, parent=0) for b in mftuser_temp.owned_business.all()]
                 # dirs_ = []
                 # for d in dirs:
                 #     dirs_.append(d)
                 #     dirs_.append(Directory.objects.get(relative_path=f'{d.business.code}/{mftuser_origin.organization.directory_name}'))
-                Permission.objects.filter(directory__parent=0, user=mftuser_origin).delete()
-                mftuser_origin.owned_business.clear()
+                msg = ''
                 for b in form.cleaned_data.get('business'):
                     bus = BusinessCode.objects.get(id=int(b))
                     if Directory.objects.filter(relative_path=f'{bus.code}/{mftuser_origin.organization.directory_name}').exists():
                         mftuser_origin.owned_business.add(bus)
+                        Permission.objects.create(
+                            created_by=isc_user,
+                            user=mftuser_origin,
+                            directory=Directory.objects.get(name=bus.code, parent=0),
+                            is_confirmed=True
+                        )
                         logger.info(f'{isc_user.user.username} added business {bus.code} for mftuser {mftuser_origin.username}.', request)
-                        # create_default_permission(
-                        #     isc_user=isc_user,
-                        #     mftuser=mftuser_origin,
-                        #     last_dir=Directory.objects.get(relative_path=f'{bus.code}/{mftuser_origin.organization.directory_name}'),
-                        #     business=bus,
-                        #     home_dir=True
-                        # )
-                        mftuser_origin.is_confirmed = False
-                        mftuser_origin.email = mftuser.email
-                        mftuser_origin.description = mftuser.description
-                        mftuser_origin.officephone = mftuser.officephone
-                        mftuser_origin.mobilephone = mftuser.mobilephone
-                        mftuser_origin.alias = mftuser.alias
-                        mftuser_origin.ipaddr = mftuser.ipaddr
-                        mftuser_origin.max_sessions = mftuser.max_sessions #2 if unlimited_sessions_is_disabled else 
-                        # if unlimited_sessions_is_disabled :
-                        #     mftuser_origin.password_expiration_interval = -1
-                        # mftuser_origin.disk_quota=mftuser.disk_quota
-                        mftuser_origin.modified_at = timezone.now()
-                        mftuser_origin.save()
-                        msg = '<strong>اطلاعات کاربر بروزرسانی شد</strong>'
-                        success = True
+                        # success = True
                     else:
                         logger.error(f'directory in {bus.code}/{mftuser_origin.organization.directory_name} does not exists.', request)
-                        mftuser_origin.email = mftuser_temp.email
-                        mftuser_origin.description = mftuser_temp.description
-                        mftuser_origin.officephone = mftuser_temp.officephone
-                        mftuser_origin.mobilephone = mftuser_temp.mobilephone
-                        mftuser_origin.alias = mftuser_temp.alias
-                        mftuser_origin.ipaddr = mftuser_temp.ipaddr
-                        mftuser_origin.max_sessions = mftuser_temp.max_sessions
-                        # mftuser_origin.disk_quota=mftuser_temp.disk_quota
-                        mftuser_origin.modified_at = mftuser_temp.modified_at
-                        mftuser_origin.save()
-                        mftuser_temp.delete()
-                        msg = '<strong>امکان تغییر پروژه/سامانه کاربر نمی باشد</strong>'
+                        msg += f'<strong>امکان افزودن پروژه/سامانه {bus.description} نمی باشد</strong>'
+                msg += '<strong>اطلاعات کاربر بروزرسانی شد</strong>'
+                mftuser_origin.save()
         else:
             msg = form.errors
 
@@ -538,10 +514,11 @@ def mftuser_access_view(request, uid, rid=-1, dir_name="", *args, **kwargs):
 
     if isc_user.role.code == 'ADMIN':
         if rid != -1:
-            buss = list(mftuser.business.all())
-            u_buss_perms = Permission.objects.filter(~Q(directory__business__in=buss), directory__parent=0, user=mftuser).values('directory__business')
-            for ubp in u_buss_perms:
-                buss.append(BusinessCode.objects.get(code=ubp['directory__business']))
+            buss = list(mftuser.owned_business.all())
+            buss += list(mftuser.used_business.all())
+            # u_buss_perms = Permission.objects.filter(~Q(directory__business__in=buss), directory__parent=0, user=mftuser).values('directory__business')
+            # for ubp in u_buss_perms:
+            #     buss.append(BusinessCode.objects.get(code=ubp['directory__business']))
             elements = get_specific_root_dir(buss, bic)
         else:
             elements = get_all_dirs(isc_user)
@@ -551,11 +528,12 @@ def mftuser_access_view(request, uid, rid=-1, dir_name="", *args, **kwargs):
             o_buss = OperationBusiness.objects.filter(user=isc_user, owned_by_user=False).order_by('access_on_bus')
             if o_buss.count() > 0:
                 used_buss = [{'value': f'{ob.access_on_bus.id}', 'name': f'{ob.access_on_bus}'} for ob in o_buss]
-            for bus in mftuser.business.all():
+            for bus in mftuser.owned_business.all():
                 if bus in owned_buss:
                     buss.append(bus)
         elif isc_user.role.code == 'CUSTOMER':
-            buss = mftuser.business.all()
+            buss = list(mftuser.owned_business.all())
+            buss += list(mftuser.used_business.all())
         elements = get_specific_root_dir(buss, bic)
 
     permissions = Permission.objects.filter(user=mftuser)
@@ -597,6 +575,7 @@ def mftuser_used_business_access_view(request, uid, bid=-1, *args, **kwargs):
 
     elements = get_specific_root_dir(used_buss, bic)    
     permissions = Permission.objects.filter(user=mftuser)
+    mftuser.used_business.add(bid)
     confirmed = False
     i = len(permissions)
     if i != 0:
@@ -626,7 +605,7 @@ def mftuser_permissions_view(request, uid, did, *args, **kwargs):
     bic = BankIdentifierCode.objects.get(code=mftuser.organization.code)
     # bus = BusinessCode.objects.get(code=mftuser.business.code)
 
-    if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=mftuser.business.all()).exists():
+    if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=mftuser.owned_business.all()).exists():
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
@@ -831,7 +810,7 @@ def mftuser_atomic_permission_view(request, uid, did, *args, **kwargs):
     directory = Directory.objects.get(pk=did)
     bic = BankIdentifierCode.objects.get(code=mftuser.organization.code)
 
-    if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=mftuser.business.all()).exists():
+    if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=mftuser.owned_business.all()).exists():
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 

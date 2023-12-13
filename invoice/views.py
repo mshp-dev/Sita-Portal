@@ -47,17 +47,7 @@ def invoice_create_view(request, *args, **kwargs):
                     if invoice_type.code == 'INVUBUS':
                         bus_dirs = Directory.objects.filter(business=BusinessCode.objects.get(pk=int(request.POST.get('ubus')))).order_by('relative_path')
                     elif invoice_type.code == 'INVOBUS':
-                        bus_dirs = Directory.objects.filter(business__in=mftuser.business.all()).order_by('relative_path')
-                    # for bd in bus_dirs.filter(parent=0):
-                    #     if not Permission.objects.filter(user=mftuser, directory=bd, permission=256).exists():
-                    #         logger.warn(f'default permission on {bd.absolute_path} for {mftuser.username} does not exists.')
-                    #         Permission.objects.create(
-                    #             user=mftuser,
-                    #             directory=bd,
-                    #             permission=256, # List (مشاهده)
-                    #             created_by=isc_user
-                    #         )
-                    #         logger.info(f'list permission on directory {bd.absolute_path} for mftuser {mftuser.username} created by {isc_user.user.username}.')
+                        bus_dirs = Directory.objects.filter(business__in=mftuser.owned_business.all()).order_by('relative_path')
                     check_directories_minimum_permissions(isc_user, mftuser)
                     check_directory_tree_permission(isc_user, mftuser)
                     permissions = Permission.objects.filter(user=mftuser, directory__in=bus_dirs, is_confirmed=False)
@@ -133,9 +123,9 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                 if isc_user.role.code == 'ADMIN':
                     mftuser = MftUser.objects.get(pk=invoice.mftuser.id)
                     buss = ''
-                    for bus in mftuser.business.all():
+                    for bus in mftuser.owned_business.all():
                         buss += f'{str(bus)}،'
-                    project = "سامانه های" if mftuser.business.all().count() > 1 else "سامانه"
+                    project = "سامانه های" if mftuser.owned_business.all().count() > 1 else "سامانه"
                     mftuser.description = f'{project} {buss[:-1]}'
                     mftuser.is_confirmed = True
                     mftuser.modified_at = timezone.now()

@@ -61,7 +61,7 @@
             </tr>
             <tr>
               <th class="col-4" scope="col" id="business-label">سامانه/پروژه{% if not ubus %}ها{% endif %} <span style="font-size: 0.5rem">(3)</span></th>
-              <td class="col-4" scope="col" id="business-value">{% if ubus %}{{ ubus }}{% else %}{{ invoice.mftuser.business.all|get_businesses }}{% endif %}</td>
+              <td class="col-4" scope="col" id="business-value">{% if ubus %}{{ ubus }}{% else %}{{ invoice.mftuser.owned_business.all|get_businesses }}{% endif %}</td>
             </tr>
             <tr>
               <th class="col-4" scope="col" id="description-label">جزئیات</th>

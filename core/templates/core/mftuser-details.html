@@ -212,7 +212,7 @@
                         <span class="ms-8" style="font-size: 0.7rem; font-weight: bold">سامانه/پروژه های انتخاب شده</span>
                       </p>
                       <div class="input-group" style="direction: ltr">
-                        <span class="input-group-text" id="business" bus-id="{{ mftuser.business.all|get_business_ids }}"><span class="fas fa-sitemap"></span></span>
+                        <span class="input-group-text" id="business" bus-id="{{ mftuser.owned_business.all|get_business_ids }}"><span class="fas fa-sitemap"></span></span>
                         <select id="left-business" style="direction: ltr" class="form-control form-select" size="10" parent="business">
                           {% for bus in buss %}
                           <option value="{{ bus.id }}">{{ bus.description }}</option>

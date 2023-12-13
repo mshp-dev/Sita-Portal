@@ -146,7 +146,7 @@ class MftUser(models.Model):
     email                        = models.EmailField(max_length=120, blank=False)
     officephone                  = models.DecimalField(max_digits=8, decimal_places=0, blank=False, default=12345678)
     mobilephone                  = models.DecimalField(max_digits=11, decimal_places=0, blank=False, default=9123456789)
-    business                     = models.ManyToManyField(BusinessCode) #, to_field='code', blank=False, default='NAHAB', on_delete=models.CASCADE)
+    # business                     = models.ManyToManyField(BusinessCode) #, to_field='code', blank=False, default='NAHAB', on_delete=models.CASCADE)
     owned_business               = models.ManyToManyField(BusinessCode, related_name='owned_business')
     used_business                = models.ManyToManyField(BusinessCode, related_name='used_business')
     organization                 = models.ForeignKey(BankIdentifierCode, to_field='code', blank=False, default='_ISC', on_delete=models.CASCADE)
@@ -204,71 +204,71 @@ class MftUser(models.Model):
         return f'{self.username} ({self.organization})'
 
 
-class MftUserTemp(models.Model):
-    id               = models.AutoField(primary_key=True)
-    username         = models.CharField(max_length=101, blank=False)
-    alias            = models.CharField(max_length=100, blank=True, default='')
-    password         = models.CharField(max_length=255, blank=False, default='Isc@12345678')
-    firstname        = models.CharField(max_length=50, blank=True)
-    lastname         = models.CharField(max_length=50, blank=True)
-    email            = models.EmailField(max_length=120, blank=False)
-    officephone      = models.DecimalField(max_digits=8, decimal_places=0, blank=False, default=12345678)
-    mobilephone      = models.DecimalField(max_digits=11, decimal_places=0, blank=False, default=9123456789)
-    business         = models.ManyToManyField(BusinessCode) #, to_field='code', blank=False, default='NAHAB', on_delete=models.CASCADE)
-    owned_business   = models.ManyToManyField(BusinessCode, related_name='temp_owned_business')
-    used_business    = models.ManyToManyField(BusinessCode, related_name='temp_used_business')
-    organization     = models.ForeignKey(BankIdentifierCode, to_field='code', blank=False, default='_ISC', on_delete=models.CASCADE)
-    description      = models.TextField(max_length=1000, blank=True)
-    # home_dir         = models.CharField(max_length=500, blank=True)
-    ipaddr           = models.CharField(max_length=15, blank=True)
-    max_sessions     = models.IntegerField(blank=True, default=2)
-    # disk_quota       = models.IntegerField(blank=False, default=100)
-    created_by       = models.ForeignKey(IscUser, blank=False, default=User.objects.get(id=1).id, on_delete=models.CASCADE)
-    created_at       = models.DateTimeField(default=timezone.now)
-    modified_at      = models.DateTimeField(default=timezone.now)
-    is_confirmed     = models.BooleanField(blank=False, default=False)
+# class MftUserTemp(models.Model):
+#     id               = models.AutoField(primary_key=True)
+#     username         = models.CharField(max_length=101, blank=False)
+#     alias            = models.CharField(max_length=100, blank=True, default='')
+#     password         = models.CharField(max_length=255, blank=False, default='Isc@12345678')
+#     firstname        = models.CharField(max_length=50, blank=True)
+#     lastname         = models.CharField(max_length=50, blank=True)
+#     email            = models.EmailField(max_length=120, blank=False)
+#     officephone      = models.DecimalField(max_digits=8, decimal_places=0, blank=False, default=12345678)
+#     mobilephone      = models.DecimalField(max_digits=11, decimal_places=0, blank=False, default=9123456789)
+#     business         = models.ManyToManyField(BusinessCode) #, to_field='code', blank=False, default='NAHAB', on_delete=models.CASCADE)
+#     owned_business   = models.ManyToManyField(BusinessCode, related_name='temp_owned_business')
+#     used_business    = models.ManyToManyField(BusinessCode, related_name='temp_used_business')
+#     organization     = models.ForeignKey(BankIdentifierCode, to_field='code', blank=False, default='_ISC', on_delete=models.CASCADE)
+#     description      = models.TextField(max_length=1000, blank=True)
+#     # home_dir         = models.CharField(max_length=500, blank=True)
+#     ipaddr           = models.CharField(max_length=15, blank=True)
+#     max_sessions     = models.IntegerField(blank=True, default=2)
+#     # disk_quota       = models.IntegerField(blank=False, default=100)
+#     created_by       = models.ForeignKey(IscUser, blank=False, default=User.objects.get(id=1).id, on_delete=models.CASCADE)
+#     created_at       = models.DateTimeField(default=timezone.now)
+#     modified_at      = models.DateTimeField(default=timezone.now)
+#     is_confirmed     = models.BooleanField(blank=False, default=False)
 
-    def get_owned_business(self):
-        bus_list = [bus for bus in self.owned_business.all()]
-        buss = ""
-        for b in bus_list:
-            buss += f'{b.code},'
-        return buss[:-1]
+#     def get_owned_business(self):
+#         bus_list = [bus for bus in self.owned_business.all()]
+#         buss = ""
+#         for b in bus_list:
+#             buss += f'{b.code},'
+#         return buss[:-1]
 
-    def get_used_business(self, obj=False):
-        bus_list = [bus for bus in self.used_business.all()]
-        if obj:
-            return self.used_business.all().values('description')
-        else:
-            buss = ""
-            for b in bus_list:
-                buss += f'{b.code},'
-            return buss[:-1]
+#     def get_used_business(self, obj=False):
+#         bus_list = [bus for bus in self.used_business.all()]
+#         if obj:
+#             return self.used_business.all().values('description')
+#         else:
+#             buss = ""
+#             for b in bus_list:
+#                 buss += f'{b.code},'
+#             return buss[:-1]
 
-    def set_all_owned_business(self):
-        for bus in self.business.all():
-            self.owned_business.add(bus)
-        self.save()
+#     def set_all_owned_business(self):
+#         for bus in self.business.all():
+#             self.owned_business.add(bus)
+#         self.save()
 
-    def set_all_used_business(self):
-        bus_list = BusinessCode.objects.all().exclude(code__in=self.business.all().values('code')).values('code')
-        bus_dirs = Directory.objects.filter(parent=0, business__code__in=bus_list)
-        for bus_dir in bus_dirs:
-            if Permission.objects.filter(user=self.id, directory=bus_dir.id).exists():
-                self.used_business.add(bus_dir.business)
-        self.save()
+#     def set_all_used_business(self):
+#         bus_list = BusinessCode.objects.all().exclude(code__in=self.business.all().values('code')).values('code')
+#         bus_dirs = Directory.objects.filter(parent=0, business__code__in=bus_list)
+#         for bus_dir in bus_dirs:
+#             if Permission.objects.filter(user=self.id, directory=bus_dir.id).exists():
+#                 self.used_business.add(bus_dir.business)
+#         self.save()
     
-    def set_max_sessions_unlimited(self):
-        self.max_sessions = -1
+#     def set_max_sessions_unlimited(self):
+#         self.max_sessions = -1
     
-    def is_max_sessions_unlimited(self):
-        if self.max_sessions == -1:
-            return True
-        else:
-            return False
+#     def is_max_sessions_unlimited(self):
+#         if self.max_sessions == -1:
+#             return True
+#         else:
+#             return False
 
-    def __str__(self):
-        return f'{self.username} ({self.organization})'
+#     def __str__(self):
+#         return f'{self.username} ({self.organization})'
 
 
 class Directory(models.Model):

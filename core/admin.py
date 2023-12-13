@@ -52,16 +52,16 @@ class IscUserAdmin(admin.ModelAdmin):
 
 class MftUserAdmin(admin.ModelAdmin):
     list_display = ['username', 'email', 'mobilephone', 'organization', 'created_by', 'get_owned_business', 'get_used_business']
-    list_filter = ['is_confirmed', 'organization', 'business', 'created_by']
+    list_filter = ['is_confirmed', 'organization', 'owned_business', 'used_business', 'created_by']
     search_fields = ['username', 'firstname', 'lastname', 'email']
     ordering = ['username']
 
 
-class MftUserTempAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'mobilephone', 'organization', 'get_owned_business', 'created_by', 'is_confirmed']
-    list_filter = ['organization', 'business']
-    search_fields = ['username', 'firstname', 'lastname']
-    ordering = ['username']
+# class MftUserTempAdmin(admin.ModelAdmin):
+#     list_display = ['username', 'email', 'mobilephone', 'organization', 'get_owned_business', 'created_by', 'is_confirmed']
+#     list_filter = ['organization', 'business']
+#     search_fields = ['username', 'firstname', 'lastname']
+#     ordering = ['username']
 
 class DirectoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'relative_path', 'bic', 'index_code', 'created_by']
@@ -111,7 +111,7 @@ admin.site.register(OrganizationType, OrganizationTypeAdmin)
 admin.site.register(DirectoryIndexCode, DirectoryIndexCodeAdmin)
 admin.site.register(IscUser, IscUserAdmin)
 admin.site.register(MftUser, MftUserAdmin)
-admin.site.register(MftUserTemp, MftUserTempAdmin)
+# admin.site.register(MftUserTemp, MftUserTempAdmin)
 admin.site.register(Directory, DirectoryAdmin)
 admin.site.register(Permission, PermissionAdmin)
 # admin.site.register(CustomerAccess, CustomerAccessAdmin)

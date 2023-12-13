@@ -99,8 +99,10 @@ class TransferPermissionsForm(forms.ModelForm):
                 raise ValidationError('کاربر مبدأ توسط شما ایجاد نشده است.')
             if MftUser.objects.get(username=destination_username).created_by != iscuser:
                 raise ValidationError('کاربر مقصد توسط شما ایجاد نشده است.')
-        if str(MftUser.objects.get(username=destination_username).business.all()) != str(MftUser.objects.get(username=origin_username).business.all()):
-            raise ValidationError('پروژه های کاربر مبدأ و مقصد برابر نیستند.')
+        if str(MftUser.objects.get(username=destination_username).owned_business.all()) != str(MftUser.objects.get(username=origin_username).owned_business.all()):
+            raise ValidationError('پروژه های کاربر مبدأ و مقصد برابر نیستند (سامانه های تحت اختیار).')
+        if str(MftUser.objects.get(username=destination_username).used_business.all()) != str(MftUser.objects.get(username=origin_username).used_business.all()):
+            raise ValidationError('پروژه های کاربر مبدأ و مقصد برابر نیستند (سامانه های تحت اختیار سایر گروه ها).')
         
         return cleaned_data
     

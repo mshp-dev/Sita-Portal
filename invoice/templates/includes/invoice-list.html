@@ -59,7 +59,7 @@
                 {% elif invoice.invoice_type.code == 'INVOBUS' %}
                 <span
                   >پروژه/سامانه(ها)ی تحت اختیار:
-                  <span class="display-6 text-info"><strong>{{ invoice.mftuser.business.all|get_businesses }}</strong></span></span
+                  <span class="display-6 text-info"><strong>{{ invoice.mftuser.owned_business.all|get_businesses }}</strong></span></span
                 >
                 {% comment %} {% elif invoice.invoice_type.code == 'INVUNLS' %}
                 <span>

@@ -60,7 +60,10 @@
                   >Organization: <span class="display-6 text-info"><strong> {{ user.organization }}</strong></span></span
                 >
                 <span
-                  >Business: <span class="display-6 text-info"><strong> {{ user.business.all|get_businesses }}</strong></span></span
+                  >OwnedBusiness: <span class="display-6 text-info"><strong> {{ user.owned_business.all|get_businesses }}</strong></span></span
+                >
+                <span
+                  >UsedBusiness: <span class="display-6 text-info"><strong> {{ user.used_business.all|get_businesses }}</strong></span></span
                 >
                 <span
                   >MobilePhone: <span class="display-6 text-info"><strong> {{ user.mobilephone }}</strong></span></span
@@ -256,7 +259,10 @@
                   >سازمان/بانک: <span class="display-6 text-info"><strong> {{ eu.mftuser.organization }}</strong></span></span
                 > {% endcomment %}
                 <span
-                  >پروژه/سامانه(ها): <span class="display-6 text-info"><strong> {{ eu.mftuser.business.all|get_businesses }}</strong></span></span
+                  >سرویس دهنده پروژه/سامانه(ها): <span class="display-6 text-info"><strong> {{ eu.mftuser.owned_business.all|get_businesses }}</strong></span></span
+                >
+                <span
+                  >سرویس گیرنده پروژه/سامانه(ها): <span class="display-6 text-info"><strong> {{ eu.mftuser.used_business.all|get_businesses }}</strong></span></span
                 >
               </div>
               <div class="col">
