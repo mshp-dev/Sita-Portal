@@ -130,7 +130,7 @@ def invoice_confirm_view(request, iid, *args, **kwargs):
                     mftuser.is_confirmed = True
                     mftuser.modified_at = timezone.now()
                     if invoice_type.code == 'INVUNLS':
-                        mftuser.set_max_sessions_unlimited()
+                        mftuser.max_sessions = -1
                         mftuser.password_expiration_interval = invoice.used_business
                     else:
                         perms_list = [int(p) for p in invoice.permissions_list.split(',')[:-1]]

@@ -801,11 +801,11 @@ def export_user_with_paths_v2(mftuser, isc_user):
     name[0].text = mftuser.username
     max_sessions = template.xpath('//webUsers/webUser/maxSessions')
     max_sessions[0].text = str(mftuser.max_sessions)
-    ipFilterEnabled = template.xpath('//webUsers/webUser/ipFilterEnabled')
-    if mftuser.max_sessions == -1:
-        ipFilterEnabled[0].text = 'true'
-    else:
-        ipFilterEnabled[0].text = 'false'
+    # ipFilterEnabled = template.xpath('//webUsers/webUser/ipFilterEnabled')
+    # if mftuser.max_sessions == -1:
+    #     ipFilterEnabled[0].text = 'true'
+    # else:
+    #     ipFilterEnabled[0].text = 'false'
     pass_exp_int = template.xpath('//webUsers/webUser/passwordExpirationInterval')
     pass_exp_int[0].text = str(mftuser.password_expiration_interval)
     ip = template.xpath('//webUsers/webUser/ipFilterEntries/ipFilterEntry/address')

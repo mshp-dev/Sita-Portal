@@ -308,13 +308,13 @@ def mftuser_details_view(request, id, *args, **kwargs):
                     pass_exp=password_expiration_interval
                 )
                 max_sessions = ' with unlimited max sessions'
+                mftuser.max_sessions = -1
                 epx_msg = ' and default (2/two months) expiration interval'
                 if password_expiration_interval != -1:
                     epx_msg = ' and 6/six months expiration interval'
                 max_sessions += epx_msg
             else:
                 unlimited_sessions_is_disabled = True
-            mftuser.max_sessions = 2
             mftuser_origin = MftUser.objects.get(username=mftuser.username)
             # if not MftUserTemp.objects.filter(username=mftuser_origin.username).exists():
                 #     mftuser_temp = MftUserTemp(

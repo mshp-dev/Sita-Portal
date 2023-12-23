@@ -193,6 +193,7 @@ class MftUser(models.Model):
     
     def set_max_sessions_unlimited(self):
         self.max_sessions = -1
+        self.save()
     
     def is_max_sessions_unlimited(self):
         if self.max_sessions == -1:
