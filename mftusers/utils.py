@@ -328,7 +328,7 @@ def check_directory_tree_permission(isc_user, mftuser):
             if non_list_perms.filter(~Q(permission=256)).exists():
                 non_list_perms.delete()
                 pl = [p['permission'] for p in non_list_perms.values('permission')]
-                logger.info(f'permission {pl} of directory {directory.absolute_path} for mftuser {mftuser.username} removed by system.')
+                logger.info(f'permission {pl} of directory {current_dir.absolute_path} for mftuser {mftuser.username} removed by system.')
             if not non_list_perms.filter(permission=256).exists():
                 Permission.objects.create(
                     user=mftuser,

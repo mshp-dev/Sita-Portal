@@ -148,7 +148,7 @@ class MftUser(models.Model):
     mobilephone                  = models.DecimalField(max_digits=11, decimal_places=0, blank=False, default=9123456789)
     # business                     = models.ManyToManyField(BusinessCode) #, to_field='code', blank=False, default='NAHAB', on_delete=models.CASCADE)
     owned_business               = models.ManyToManyField(BusinessCode, related_name='owned_business')
-    used_business                = models.ManyToManyField(BusinessCode, related_name='used_business')
+    used_business                = models.ManyToManyField(BusinessCode, related_name='used_business', blank=False)
     organization                 = models.ForeignKey(BankIdentifierCode, to_field='code', blank=False, default='_ISC', on_delete=models.CASCADE)
     description                  = models.TextField(max_length=1000, blank=True)
     # home_dir                     = models.CharField(max_length=500, blank=True)
