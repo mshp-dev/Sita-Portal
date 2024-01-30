@@ -70,7 +70,7 @@ def invoice_create_view(request, *args, **kwargs):
                     else:
                         response = {
                             'result': 'error',
-                            'message': 'برای ایجاد درخواست چارگون، باید حداقل یک دسترسی ایجاد کنید.'
+                            'message': 'برای ایجاد درخواست چارگون، باید حداقل یک دسترسی (جدید) ایجاد کنید.'
                         }
             except Exception as e:
                 logger.info(f'creating invoice encountered error.', request)

@@ -55,7 +55,7 @@
           alert("فرم چارگون با موفقیت ایجاد شد، شما اکنون به صفحه جزئیات فرم منتقل می شوید.");
           window.location = "/invoices/details/" + response.invoice_id + "/";
         } else if (response.result == "error") {
-          alert("مشکلی پیش آمده است، با مدیر سیستم تماس بگیرید!");
+          alert(response.message);
         }
       }
     );
