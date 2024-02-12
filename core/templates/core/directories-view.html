@@ -518,17 +518,14 @@
                               function (response) {
                                 $("#delete-modal").modal("hide");
                                 if (response.result == "error") {
-                                  alert("خطایی رخ داده است، با مدیر سیستم تماس بگیرید.");
+                                  alert(response.message);
                                 } else if (response.result == "success") {
-                                  //TODO: remove deleted dir from tree without reload
                                   //location.reload();
                                   var currentDirName = document.getElementById("current-dir-name");
                                   currentDirName.innerHTML = "";
                                   var deleted = document.getElementById("treeitem-" + response.deleted_dir);
                                   deleted.remove();
                                   alert("دایرکتوری حذف شد.");
-                                } else if (response.result == "failed") {
-                                  alert("دسترسی پاک کردن این دایرکتوری را ندارید!");
                                 }
                               }
                             );

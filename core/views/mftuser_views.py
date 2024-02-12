@@ -1109,19 +1109,35 @@ def delete_directory_view(request, did, *args, **kwargs):
         if request.method == 'POST':
             try:
                 if isc_user.role.code == 'ADMIN' or dir_.created_by.department == isc_user.department:
-                    if dir_.parent == 0:
-                        OperationBusiness.objects.filter(access_on_bus=dir_.business).delete()
-                        bc = BusinessCode.objects.get(code=dir_.business.code)
-                        bc.delete()
-                        logger.warning(f'business and directory of {bc.code} has been deleted by {isc_user.user.username}.', request)
-                    delete_dir_and_clean_sub_directories(dir_)
-                    logger.info(f'directory in {dir_.absolute_path} with all of it\'s children and permissions of them has been deleted by {isc_user.user.username}.', request)
-                    response = {'result': 'success', 'deleted_dir': did}
+                    if Permission.objects.filter(directory=dir_).exists():
+                        response = {
+                            'result': 'error',
+                            'message': 'برای برخی از کاربران بر روی این مسیر دسترسی اخذ شده است!'
+                        }
+                        JsonResponse(data=response, safe=False)
+                    else:
+                        if dir_.parent == 0:
+                            OperationBusiness.objects.filter(access_on_bus=dir_.business).delete()
+                            bc = BusinessCode.objects.get(code=dir_.business.code)
+                            bc.delete()
+                            logger.warning(f'business and directory of {bc.code} has been deleted by {isc_user.user.username}.', request)
+                        delete_dir_and_clean_sub_directories(dir_)
+                        logger.info(f'directory in {dir_.absolute_path} with all of it\'s children and permissions of them has been deleted by {isc_user.user.username}.', request)
+                        response = {
+                            'result': 'success',
+                            'deleted_dir': did
+                        }
                 else:
-                    response = {'result': 'failed'}
+                    response = {
+                        'result': 'error',
+                        'message': 'شما دسترسی کافی برای حذف این دایرکتوری را ندارید!'
+                    }
             except Exception as e:
                 logger.error(e, request)
-                response = {'result': 'error'}
+                response = {
+                    'result': 'error',
+                    'message': 'خطایی رخ داده است، با مدیر سیستم تماس بگیرید!'
+                }
             
             return JsonResponse(data=response, safe=False)
 
