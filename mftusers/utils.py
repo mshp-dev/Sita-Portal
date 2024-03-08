@@ -1,11 +1,12 @@
 from django.contrib.auth.models import User
 from django.core.files import File
 from django.conf import settings
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, F
 from pathlib import Path
 
 from core.models import *
 from invoice.models import *
+from setad.models import *
 
 from jdatetime import datetime as jdt
 from tempfile import NamedTemporaryFile as ntf
@@ -609,39 +610,50 @@ def make_username(firstname, lastname, delimiter):
             return new_username
 
 
-def export_user(id, isc_user):
-    mftuser = MftUser.objects.get(pk=id)
-    template = ET.parse(os.path.join(settings.MEDIA_ROOT, 'template.xml'))
+def create_permissions_for_setad_user(invoice):
+    buss = invoice.business.split(',')
+    if buss[-1] == ',':
+        buss.pop()
+    for bus in buss:
+        AzmoonDirectoryPermission.objects.create(
+            invoice=invoice,
+            directory=AzmoonDirectory.objects.get(name=bus),
+            permission=256
+        )
+
+
+def export_setad_user(id, isc_user):
+    template = ET.parse(os.path.join(settings.MEDIA_ROOT, 'setad_template.xml'))
     description = template.xpath('//webUsers/webUser/description')
-    description[0].text = mftuser.description
+    description[0].text = invoice.description
     email = template.xpath('//webUsers/webUser/email')
-    email[0].text = mftuser.email
+    email[0].text = invoice.email
     firstName = template.xpath('//webUsers/webUser/firstName')
-    firstName[0].text = mftuser.firstname
+    firstName[0].text = invoice.firstname
     phone = template.xpath('//webUsers/webUser/phone')
-    phone[0].text = str(mftuser.officephone)
-    authenticationAlias = template.xpath('//webUsers/webUser/authenticationAlias')
-    authenticationAlias[0].text = mftuser.alias
+    phone[0].text = str(invoice.officephone)
+    # authenticationAlias = template.xpath('//webUsers/webUser/authenticationAlias')
+    # authenticationAlias[0].text = invoice.alias
     lastName = template.xpath('//webUsers/webUser/lastName')
-    lastName[0].text = mftuser.lastname
+    lastName[0].text = invoice.lastname
     organization = template.xpath('//webUsers/webUser/organization')
-    organization[0].text = f'{mftuser.organization.description} - {mftuser.created_by.department.description}' if mftuser.organization.code == 'ISC' else mftuser.organization.description
+    organization[0].text = invoice.department
     mobilePhone = template.xpath('//webUsers/webUser/mobilePhone')
-    mobilePhone[0].text = str(mftuser.mobilephone)
+    mobilePhone[0].text = str(invoice.mobilephone)
     name = template.xpath('//webUsers/webUser/name')
-    name[0].text = mftuser.username
+    name[0].text = invoice.username
     # <ipFilterEntries>
     #     <ipFilterEntry>
     #         <address></address>
     #     </ipFilterEntry>
     # </ipFilterEntries>
     # ip = template.xpath('//webUsers/webUser/ipFilterEntries/ipFilterEntry/address')
-    # ip[0].text = mftuser.ipaddr
+    # ip[0].text = invoice.ipaddr
     virtualFile = template.xpath('//webUsers/webUser/virtualFile')
     virtual_files = template.xpath('//webUsers/webUser/virtualFile/virtualFiles')
-    permissions = Permission.objects.filter(user=mftuser, is_confirmed=True)
+    permissions = Permission.objects.filter(user=invoice, is_confirmed=True)
     all_dirs = permissions.values('directory').distinct()
-    # bus_codes = [ub.code for ub in mftuser.business.all()]
+    # bus_codes = [ub.code for ub in invoice.business.all()]
     # bus_dirs = Directory.objects.filter(name__in=bus_codes)
     bus_dirs = []
     for d in all_dirs:
@@ -661,9 +673,9 @@ def export_user(id, isc_user):
     bytes_template = ET.tostring(template)
     temp_file.write(bytes_template.decode('utf-8'))
     temp_file.flush()
-    webuser_file = File(temp_file, name=f'{mftuser.username}.xml')
-    if ReadyToExport.objects.filter(mftuser=mftuser).exists():
-        rte = ReadyToExport.objects.get(mftuser=mftuser)
+    webuser_file = File(temp_file, name=f'{invoice.username}.xml')
+    if ReadyToExport.objects.filter(mftuser=invoice).exists():
+        rte = ReadyToExport.objects.get(mftuser=invoice)
         # rte.is_downloaded = False
         rte.number_of_exports = rte.number_of_exports + 1
         # if os.path.isfile(rte.export.path):
@@ -672,10 +684,10 @@ def export_user(id, isc_user):
         rte.save()
         # rte.delete()
     else:
-        if os.path.exists(os.path.join(settings.MEDIA_ROOT, 'exports', f'{mftuser.username}.xml')):
-            os.remove(os.path.join(settings.MEDIA_ROOT, 'exports', f'{mftuser.username}.xml'))
+        if os.path.exists(os.path.join(settings.MEDIA_ROOT, 'exports', f'{invoice.username}.xml')):
+            os.remove(os.path.join(settings.MEDIA_ROOT, 'exports', f'{invoice.username}.xml'))
         ReadyToExport.objects.create(
-            mftuser=mftuser,
+            invoice=invoice,
             created_by=isc_user,
             export=webuser_file
             # is_downloaded=False,
@@ -926,7 +938,7 @@ def make_csv_of_all_paths(name='paths'):
 
 
 def make_report_in_csv_format(dir_default_depth, name='report'):
-    all_buss = BusinessCode.objects.all().order_by('description')
+    all_buss = BusinessCode.objects.all().exclude(code__startswith='SETAD_', code=F('description')).order_by('description')
     path = os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv')
     with open(path, mode='w', encoding='utf-8') as csv_file:
         csv_writer = csv.writer(csv_file, delimiter=',', lineterminator='\n')
@@ -1168,7 +1180,7 @@ def insert_into_db():
     ]
 
     #####
-        # for bus in BusinessCode.objects.all().order_by('code'):
+        # for bus in BusinessCode.objects.all().exclude(code__startswith='SETAD_', code=F('description')).order_by('code'):
         #     dir_ = Directory(
         #         name=bus.code,
         #         relative_path=bus.code,

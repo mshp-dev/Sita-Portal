@@ -1,6 +1,6 @@
 from multiprocessing import context
 from django import template
-from django.db.models import Q
+from django.db.models import Q, F
 from django.forms.models import model_to_dict
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -49,7 +49,7 @@ def mftuser_create_view(request, *args, **kwargs):
     
     if isc_user.role.code == 'CUSTOMER':
         orgs = [acc.access_on_bic for acc in CustomerBank.objects.filter(user=isc_user).order_by('access_on_bic')]
-        buss = [bus for bus in BusinessCode.objects.all().order_by('description')]
+        buss = [bus for bus in BusinessCode.objects.all().exclude(code__startswith='SETAD_', code=F('description')).order_by('description')]
     elif isc_user.role.code == 'OPERATION':
         # orgs = [bic for bic in BankIdentifierCode.objects.all().order_by('description')]
         orgs = [bic for bic in BankIdentifierCode.objects.filter(code='ISC')]
@@ -59,7 +59,7 @@ def mftuser_create_view(request, *args, **kwargs):
             buss = [BusinessCode.objects.get(code='NO_PROJECT'),]
     elif isc_user.role.code == 'ADMIN':
         orgs = [bic for bic in BankIdentifierCode.objects.all().order_by('description')]
-        buss = [bus for bus in BusinessCode.objects.all().order_by('description')]
+        buss = [bus for bus in BusinessCode.objects.all().exclude(code__startswith='SETAD_', code=F('description')).order_by('description')]
     
     form = MftUserForm(request.POST or None, request=request)
     form.fields['organization'].choices = [(bic.id, bic) for bic in orgs]
@@ -277,7 +277,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
 
     if isc_user.role.code == 'CUSTOMER':
         orgs = [acc.access_on_bic for acc in CustomerBank.objects.filter(user=isc_user)]
-        buss = [bus for bus in BusinessCode.objects.all().order_by('description')]
+        buss = [bus for bus in BusinessCode.objects.all().exclude(code__startswith='SETAD_', code=F('description')).order_by('description')]
     elif isc_user.role.code == 'OPERATION':
         orgs = [acc for acc in BankIdentifierCode.objects.all().order_by('description')]
         if OperationBusiness.objects.filter(user=isc_user, owned_by_user=True).exists():
@@ -286,7 +286,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
             buss = [BusinessCode.objects.get(code='NO_PROJECT'),]
     elif isc_user.role.code == 'ADMIN':
         orgs = [bic for bic in BankIdentifierCode.objects.all().order_by('description')]
-        buss = [bus for bus in BusinessCode.objects.all().order_by('description')]
+        buss = [bus for bus in BusinessCode.objects.all().exclude(code__startswith='SETAD_', code=F('description')).order_by('description')]
     
     form = MftUserForm(request.POST or None, instance=mftuser, request=request)
     form.fields['organization'].choices = [(bic.id, bic) for bic in orgs]

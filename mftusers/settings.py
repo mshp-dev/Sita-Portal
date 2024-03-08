@@ -59,6 +59,7 @@ INSTALLED_APPS = [
 
     'core.apps.CoreConfig',
     'invoice.apps.InvoiceConfig',
+    'setad.apps.SetadConfig',
 ]
 
 MIDDLEWARE = [

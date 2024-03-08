@@ -79,7 +79,6 @@ urlpatterns = [
     # path("directories/permission/", add_permission_view, name="add-permission"),
     # re_path(r"directories/(?P<user_id>[0-9]+)/$", directories_list_view, name="directories-list"),
     path("error/<int:err>/", error_view, name="error-view"),
-    path('invoices/', include('invoice.urls')),
     path('download/mftuser/<int:id>/', download_mftuser_view, name='download-mftuser-view'),
     path('download/paths/', download_dirs_paths_view, name='download-dirs-paths-view'),
     path('download/report/<int:dd>/', download_report_view, name='download-report-view'),

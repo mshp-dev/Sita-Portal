@@ -1,0 +1,52 @@
+<!--Tables-->
+<div id="downloadable" class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-12" style="direction: rtl">
+      <div class="col text-center">
+        <span class="h4">اطلاعات کاربر در سامانه ستاد</span>
+      </div>
+      <div class="col">
+        <div class="ms-4 me-4 d-flex justify-content-center">
+          <table class="table table-bordered" style="direction: rtl">
+            <tr>
+              <th class="col-4" scope="col" id="firstname-label">نام</th>
+              <td class="col-4" scope="col" id="firstname-value">{{ invoice.firstname }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="lastname-label">نام خانوادگی</th>
+              <td class="col-4" scope="col" id="lastname-value">{{ invoice.lastname }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="username-label">نام کاربری</th>
+              <td class="col-4" scope="col" id="username-value">{{ invoice.username }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="email-label">ایمیل</th>
+              <td class="col-4" scope="col" id="email-value">{{ invoice.email }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="officephone-label">تلفن دفتر کار</th>
+              <td class="col-4" scope="col" id="officephone-value">{{ invoice.officephone }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="mobilephone-label">شماره تلفن همراه</th>
+              <td class="col-4" scope="col" id="mobilephone-value">{{ invoice.mobilephone }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="department-label">دپارتمان</th>
+              <td class="col-4" scope="col" id="department-value">{{ invoice.department }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="business-label">سامانه/پروژه ها <span style="font-size: 0.5rem">(3)</span></th>
+              <td class="col-4" scope="col" id="business-value">{{ invoice.business }}</td>
+            </tr>
+            <tr>
+              <th class="col-4" scope="col" id="description-label">جزئیات</th>
+              <td class="col-4" scope="col" id="description-value">{% if invoice.description %}{{ invoice.description }}{% endif %}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+</div>
+<!--End of Tables-->

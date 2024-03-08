@@ -1,6 +1,6 @@
 from multiprocessing import context
 from django import template
-from django.db.models import Q
+from django.db.models import Q, F
 from django.forms.models import model_to_dict
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -31,7 +31,7 @@ def index_view(request):
     context = {
         'users_count': MftUser.objects.all().count(),
         'directories_count': Directory.objects.all().count(),
-        'business_count': BusinessCode.objects.all().count(),
+        'business_count': BusinessCode.objects.all().exclude(code__startswith='SETAD_', code=F('description')).count(),
         'organizations_count': BankIdentifierCode.objects.all().count()
     }
     
@@ -63,8 +63,8 @@ def register_user_view(request):
                 }
         return JsonResponse(data=response, safe=False)
     
-    form.fields['department'].choices = [(dept.id, dept) for dept in IscDepartmentCode.objects.all().order_by('description')]
-    form.fields['business'].choices = [(bus.id, bus) for bus in BusinessCode.objects.all().order_by('description')]
+    form.fields['department'].choices = [(dept.id, dept) for dept in IscDepartmentCode.objects.all().exclude(code__endswith='-SETAD').order_by('description')]
+    form.fields['business'].choices = [(bus.id, bus) for bus in BusinessCode.objects.all().exclude(code__startswith='SETAD_', code=F('description')).order_by('description')]
     form.fields['organization'].choices = [(org.id, org) for org in BankIdentifierCode.objects.all().order_by('description')]
     
     if request.method == "POST":
@@ -130,7 +130,7 @@ def register_user_view(request):
     context = {
         "form": form,
         "orgs": BankIdentifierCode.objects.all().order_by('description'),
-        "buss": BusinessCode.objects.all().order_by('description'),
+        "buss": BusinessCode.objects.all().exclude(code__startswith='SETAD_', code=F('description')).order_by('description'),
         "msg": msg,
         "success": success,
         "access_type": access_type
@@ -299,8 +299,8 @@ def profile_view(request, *args, **kwargs):
         user_organizations = CustomerBank.objects.filter(user=isc_user).order_by('access_on_bic__description')
         user_orgs = [org.access_on_bic for org in user_organizations]
     elif isc_user.role.code == 'ADMIN':
-        o_buss = [bus for bus in BusinessCode.objects.all().order_by('description')]
-        u_buss = [] # [bus for bus in BusinessCode.objects.all().order_by('description')]
+        o_buss = [bus for bus in BusinessCode.objects.all().exclude(code__startswith='SETAD_', code=F('description')).order_by('description')]
+        u_buss = [] # [bus for bus in BusinessCode.objects.all().exclude(code__startswith='SETAD_', code=F('description')).order_by('description')]
         user_orgs = BankIdentifierCode.objects.all().order_by('description')
     business_form.fields['owned_business'].choices = [(bus.id, bus) for bus in BusinessCode.objects.exclude(code__in=used_by_user).order_by('description')]
     organization_form.fields['organizations'].choices = [(org.id, org) for org in BankIdentifierCode.objects.all().order_by('description')]
@@ -390,7 +390,7 @@ def profile_view(request, *args, **kwargs):
         'used_business': [ub.access_on_bus for ub in u_buss] if isc_user.role.code == 'OPERATION' else [],
         'organizations': user_orgs,
         'all_organizations': BankIdentifierCode.objects.all().order_by('description'),
-        'all_businesses': BusinessCode.objects.all().order_by('description'),
+        'all_businesses': BusinessCode.objects.all().exclude(code__startswith='SETAD_', code=F('description')).order_by('description'),
         'username': str(isc_user.user.username),
         'access': str(isc_user.role.code),
         'profile_form': profile_form,

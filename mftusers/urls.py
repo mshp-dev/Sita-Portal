@@ -29,6 +29,8 @@ admin.site.site_url = '/dashboard/'
 urlpatterns = [
     path('sita-admin/', admin.site.urls, name='admin'),
     path('sita-admin/logout/', logout_view, name='home'),
+    path('invoices/', include('invoice.urls')),
+    path('setad/', include('setad.urls')),
     path('', include('core.urls')),
     # path('command/', change_issue_mode, name='change_issue_mode'),
     # re_path(r'^.*\.*', issue_view, name='issue-view'),

@@ -25,7 +25,7 @@ class BaseInvoice(models.Model):
     description       = models.CharField(max_length=1000, blank=True, null=True, default=None)
     created_by        = models.ForeignKey(IscUser, blank=False, on_delete=models.CASCADE)
     created_at        = models.DateTimeField(default=timezone.now)
-        
+    
     class Meta:
         abstract = True
     

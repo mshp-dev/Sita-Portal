@@ -1,0 +1,340 @@
+{% extends "layouts/base.html" %} {% block title %} مدیریت اطلاعات {% endblock %} {% load static %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<link type="text/css" href="/static/assets/css/tree.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" />
+{% endblock stylesheets %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript">
+  $(function () {
+    $("input[role='invoice-confirm-btn']").click(function () {
+      $("#current-invoice-id").html($(this).attr("iid"));
+      $("#current-invoice-type").html($(this).attr("itype"));
+      $("#invoice-confirm-modal").modal("show");
+    });
+
+    $("input[role='invoice-delete-btn']").click(function () {
+      $("#current-invoice-id").html($(this).attr("iid"));
+      $("#current-invoice-type").html($(this).attr("itype"));
+      $("#invoice-delete-modal").modal("show");
+    });
+
+    /*$("input[role='invoice-reject-btn']").click(function () {
+      $("#current-invoice-id").html($(this).attr("iid"));
+      $("#current-invoice-type").html($(this).attr("itype"));
+      $("#invoice-reject-modal").modal("show");
+    });
+    
+    $("input[role='invoice-delete-btn']").click(function () {
+      var invoice_id = $(this).attr("iid");
+      var invoice_type = $(this).attr("itype");
+      var csrf = "{{ csrf_token }}";
+      $.post(
+        "/invoices/delete/" + invoice_id + "/",
+        {
+          csrfmiddlewaretoken: csrf,
+          itype: invoice_type,
+        },
+        function (response) {
+          if (response.result == "success") {
+            $("#" + response.type + "inv-" + response.deleted + "-parent").remove();
+            //$("#" + response.type + "inv-" + response.deleted + "-parent").parent().appendTo("#tabs-deleted-invoices");
+          } else if (response.result == "error") {
+            alert(response.message);
+          }
+        }
+      );
+    });*/
+
+    $("input[role='invoice-change-to-new-btn']").click(function () {
+      var invoice_id = $(this).attr("iid");
+      var csrf = "{{ csrf_token }}";
+      $.post(
+        "/setad/invoice/update/" + invoice_id + "/",
+        {
+          csrfmiddlewaretoken: csrf,
+        },
+        function (response) {
+          if (response.result == "success") {
+            window.location.reload();
+            //document.getElementById(response.type + "inv-" + response.updated + "-parent").remove();
+            //$("#" + response.type + "inv-" + response.updated + "-parent")
+            //  .parent()
+            //  .appendTo("#tabs-undefined-invoices");
+          } else if (response.result == "error") {
+            alert(response.message);
+          }
+        }
+      );
+    });
+  });
+</script>
+{% endblock javascripts %} {% block content %}
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <div class="section-header pb-6 bg-primary text-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-10 text-center" style="direction: rtl">
+          <h1 class="display-3 mb-4">مدیریت درخواست های ستاد</h1>
+          <p class="lead">
+            لیست درخواست های ارسال شده برای دسترسی به<br>
+            پروژه های آزمون در سامانه ستاد را مشاهده می کنید.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section section-md">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="row mb-5">
+          <div class="mb-3">
+            <h4 class="display-6" style="direction: rtl" for="search">جستجو در بین فرم های چارگون</h4>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                style="text-align: right; direction: rtl"
+                id="search-input"
+                placeholder="سریال یا تاریخ ایجاد یا کاربر ایجاد کننده یا کاربر مدنظر"
+                aria-label="Search"
+                aria-describedby="basic-addon"
+              /><span class="input-group-text" id="basic-addon"><span id="search-icon" class="fas fa-search"></span></span>
+            </div>
+          </div>
+        </div>
+        <div class="row mb-5">
+          {% include "includes/setad-user-invoice-list.html" %}
+        </div>
+      </div>
+      <div class="row mt-8 mb-5">
+        <input type="button" style="width: 50%" class="btn btn-success mx-auto" value="بازگشت" onClick="javascript:history.go(-1);" />
+      </div>
+      <div class="row">
+        <div class="col md-2">
+          {% comment %} <div class="modal fade" id="invoice-reject-modal" role="dialog" aria-labelledby="inv-c-modal" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content" style="direction: rtl">
+                <div class="modal-header">
+                  <h2 class="h6 modal-title">علت رد نمودن درخواست</h2>
+                  <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="direction: ltr">
+                  <div style="display: none">
+                    <p id="current-invoice-id"></p>
+                    <p id="current-invoice-type"></p>
+                  </div>
+                  <div class="input-group mb-3">
+                    <input
+                      id="reason-input"
+                      type="text"
+                      class="form-control"
+                      placeholder="Reason"
+                      aria-label="Reason"
+                      aria-describedby="invoice-reason-input"
+                    />
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button id="submit-reason-btn" type="button" class="btn btn-secondary ms-auto" data-bs-dismiss="modal">ثبت</button>
+                  <button type="button" class="btn btn-link ms-0" data-bs-dismiss="modal">انصراف</button>
+                  <script type="text/javascript">
+                    $(function () {
+                      $("#submit-reason-btn").click(function () {
+                        var iid = $("#current-invoice-id").html();
+                        var itype = $("#current-invoice-type").html();
+                        var reason_text = $("#reason-input").val();
+                        var csrf = "{{ csrf_token }}";
+                        $("#invoice-reject-modal").modal("hide");
+                        if (reason_text != "") {
+                          $.post(
+                            "/invoices/reject/" + iid + "/",
+                            {
+                              csrfmiddlewaretoken: csrf,
+                              itype: itype,
+                              reason: reason_text,
+                            },
+                            function (response) {
+                              if (response.result == "success") {
+                                //document.getElementById(response.type + "inv-" + response.rejected + "-parent").remove();
+                                $("#" + response.type + "inv-" + response.rejected + "-parent")
+                                  .parent()
+                                  .appendTo("#tabs-rejected-invoices");
+                              } else if (response.result == "error") {
+                                alert(response.message);
+                              }
+                            }
+                          );
+                        } else {
+                          alert("علت رد درخواست را وارد کنید!");
+                        }
+                        return false;
+                      });
+                    });
+                  </script>
+                </div>
+              </div>
+            </div>
+          </div> {% endcomment %}
+          <div class="modal fade" id="invoice-delete-modal" role="dialog" aria-labelledby="inv-c-modal" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content" style="direction: rtl">
+                <div class="modal-header">
+                  <h2 class="h6 modal-title">حذف نمودن درخواست</h2>
+                  <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div style="display: none">
+                    <p id="current-invoice-id"></p>
+                    <p id="current-invoice-type"></p>
+                  </div>
+                  <p>آیا از حذف این درخواست، اطمینان دارید؟</p>
+                </div>
+                <div class="modal-footer">
+                  <button id="submit-delete-btn" type="button" class="btn btn-secondary ms-auto" data-bs-dismiss="modal">تأیید</button>
+                  <button type="button" class="btn btn-link ms-0" data-bs-dismiss="modal">انصراف</button>
+                  <script type="text/javascript">
+                    $(function () {
+                      $("#submit-delete-btn").click(function () {
+                        var iid = $("#current-invoice-id").html();
+                        var itype = $("#current-invoice-type").html();
+                        var csrf = "{{ csrf_token }}";
+                        $.post(
+                          "/setad/invoice/delete/" + iid + "/",
+                          {
+                            csrfmiddlewaretoken: csrf,
+                          },
+                          function (response) {
+                            if (response.result == "success") {
+                              $("#inv-" + response.deleted + "-parent")
+                                .parent()
+                                .remove();
+                            } else if (response.result == "error") {
+                              alert(response.message);
+                            }
+                          }
+                        );
+                        return false;
+                      });
+                    });
+                  </script>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal fade" id="invoice-confirm-modal" role="dialog" aria-labelledby="inv-c-modal" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content" style="direction: rtl">
+                <div class="modal-header">
+                  <h2 class="h6 modal-title">تأیید نمودن درخواست</h2>
+                  <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div style="display: none">
+                    <p id="current-invoice-id"></p>
+                    <p id="current-invoice-type"></p>
+                  </div>
+                  <p>آیا از تأیید این درخواست، اطمینان دارید؟</p>
+                </div>
+                <div class="modal-footer">
+                  <button id="submit-confirm-btn" type="button" class="btn btn-secondary ms-auto" data-bs-dismiss="modal">تأیید</button>
+                  <button type="button" class="btn btn-link ms-0" data-bs-dismiss="modal">انصراف</button>
+                  <script type="text/javascript">
+                    $(function () {
+                      $("#submit-confirm-btn").click(function () {
+                        var iid = $("#current-invoice-id").html();
+                        var itype = $("#current-invoice-type").html();
+                        var csrf = "{{ csrf_token }}";
+                        $.post(
+                          "/setad/invoice/confirm/" + iid + "/",
+                          {
+                            csrfmiddlewaretoken: csrf,
+                          },
+                          function (response) {
+                            if (response.result == "success") {
+                              window.location.reload();
+                              //document.getElementById(response.type + "inv-" + response.confirmed + "-parent").remove();
+                              //$("#" + response.type + "inv-" + response.confirmed + "-parent")
+                              //  .parent()
+                              //  .remove();
+                              //.appendTo("#tabs-confirmed-invoices");
+                            } else if (response.result == "error") {
+                              alert(response.message);
+                            }
+                          }
+                        );
+                        return false;
+                      });
+                    });
+                  </script>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    const search_input = $("#search-input");
+    const search_icon = $("#search-icon");
+    const contents_list = $("#replaceable-content");
+    const endpoint = window.location.pathname;
+    const delay_by_in_ms = 700;
+    var scheduled_function = false;
+
+    var ajax_call = function (endpoint, request_parameters) {
+      $.getJSON(endpoint, request_parameters).done((response) => {
+        // fade out the users_list, then:
+        contents_list
+          .fadeTo("slow", 0)
+          .promise()
+          .then(() => {
+            // replace the HTML contents
+            // contents_list.html(response["html_from_view"]);
+            var filtered = response["filtered_invs"];
+            $("div[role-in-list='inv-container']").each(function () {
+              if (filtered["invoices"].indexOf(parseInt($(this).attr("invid"))) == -1) {
+                $(this).hide();
+              } else {
+                $(this).show();
+              }
+            });
+            $("div[role-in-list='pinv-container']").each(function () {
+              if (filtered["pre_invoices"].indexOf(parseInt($(this).attr("invid"))) == -1) {
+                $(this).hide();
+              } else {
+                $(this).show();
+              }
+            });
+            // fade-in the div with new contents
+            contents_list.fadeTo("slow", 1);
+            // stop animating search icon
+            search_icon.removeClass("blink");
+          });
+      });
+    };
+    search_input.on("keyup", function () {
+      const request_parameters = {
+        q: $(this).val(), // value of search_input: the HTML element with ID search-input
+      };
+      // start animating the search icon with the CSS class
+      search_icon.addClass("blink");
+      // if scheduled_function is NOT false, cancel the execution of the function
+      if (scheduled_function) {
+        clearTimeout(scheduled_function);
+      }
+      // setTimeout returns the ID of the function to be executed
+      scheduled_function = setTimeout(ajax_call, delay_by_in_ms, endpoint, request_parameters);
+    });
+  </script>
+</main>
+
+{% include "includes/footer.html" %} {% endblock content %}

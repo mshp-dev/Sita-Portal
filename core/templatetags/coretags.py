@@ -56,6 +56,11 @@ def get_business_ids(buss):
 
 
 @register.filter
+def clean_setad_business(bus):
+    return bus.replace("SETAD_", "")
+
+
+@register.filter
 def get_organization_ids(orgs):
     org_ids = ''
     for org in orgs:

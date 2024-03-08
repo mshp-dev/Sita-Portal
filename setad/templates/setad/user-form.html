@@ -1,0 +1,363 @@
+{% extends "layouts/base-fullscreen.html" %} {% block title %} ایجاد کاربر ستاد{% endblock %} {% load coretags %} {% load static %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+
+<main>
+  {% comment %} {% include 'includes/preloader.html' %} {% endcomment %}
+
+  <!-- Section -->
+  <section
+    class="min-vh-100 d-flex align-items-center overlay-soft-dark"
+    style="background-image: url('/static/assets/img/bg.png'); background-repeat: no-repeat; background-size: 100% 100%"
+  >
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 d-flex align-items-center justify-content-center">
+          <div class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-1000">
+            <div class="text-center text-md-center mb-4 mt-md-0" style="direction: rtl">
+              <h1 class="mb-0 h3">فرم ایجاد کاربر در سامانه ستاد</h1>
+              <br />
+              <span class="font-weight-normal"> {% if msg %} {{ msg | safe }} {% endif %} </span>
+            </div>
+            {% if not success %}
+            <div style="direction: rtl" class="col">
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* وارد نمودن تمامی موارد ستاره دار الزامی است</strong></p>
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* نام کاربری</strong> را همان نام کاربری دامین ایرانت وارد نمائید</p>
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* ایمیل</strong> را همان ایمیل دامین ایرانت وارد نمائید</p>
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* تلفن محل کار </strong> بدون پیش شماره و به طور کامل (هشت رقم) وارد شود</p>
+              <p class="text-danger" style="font-size: 0.7rem">
+                <strong>* تلفن همراه </strong> در ده رقم بدون صفر و یا به طور کامل (یازده رقم) وارد شود
+              </p>
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* سامانه</strong> همان نام پروژه یا بیزینس که به تبادل فایل نیاز دارد</p>
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* گروه</strong> از بین توسعه، آزمون و یا عملیات انتخاب نمائید</p>
+            </div>
+            <div style="display: none">
+              <p id="current-access-type">{{ access_type }}</p>
+            </div>
+            <form class="mt-5" method="POST" action="" id="iscuser-form">
+              {% csrf_token %}
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="firstname"
+                  >نام <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="firstname"><span class="fas fa-address-book"></span></span>
+                  {{ form.firstname }}
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="lastname"
+                  >نام خانوادگی <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="lastname"><span class="fas fa-address-book"></span></span>
+                  {{ form.lastname }}
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="username"
+                  >نام کاربری <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="username"><span class="fas fa-user"></span></span>
+                  {{ form.username }}
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="email"
+                  >آدرس ایمیل <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="email"><span class="fas fa-envelope"></span></span>
+                  {{ form.email }}
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="officephone"
+                  >تلفن دفتر کار <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="officephone"><span class="fas fa-phone"></span></span>
+                  {{ form.officephone }}
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="mobilephone"
+                  >شماره تلفن همراه <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="mobilephone"><span class="fas fa-mobile"></span></span>
+                  {{ form.mobilephone }}
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="department"
+                  >گروه کاری <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <p>
+                  <span style="font-size: 0.7rem">لطفاً نوع گروهی که در آن قرار دارید را انتخاب نمائید.</span>
+                </p>
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="department"><span class="fas fa-building"></span></span>
+                  {{ form.department }}
+                </div>
+              </div>
+              <div id="business-parent" class="form-group mb-4" style="direction: rtl">
+                <label for="business"
+                  >سامانه/پروژه ها <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <p>
+                  <span style="font-size: 0.7rem">با نگهداشتن کلید CTRL می توانید چند سامانه را انتخاب نمایید</span>
+                </p>
+                <div class="input-group mb-2">
+                  <input
+                    type="text"
+                    class="form-control"
+                    style="text-align: right; direction: rtl"
+                    id="business-search-input"
+                    placeholder="جستجو در بین پروژه/سامانه ها"
+                    aria-label="Search"
+                    aria-describedby="basic-addon"
+                  />
+                </div>
+                <p style="direction: ltr">
+                  <span class="ms-8" style="font-size: 0.7rem; font-weight: bold">سامانه/پروژه های انتخاب شده</span>
+                </p>
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="business"><span class="fas fa-sitemap"></span></span>
+                  <select id="left-business" class="form-control form-select" size="10" parent="business">
+                    {% for bus in buss %}
+                    <option style="display: none" value="{{ bus.id }}">{{ bus.description|clean_setad_business }}</option>
+                    {% endfor %}
+                  </select>
+                  <select id="right-business" style="direction: rtl" class="form-control form-select" size="10" parent="business">
+                    {% for bus in buss %}
+                    <option value="{{ bus.id }}">{{ bus.description|clean_setad_business }}</option>
+                    {% endfor %}
+                  </select>
+                  <div style="display: none">{{ form.business }}</div>
+                </div>
+              </div>
+              <br />
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary">ارسال فرم درخواست</button>
+              </div>
+              <div class="d-grid mt-3">
+                <input type="button" class="btn btn-success" value="بازگشت" onClick="goBack();" />
+              </div>
+            </form>
+            {% else %}
+            <div class="mt-4 text-sm text-center">
+              <div class="d-grid mb-3">
+                <a href="{% url 'login' %}" class="btn btn-info">رفتن به صفحه ورود</a>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script src="{% static 'assets/js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript">
+  $(window).on("load", function () {
+    //$("#id_organization option[value=1]").prop("selected", true);
+    //$("#id_business option[value=1]").prop("selected", true);
+
+    //$("#right-business option[value=88]").attr("style", "font-style: italic; font-size: 1.5rem; color: orangered;");
+
+    $("option").each(function () {
+      $(this).attr("is_selected", "false");
+    });
+  });
+
+  function goBack() {
+    var url = "/";
+    window.location = url;
+  }
+
+  function switch_business(option, direction) {
+    id = $(option).val();
+    if (direction === "left_to_right") {
+      $("#left-business option[value='" + id + "']").attr("is_selected", "false");
+      $("#left-business option[value='" + id + "']").prop("style", "display: none");
+      $("#id_business option[value='" + id + "']").prop("selected", false);
+      $("#right-business option[value='" + id + "']").prop("style", "");
+      $("#right-business option[value='" + id + "']").attr("is_selected", "true");
+    } else if (direction === "right_to_left") {
+      $("#right-business option[value='" + id + "']").attr("is_selected", "false");
+      $("#right-business option[value='" + id + "']").prop("style", "display: none");
+      $("#id_business option[value='" + id + "']").prop("selected", true);
+      $("#left-business option[value='" + id + "']").prop("style", "");
+      $("#left-business option[value='" + id + "']").attr("is_selected", "true");
+    }
+  }
+
+  $("#business-search-input").on("keyup", function () {
+    var inp = $(this).val();
+    if (inp !== "") {
+      $("#right-business option").each(function () {
+        var opt = $(this).html();
+        if (opt.includes(inp) && $(this).attr("is_selected") === "false") {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+      /*$("#id_business :selected").each(function () {
+        $(this).show();
+      });*/
+    } else {
+      $("#right-business option").each(function () {
+        if ($(this).attr("is_selected") === "false") {
+          $(this).show();
+        }
+      });
+    }
+  });
+
+  $("#right-business option").on("click", function () {
+    switch_business(this, "right_to_left");
+    if ($(this).val() != 88) {
+      if ($("#left-business option[value=88]").attr("is_selected") == "true") {
+        switch_business($("#left-business option[value='" + $(this).val() + "']"), "left_to_right");
+      }
+    } else if ($(this).val() == 88) {
+      $("#left-business option").each(function () {
+        if ($(this).attr("is_selected") == "true") {
+          if ($(this).val() != 88) {
+            switch_business(this, "left_to_right");
+          }
+        }
+      });
+    }
+  });
+
+  $("#left-business option").on("click", function () {
+    switch_business(this, "left_to_right");
+  });
+
+  var dept = document.getElementById("id_department");
+  dept.addEventListener("change", function (event) {
+    var department = event.currentTarget.options[event.currentTarget.selectedIndex].text;
+    var username = document.getElementById("id_username");
+    if (department == "کاربر عملیات") {
+      if (username.value.search("@iranet.net") == -1 && username.value.search("@amaliat.local") == -1) {
+        username.value = username.value + "@amaliat.local";
+      } else if (username.value.search("@iranet.net") != -1) {
+        username.value = username.value.replace("@iranet.net", "") + "@amaliat.local";
+      }
+    } else {
+      if (username.value.search("@iranet.net") == -1 && username.value.search("@amaliat.local") == -1) {
+        username.value = username.value + "@iranet.net";
+      } else if (username.value.search("@amaliat.local") != -1) {
+        username.value = username.value.replace("@amaliat.local", "") + "@iranet.net";
+      }
+    }
+  });
+
+  var username = document.getElementById("id_username");
+  username.addEventListener("change", function (event) {
+    var uname = cleanInputValue(event.currentTarget.value, "username");
+    var dept = document.getElementById("id_department");
+    var department = dept.options[dept.selectedIndex].text;
+    if (department == "کاربر عملیات") {
+      if (uname.search("@iranet.net") == -1 && uname.search("@amaliat.local") == -1) {
+        uname = uname + "@amaliat.local";
+      } else if (username.value.search("@iranet.net") != -1) {
+        uname = uname.replace("@iranet.net", "") + "@amaliat.local";
+      }
+    } else {
+      if (uname.search("@iranet.net") == -1 && uname.search("@amaliat.local") == -1) {
+        uname = uname + "@iranet.net";
+      } else if (username.value.search("@amaliat.local") != -1) {
+        uname = uname.replace("@amaliat.local", "") + "@iranet.net";
+      }
+    }
+    event.currentTarget.value = uname;
+  });
+
+  var email = document.getElementById("id_email");
+  email.addEventListener("change", function (event) {
+    var mail = cleanInputValue(event.currentTarget.value, "email");
+    event.currentTarget.value = mail;
+  });
+
+  var firstname = document.getElementById("id_firstname");
+  firstname.addEventListener("change", function (event) {
+    var first = cleanInputValue(event.currentTarget.value, "name");
+    event.currentTarget.value = first;
+  });
+
+  var lastname = document.getElementById("id_lastname");
+  lastname.addEventListener("change", function (event) {
+    var last = cleanInputValue(event.currentTarget.value, "name");
+    event.currentTarget.value = last;
+  });
+
+  var phone = document.getElementById("id_officephone");
+  phone.addEventListener("change", function (event) {
+    var ph = cleanInputValue(event.currentTarget.value, "number");
+    event.currentTarget.value = ph;
+  });
+
+  var mobile = document.getElementById("id_mobilephone");
+  mobile.addEventListener("change", function (event) {
+    var mb = cleanInputValue(event.currentTarget.value, "number");
+    event.currentTarget.value = mb;
+  });
+
+  function cleanInputValue(input, type) {
+    if (type == "name" || type == "email") {
+      input = input.replace(/[0-9]/g, "");
+    }
+    if (type == "number") {
+      input = input.replace(/[a-z]/g, "");
+      input = input.replace(/[A-Z]/g, "");
+      input = input.replace(/\_/g, "");
+    }
+    if (type != "email") {
+      input = input.replace(/\@/g, "");
+      input = input.replace(/\./g, "");
+    }
+    if (type == "username") {
+      input = input.replace("amaliatlocal", "");
+      input = input.replace("iranetnet", "");
+    }
+    input = input.replace(/[\u0600-\u06FF]/g, "");
+    input = input.replace(/\s/g, "");
+    input = input.replace(/\-/g, "");
+    input = input.replace(/\#/g, "");
+    input = input.replace(/\!/g, "");
+    input = input.replace(/\$/g, "");
+    input = input.replace(/\%/g, "");
+    input = input.replace(/\^/g, "");
+    input = input.replace(/\&/g, "");
+    input = input.replace(/\*/g, "");
+    input = input.replace(/\(/g, "");
+    input = input.replace(/\)/g, "");
+    input = input.replace(/\+/g, "");
+    input = input.replace(/\=/g, "");
+    input = input.replace(/\//g, "");
+    input = input.replace(/\\/g, "");
+    input = input.replace(/\|/g, "");
+    input = input.replace(/\~/g, "");
+    input = input.replace(/\'/g, "");
+    input = input.replace(/\"/g, "");
+    input = input.replace(/\,/g, "");
+    input = input.replace(/\?/g, "");
+    input = input.replace(/\;/g, "");
+    input = input.replace(/\:/g, "");
+    input = input.replace(/\>/g, "");
+    input = input.replace(/\</g, "");
+    return input;
+  }
+</script>
+{% endblock javascripts %}
