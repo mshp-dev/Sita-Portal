@@ -192,7 +192,7 @@ class MftUserForm(forms.ModelForm):
     def clean_alias(self):
         alias = self.cleaned_data.get('alias')
         if alias != '':
-            if MftUser.objects.filter(Q(alias=alias)).exists() or MftUser.objects.filter(Q(username=alias)).exists():
+            if MftUser.objects.filter(Q(alias=alias)).exists() or MftUser.objects.filter(Q(alias=alias.lower())).exists() or MftUser.objects.filter(Q(username=alias)).exists() or MftUser.objects.filter(Q(username=alias.lower())).exists():
                 if 'create' not in self.request.path:
                     id_ = int(self.request.path.split('/')[-2])
                     mftuser = MftUser.objects.get(pk=id_)
@@ -201,7 +201,7 @@ class MftUserForm(forms.ModelForm):
                         raise ValidationError('این نام مستعار قبلاً برای کاربری دیگر استفاده شده است.')
                 else:
                     raise ValidationError('نام مستعار انتخاب شده تکراری می باشد.')
-            if alias == self.cleaned_data.get('username'):
+            if alias == self.cleaned_data.get('username') or alias.lower() == self.cleaned_data.get('username'):
                 raise ValidationError('نام مستعار نمی تواند برابر نام کاربری باشد.')
         return alias
     
