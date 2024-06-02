@@ -726,7 +726,7 @@ def export_setad_user_v2(invoice):
     webuser_file = open(path, mode='w', encoding='utf-8')
     all_business = invoice.business.split(',')
     for bus in all_business:
-        webuser_file.write(f'{invoice.email},{bus},{invoice.get_role}\n')
+        webuser_file.write(f'{invoice.username},{bus},{invoice.get_role}\n')
     webuser_file.close()
     export_files_with_sftp(files_list=[path,], dest=settings.SETAD_USERS_PATH, name='DEVOP_USERS_OPR.txt')
 
