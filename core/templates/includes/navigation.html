@@ -67,6 +67,11 @@
                 <div class="col-6 col-lg-4">
                   <h6 class="d-block mb-3 text-primary" style="margin-left: 30%">مدیریت</h6>
                   <ul class="list-style-none mb-4">
+                    {% if debug %}
+                    <li class="mb-2 megamenu-item">
+                      <a class="megamenu-link text-danger" href="{% url 'debug-mode-actions' %}">DEBUG_MODE_ACTIONS</a>
+                    </li>
+                    {% endif %}
                     <li class="mb-2 megamenu-item">
                       <a class="megamenu-link" href="/sita-admin/">پنل مدیریت</a>
                     </li>

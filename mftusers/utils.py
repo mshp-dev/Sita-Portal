@@ -618,14 +618,46 @@ def create_permissions_for_setad_user(invoice):
         AzmoonDirectoryPermission.objects.create(
             invoice=invoice,
             directory=AzmoonDirectory.objects.get(name=bus),
-            permission=256
+            permission=1, #Download
+            created_by=IscUser.objects.get(user__username='admin')
         )
+        AzmoonDirectoryPermission.objects.create(
+            invoice=invoice,
+            directory=AzmoonDirectory.objects.get(name=bus),
+            permission=128, #Checksum
+            created_by=IscUser.objects.get(user__username='admin')
+        )
+        AzmoonDirectoryPermission.objects.create(
+            invoice=invoice,
+            directory=AzmoonDirectory.objects.get(name=bus),
+            permission=256, #List
+            created_by=IscUser.objects.get(user__username='admin')
+        )
+        AzmoonDirectoryPermission.objects.create(
+            invoice=invoice,
+            directory=AzmoonDirectory.objects.get(name=bus),
+            permission=1024, #Append
+            created_by=IscUser.objects.get(user__username='admin')
+        )
+        if invoice.group_type.description != 'کاربر توسعه':
+            AzmoonDirectoryPermission.objects.create(
+                invoice=invoice,
+                directory=AzmoonDirectory.objects.get(name=bus),
+                permission=2, #Upload
+                created_by=IscUser.objects.get(user__username='admin')
+            )
+            AzmoonDirectoryPermission.objects.create(
+                invoice=invoice,
+                directory=AzmoonDirectory.objects.get(name=bus),
+                permission=512, #Overwrite
+                created_by=IscUser.objects.get(user__username='admin')
+            )
 
 
-def export_setad_user(id, isc_user):
-    template = ET.parse(os.path.join(settings.MEDIA_ROOT, 'setad_template.xml'))
+def export_setad_user(invoice, isc_user):
+    template = ET.parse(os.path.join(settings.MEDIA_ROOT, 'setad_user_template.xml'))
     description = template.xpath('//webUsers/webUser/description')
-    description[0].text = invoice.description
+    description[0].text = invoice.all_business
     email = template.xpath('//webUsers/webUser/email')
     email[0].text = invoice.email
     firstName = template.xpath('//webUsers/webUser/firstName')
@@ -637,7 +669,7 @@ def export_setad_user(id, isc_user):
     lastName = template.xpath('//webUsers/webUser/lastName')
     lastName[0].text = invoice.lastname
     organization = template.xpath('//webUsers/webUser/organization')
-    organization[0].text = invoice.department
+    organization[0].text = f'شرکت خدمات انفورماتیک - {invoice.group_type} - {invoice.department}'
     mobilePhone = template.xpath('//webUsers/webUser/mobilePhone')
     mobilePhone[0].text = str(invoice.mobilephone)
     name = template.xpath('//webUsers/webUser/name')
@@ -651,49 +683,52 @@ def export_setad_user(id, isc_user):
     # ip[0].text = invoice.ipaddr
     virtualFile = template.xpath('//webUsers/webUser/virtualFile')
     virtual_files = template.xpath('//webUsers/webUser/virtualFile/virtualFiles')
-    permissions = Permission.objects.filter(user=invoice, is_confirmed=True)
+    permissions = AzmoonDirectoryPermission.objects.filter(invoice=invoice, is_confirmed=True)
     all_dirs = permissions.values('directory').distinct()
-    # bus_codes = [ub.code for ub in invoice.business.all()]
-    # bus_dirs = Directory.objects.filter(name__in=bus_codes)
-    bus_dirs = []
+    project_dirs = []
     for d in all_dirs:
-        dir_ = Directory.objects.get(pk=d['directory'])
-        if dir_.parent == 0:
-            bus_dirs.append(dir_)
-    for bus_dir in bus_dirs:
+        dir_ = AzmoonDirectory.objects.get(pk=d['directory'])
+        if dir_.parent == 1:
+            project_dirs.append(dir_)
+    for project_dir in project_dirs:
         virtual_file = ET.SubElement(virtual_files[0], 'virtualFile')
-        make_virtual_file(bus_dir, permissions, virtual_file)
-        # chs = bus_dir.children.split(',')[:-1]
-        # dirs_with_perms = [dir_['directory'] for dir_ in all_dirs if str(dir_['directory']) in chs]
-        # for d in dirs_with_perms:
-        #     virtual_file = ET.SubElement(virtual_files[0], 'virtualFile')
-        #     make_virtual_file(Directory.objects.get(pk=d), permissions, virtual_file)
+        make_virtual_file(project_dir, permissions, virtual_file, foreign_user=True)
     
     temp_file = ntf(mode='w+', encoding='utf-8', delete=True)
     bytes_template = ET.tostring(template)
     temp_file.write(bytes_template.decode('utf-8'))
     temp_file.flush()
     webuser_file = File(temp_file, name=f'{invoice.username}.xml')
-    if ReadyToExport.objects.filter(mftuser=invoice).exists():
-        rte = ReadyToExport.objects.get(mftuser=invoice)
+    if ReadyToExportSetad.objects.filter(invoice=invoice).exists():
+        rte = ReadyToExportSetad.objects.get(invoice=invoice)
         # rte.is_downloaded = False
         rte.number_of_exports = rte.number_of_exports + 1
         # if os.path.isfile(rte.export.path):
-        os.remove(rte.export.path)
-        rte.export = webuser_file
+        os.remove(rte.webuser.path)
+        rte.webuser = webuser_file
         rte.save()
         # rte.delete()
     else:
         if os.path.exists(os.path.join(settings.MEDIA_ROOT, 'exports', f'{invoice.username}.xml')):
             os.remove(os.path.join(settings.MEDIA_ROOT, 'exports', f'{invoice.username}.xml'))
-        ReadyToExport.objects.create(
+        ReadyToExportSetad.objects.create(
             invoice=invoice,
             created_by=isc_user,
-            export=webuser_file
+            webuser=webuser_file
             # is_downloaded=False,
             # number_of_exports=1,
             # number_of_downloads=0,
         )
+
+
+def export_setad_user_v2(invoice):
+    path = os.path.join(settings.MEDIA_ROOT, 'setad_user.txt')
+    webuser_file = open(path, mode='w', encoding='utf-8')
+    all_business = invoice.business.split(',')
+    for bus in all_business:
+        webuser_file.write(f'{invoice.email},{bus},{invoice.get_role}\n')
+    webuser_file.close()
+    export_files_with_sftp(files_list=[path,], dest=settings.SETAD_USERS_PATH, name='DEVOP_USERS_OPR.txt')
 
 
 def export_user_with_paths(id, isc_user):
@@ -1102,9 +1137,9 @@ def transfer_permissions(isc_user, origin_mftuser, destination_mftusers):
 
 
 def insert_into_db():
-    iscuser = IscUser.objects.get(pk=1)
+    iscuser = IscUser.objects.get(pk=164)
 
-    bank_dir_names = {
+    bank_dir_names_with_bic = {
         'Ansar': 'ANSBIRTHXXX',
         'Ayandeh': 'AYBKIRTHXXX',
         'EghtesadNovin': 'BEGNIRTHXXX',
@@ -1128,8 +1163,6 @@ def insert_into_db():
         'Keshavarzi': 'KESHIRTHXXX',
         'Khavarmiyaneh': 'KHMIIRTHXXX',
         'Kosar': 'KSACIRTHXXX',
-        'ISC': 'MACDIRTHXXX',
-        'ISC': 'SIAMIRTHXXX',
         'ISC': 'ISCOIRTHXXX',
         'Markazi': 'BMJIIRTHXXX',
         'Markazi': 'BMJJIRTHXXX',
@@ -1148,35 +1181,75 @@ def insert_into_db():
         'TosseTaavon': 'TTBIIRTHXXX',
     }
 
-    dir_list = [
-        {'name': 'Offline_process', 'parent': 'bank'},
-        {'name': 'in', 'parent': 'bic_dir'},
-        {'name': 'accepted', 'parent': 'in'},
-        {'name': 'out', 'parent': 'bic_dir'},
+    bank_dir_names = [
+        # 'Ansar',
+        # 'Ayandeh',
+        'EghtesadNovin',
+        'Pasargad',
+        'Maskan',
+        'Mellat',
+        'Parsian',
+        'SanatOMadan',
+        'Saderat',
+        'Tejarat',
+        'Tosse',
+        'Caspian',
+        'Shahr',
+        'Day',
+        'TosseSaderat',
+        'IranEuropa',
+        'Ghavamin',
+        'IranZamin',
+        'IranVenezoela',
+        'Karafarin',
+        'Keshavarzi',
+        'Khavarmiyaneh',
+        'Kosar',
+        # 'ISC',
+        # 'Markazi',
+        'Mehr',
+        'Melli',
+        'Noor',
+        'PostBank',
+        'Refah',
+        'Resalat',
+        'Saman',
+        'Sepah',
+        'Sina',
+        'Sarmayeh',
+        'Gardeshgari',
+        'Melal',
+        'TosseTaavon',
     ]
 
-    mftusers_list = [
-        'a_ansari',
-        'a_bakhtiari',
-        'a_rezvanpour',
-        'a_sedighi',
-        'b_hafezi',
-        'h_enayati',
-        'h_ravanshad',
-        'k_ghorbani',
-        'k_zabeti',
-        'm_babakhanian',
-        'm_babanejad',
-        'm_eini',
-        'm_haghighat',
-        'm_omidi',
-        'm_taheri',
-        'o_rouein',
-        'p_bahrami',
-        'p_norouzimanesh',
-        'p_vahebzadeh',
-        'r_kazemi',
-        's_jamshidi'
+    # Ayandeh       SAYAD/Ayandeh                       بانک آینده	Bank Directories Index - Directories Index Sub level 1	        admin (مدیر سیستم)
+    # Files         SAYAD/Ayandeh/Files                 بانک آینده	Business Working Directories - Directories Index Sub level 2	a_derakhshanfar (عملیات)
+    # Confirm       SAYAD/Ayandeh/Files/Confirm         بانک آینده	Directories Index Sub level 3                               	a_derakhshanfar (عملیات)
+    # Output        SAYAD/Ayandeh/Files/Output          بانک آینده	Directories Index Sub level 3                               	a_derakhshanfar (عملیات)
+    # Printery      SAYAD/Ayandeh/Files/Printery        بانک آینده	Directories Index Sub level 3                               	a_derakhshanfar (عملیات)
+    # IN            SAYAD/Ayandeh/Files/Printery/IN     بانک آینده	Directories Index Sub level 4                               	a_derakhshanfar (عملیات)
+    # OUT           SAYAD/Ayandeh/Files/Printery/OUT    بانک آینده	Directories Index Sub level 4                               	a_derakhshanfar (عملیات)
+    # Request       SAYAD/Ayandeh/Files/Request         بانک آینده	Directories Index Sub level 3                               	a_derakhshanfar (عملیات)
+    # RequestFault  SAYAD/Ayandeh/Files/RequestFault    بانک آینده	Directories Index Sub level 3                               	a_derakhshanfar (عملیات)
+    
+    dir_list = [
+        {'name': 'Files', 'parent': 'bank'},
+        {'name': 'Confirm', 'parent': 'Files'},
+        {'name': 'Output', 'parent': 'Files'},
+        {'name': 'Printery', 'parent': 'Files'},
+        {'name': 'IN', 'parent': 'Printery'},
+        {'name': 'OUT', 'parent': 'Printery'},
+        {'name': 'Request', 'parent': 'Files'},
+        {'name': 'RequestFault', 'parent': 'Files'},
+    ]
+
+    dirs_list = [
+        '/Files/Confirm',
+        '/Files/Output',
+        '/Files/Printery/IN',
+        '/Files/Printery/OUT',
+        '/Files/Request',
+        '/Files/RequestFault',
     ]
 
     #####
@@ -1238,6 +1311,176 @@ def insert_into_db():
         #         d_.parent = banki.id
         #         lower_directory_index(d_)
         #         d_.save()
+
+    # Sayad dirs
+        # print(f'|_SAYAD')
+        # for bd in Directory.objects.filter(parent=1244, name__in=bank_dir_names):
+        #     files = Directory(
+        #         name=dir_list[0]['name'],
+        #         parent=bd.id,
+        #         business=bd.business,
+        #         bic=bd.bic,
+        #         relative_path=f'{bd.relative_path}/{dir_list[0]["name"]}',
+        #         index_code=DirectoryIndexCode.objects.get(code=str(int(bd.index_code.code) - 1)),
+        #         created_by=iscuser
+        #     )
+        #     files.save()
+        #     bd.children = f'{str(files.id)},'
+        #     bd.save()
+        #     confirm = Directory(
+        #         name=dir_list[1]['name'],
+        #         parent=files.id,
+        #         business=files.business,
+        #         bic=files.bic,
+        #         relative_path=f"{files.relative_path}/{dir_list[1]['name']}",
+        #         index_code=DirectoryIndexCode.objects.get(code=str(int(files.index_code.code) - 1)),
+        #         created_by=iscuser
+        #     )
+        #     confirm.save()
+        #     output = Directory(
+        #         name=dir_list[2]['name'],
+        #         parent=files.id,
+        #         business=files.business,
+        #         bic=files.bic,
+        #         relative_path=f"{files.relative_path}/{dir_list[2]['name']}",
+        #         index_code=DirectoryIndexCode.objects.get(code=str(int(files.index_code.code) - 1)),
+        #         created_by=iscuser
+        #     )
+        #     output.save()
+        #     printery = Directory(
+        #         name=dir_list[3]['name'],
+        #         parent=files.id,
+        #         business=files.business,
+        #         bic=files.bic,
+        #         relative_path=f"{files.relative_path}/{dir_list[3]['name']}",
+        #         index_code=DirectoryIndexCode.objects.get(code=str(int(files.index_code.code) - 1)),
+        #         created_by=iscuser
+        #     )
+        #     printery.save()
+        #     in_ = Directory(
+        #         name=dir_list[4]['name'],
+        #         parent=printery.id,
+        #         business=printery.business,
+        #         bic=printery.bic,
+        #         relative_path=f"{printery.relative_path}/{dir_list[4]['name']}",
+        #         index_code=DirectoryIndexCode.objects.get(code=str(int(printery.index_code.code) - 1)),
+        #         created_by=iscuser
+        #     )
+        #     in_.save()
+        #     out = Directory(
+        #         name=dir_list[5]['name'],
+        #         parent=printery.id,
+        #         business=printery.business,
+        #         bic=printery.bic,
+        #         relative_path=f"{printery.relative_path}/{dir_list[5]['name']}",
+        #         index_code=DirectoryIndexCode.objects.get(code=str(int(printery.index_code.code) - 1)),
+        #         created_by=iscuser
+        #     )
+        #     out.save()
+        #     printery.children = f'{str(in_.id)},{str(out.id)},'
+        #     printery.save()
+        #     request = Directory(
+        #         name=dir_list[6]['name'],
+        #         parent=files.id,
+        #         business=files.business,
+        #         bic=files.bic,
+        #         relative_path=f"{files.relative_path}/{dir_list[6]['name']}",
+        #         index_code=DirectoryIndexCode.objects.get(code=str(int(files.index_code.code) - 1)),
+        #         created_by=iscuser
+        #     )
+        #     request.save()
+        #     request_fault = Directory(
+        #         name=dir_list[7]['name'],
+        #         parent=files.id,
+        #         business=files.business,
+        #         bic=files.bic,
+        #         relative_path=f"{files.relative_path}/{dir_list[7]['name']}",
+        #         index_code=DirectoryIndexCode.objects.get(code=str(int(files.index_code.code) - 1)),
+        #         created_by=iscuser
+        #     )
+        #     request_fault.save()
+        #     files.children = f'{str(confirm.id)},{str(output.id)},{str(printery.id)},{str(request.id)},{str(request_fault.id)},'
+        #     files.save()
+        #     print(f'  |_{bd.name}')
+        #     print(f'    |_{files}')
+        #     print(f'      |_{confirm}')
+        #     print(f'      |_{output}')
+        #     print(f'      |_{printery}')
+        #     print(f'        |_{in_}')
+        #     print(f'        |_{out}')
+        #     print(f'      |_{request}')
+        #     print(f'      |_{request_fault}')
+
+    # Sayad user permissions
+        # user = MftUser.objects.get(username='a_derakhshanfar')
+        # iscuser = IscUser.objects.get(user__username='a_derakhshanfar')
+        # for bd in Directory.objects.filter(parent=1244, name__in=bank_dir_names):
+        #     confirm = Directory.objects.get(name='Confirm', business=BusinessCode.objects.get(code='SAYAD'), bic=bd.bic)
+        #     output = Directory.objects.get(name='Output', business=BusinessCode.objects.get(code='SAYAD'), bic=bd.bic)
+        #     in_ = Directory.objects.get(name='IN', business=BusinessCode.objects.get(code='SAYAD'), bic=bd.bic)
+        #     out = Directory.objects.get(name='OUT', business=BusinessCode.objects.get(code='SAYAD'), bic=bd.bic)
+        #     request = Directory.objects.get(name='Request', business=BusinessCode.objects.get(code='SAYAD'), bic=bd.bic)
+        #     request_fault = Directory.objects.get(name='RequestFault', business=BusinessCode.objects.get(code='SAYAD'), bic=bd.bic)
+            
+        #     Permission.objects.create(user=user, directory=confirm, permission=0, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=confirm, permission=1, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=confirm, permission=2, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=confirm, permission=8, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=confirm, permission=32, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=confirm, permission=128, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=confirm, permission=256, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=confirm, permission=512, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=confirm, permission=1024, created_by=iscuser)
+
+        #     Permission.objects.create(user=user, directory=output, permission=0, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=output, permission=1, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=output, permission=2, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=output, permission=8, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=output, permission=32, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=output, permission=128, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=output, permission=256, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=output, permission=512, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=output, permission=1024, created_by=iscuser)
+            
+        #     Permission.objects.create(user=user, directory=in_, permission=0, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=in_, permission=1, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=in_, permission=2, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=in_, permission=8, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=in_, permission=32, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=in_, permission=128, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=in_, permission=256, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=in_, permission=512, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=in_, permission=1024, created_by=iscuser)
+
+        #     Permission.objects.create(user=user, directory=out, permission=0, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=out, permission=1, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=out, permission=2, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=out, permission=8, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=out, permission=32, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=out, permission=128, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=out, permission=256, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=out, permission=512, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=out, permission=1024, created_by=iscuser)
+
+        #     Permission.objects.create(user=user, directory=request, permission=0, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request, permission=1, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request, permission=2, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request, permission=8, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request, permission=32, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request, permission=128, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request, permission=256, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request, permission=512, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request, permission=1024, created_by=iscuser)
+
+        #     Permission.objects.create(user=user, directory=request_fault, permission=0, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request_fault, permission=1, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request_fault, permission=2, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request_fault, permission=8, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request_fault, permission=32, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request_fault, permission=128, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request_fault, permission=256, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request_fault, permission=512, created_by=iscuser)
+        #     Permission.objects.create(user=user, directory=request_fault, permission=1024, created_by=iscuser)
 
     # Nahab dirs
         # for bd in Directory.objects.filter(parent=758):

@@ -14,6 +14,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.contrib.auth.hashers import make_password
+from django.conf import settings
 
 from invoice.models import Invoice, PreInvoice
 
@@ -196,30 +197,12 @@ def error_view(request, err=None, *args, **kwargs):
 
 @login_required(login_url='/login/')
 def dashboard_view(request):
-    # buck insertion into or correction in db
-    # insert_into_db()
-    # clean_up(flag='perm', action=False)
-    # clean_up(flag='perm2', action=False)
-    # clean_up(flag='dir', action=False)
-    # clean_up(flag='dir3', action=False, bic_name="FIU")
-    # clean_up(flag='inv', action=False)
-    # dirs = Directory.objects.filter(name='Test')
-    # refactor_directory(operation='rename', action=False, old_name='TRANSACTION', new_name='BANKIRAN')
-
-    # invs = Invoice.objects.filter(id__in=[277, 278, 279, 280])
-    # for inv in invs:
-    #     ids = [int(i) for i in inv.permissions_list.split(',')[:-1]]
-    #     for p in Permission.objects.filter(id__in=ids):
-    #         print(p)
-    #         if p.directory.name == 'accepted':
-    #             p.directory = Directory.objects.get(pk=p.directory.parent)
-    #             p.save()
-
     isc_user = IscUser.objects.get(user=request.user)
 
     context = {
         'username': str(isc_user.user.username),
-        'access': str(isc_user.role.code)
+        'access': str(isc_user.role.code),
+        'debug': settings.DEBUG
     }
     
     html_template = loader.get_template('core/dashboard.html')

@@ -44,6 +44,7 @@ urlpatterns = [
     path("logout/", logout_view, name="logout"),
     path('register/', register_user_view, name='register'),
     path('dashboard/', dashboard_view, name='dashboard'),
+    path('debug-mode-actions/', debug_mode_actions_view, name='debug-mode-actions'),
     path("change-password/", change_password_view, name="change-password"),
     path("reset-password/", reset_password_view, name="reset-password"),
     path("profile/", profile_view, name="iscuser-profile"),

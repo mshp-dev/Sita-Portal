@@ -7,7 +7,7 @@
       </div>
       <div class="col">
         <div class="ms-4 me-4 d-flex justify-content-center">
-          <table class="table table-bordered" style="direction: rtl">
+          <table class="table table-bordered" style="direction: rtl; table-layout: fixed;">
             <tr>
               <th class="col-4" scope="col" id="firstname-label">نام</th>
               <td class="col-4" scope="col" id="firstname-value">{{ invoice.firstname }}</td>
@@ -37,13 +37,17 @@
               <td class="col-4" scope="col" id="department-value">{{ invoice.department }}</td>
             </tr>
             <tr>
-              <th class="col-4" scope="col" id="business-label">سامانه/پروژه ها <span style="font-size: 0.5rem">(3)</span></th>
-              <td class="col-4" scope="col" id="business-value">{{ invoice.business }}</td>
+              <th class="col-4" scope="col" id="group-type-label">گروه کاری</th>
+              <td class="col-4" scope="col" id="group-type-value">{{ invoice.group_type }}</td>
             </tr>
             <tr>
+              <th class="col-4" scope="col" id="business-label">سامانه/پروژه ها <span style="font-size: 0.5rem">(3)</span></th>
+              <td class="col-4" scope="col" id="business-value" style="word-wrap: break-word">{{ invoice.all_business }}</td>
+            </tr>
+            {% comment %} <tr>
               <th class="col-4" scope="col" id="description-label">جزئیات</th>
               <td class="col-4" scope="col" id="description-value">{% if invoice.description %}{{ invoice.description }}{% endif %}</td>
-            </tr>
+            </tr> {% endcomment %}
           </table>
         </div>
       </div>

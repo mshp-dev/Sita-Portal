@@ -905,3 +905,33 @@ def logs_list_view(request, *args, **kwargs):
             return JsonResponse(data={"filtered_logs": filtered_logs}, safe=False)
     
     return render(request, "core/logs-list.html", context)
+
+
+@login_required(login_url="/login/")
+def debug_mode_actions_view(request, *args, **kwargs):
+    isc_user = IscUser.objects.get(user=request.user)
+
+    if not isc_user.user.is_staff:
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
+        return redirect('/error/401/')
+
+    # buck insertion into or correction in db
+    insert_into_db()
+    # clean_up(flag='perm', action=False)
+    # clean_up(flag='perm2', action=False)
+    # clean_up(flag='dir', action=False)
+    # clean_up(flag='dir3', action=False, bic_name="FIU")
+    # clean_up(flag='inv', action=False)
+    # dirs = Directory.objects.filter(name='Test')
+    # refactor_directory(operation='rename', action=False, old_name='TRANSACTION', new_name='BANKIRAN')
+
+    # invs = Invoice.objects.filter(id__in=[277, 278, 279, 280])
+    # for inv in invs:
+    #     ids = [int(i) for i in inv.permissions_list.split(',')[:-1]]
+    #     for p in Permission.objects.filter(id__in=ids):
+    #         print(p)
+    #         if p.directory.name == 'accepted':
+    #             p.directory = Directory.objects.get(pk=p.directory.parent)
+    #             p.save()
+
+    return redirect('/dashboard/')

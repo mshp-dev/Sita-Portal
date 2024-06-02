@@ -44,6 +44,7 @@ SFTP_DEFAULT_PATH = 'Imported_WebUser'
 SFTP_PORTAL_DIRECTORIES_PATH = 'Sita_Portal_Directories'
 SFTP_EXTERNAL_USERS_PATH = 'Setad_Imported_WebUser'
 SFTP_EXTERNAL_DIRECTORIES_PATH = 'Setad_Directories'
+SETAD_USERS_PATH = '/Setad_Imported_WebUser/SLA/DEVOPS'
 
 # Application definition
 

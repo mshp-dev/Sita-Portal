@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
 
-from mftusers.utils import export_setad_user, create_permissions_for_setad_user
+from mftusers.utils import export_setad_user_v2
 from core.models import IscUser, IscDepartmentCode, BusinessCode
 from invoice.models import InvoiceType
 
@@ -22,7 +22,7 @@ def setad_user_create_view(request, *args, **kwargs):
     success = False
     form = SetadUserForm(request.POST or None)
 
-    form.fields['department'].choices = [(dept.id, dept) for dept in IscDepartmentCode.objects.filter(code__endswith='-SETAD').order_by('description')]
+    form.fields['group_type'].choices = [(dept.id, dept) for dept in IscDepartmentCode.objects.filter(code__endswith='-SETAD').order_by('description')]
     form.fields['business'].choices = [(bus.id, bus) for bus in BusinessCode.objects.filter(code__startswith='SETAD_', code=F('description')).order_by('description')]
     
     if request.method == "POST":
@@ -35,13 +35,14 @@ def setad_user_create_view(request, *args, **kwargs):
                 email=form.cleaned_data.get("email"),
                 officephone=form.cleaned_data.get("officephone"),
                 mobilephone=form.cleaned_data.get("mobilephone"),
+                group_type=form.cleaned_data.get("group_type"),
                 department=form.cleaned_data.get("department"),
                 created_by=IscUser.objects.get(user__username='admin')
             )
             invoice.set_business(form.cleaned_data.get("business"))
             invoice.save()
             logger.info(f'an invoice for username {invoice.username} in setad generated successfully.', request)
-            create_permissions_for_setad_user(invoice)
+            # create_permissions_for_setad_user(invoice)
             return redirect(f"/setad/invoice/details/{invoice.pk}/")
         else:
             # 'اطلاعات ورودی صحیح نیست!'
@@ -80,7 +81,9 @@ def setad_user_invoice_confirm_view(request, iid, *args, **kwargs):
         if request.method == 'POST':
             invoice = SetadUserInvoice.objects.get(pk=iid)
             if isc_user.role.code == 'ADMIN':
-                export_setad_user(invoice, isc_user)
+                AzmoonDirectoryPermission.objects.filter(invoice=invoice).update(is_confirmed=True)
+                # export_setad_user(invoice, isc_user)
+                export_setad_user_v2(invoice)
                 invoice.confirm_or_reject = 'CONFIRMED'
                 invoice.status = 1
                 invoice.save()

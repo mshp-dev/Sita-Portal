@@ -4,10 +4,10 @@ from .models import *
 
 
 class SetadUserInvoiceAdmin(admin.ModelAdmin):
-    list_display = ['serial_number', 'get_jalali_created_at', 'username', 'department', 'business']
-    list_filter = ['department']
-    # ordering = ['serial_number', 'username', 'department']
-    search_fields = ['firstname', 'lastname', 'username', 'department', 'business']
+    list_display = ['serial_number', 'get_jalali_created_at', 'username', 'group_type', 'department', 'all_business']
+    list_filter = ['group_type', 'department']
+    # ordering = ['serial_number', 'username', 'group_type', 'department']
+    search_fields = ['firstname', 'lastname', 'username', 'group_type', 'department', 'all_business']
 
 
 class AzmoonDirectoryAdmin(admin.ModelAdmin):
@@ -18,7 +18,7 @@ class AzmoonDirectoryAdmin(admin.ModelAdmin):
 
 
 class AzmoonDirectoryPermissionAdmin(admin.ModelAdmin):
-    list_display = ['invoice', 'directory', 'permission']
+    list_display = ['invoice', 'directory', 'permission', 'is_confirmed']
     list_filter = ['invoice']
     search_fields = ['invoice__username', 'invoice__business__code']
     # ordering = ['absolute_path']

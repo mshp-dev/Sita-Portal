@@ -16,6 +16,7 @@ class SetadUserInvoice(BaseInvoice):
     officephone = models.CharField(max_length=100, blank=False)
     mobilephone = models.CharField(max_length=100, blank=False)
     department  = models.CharField(max_length=100, blank=False)
+    group_type  = models.CharField(max_length=500, blank=False)
     business    = models.CharField(max_length=10000, blank=False, default='')
 
     def __str__(self):
@@ -28,6 +29,21 @@ class SetadUserInvoice(BaseInvoice):
 
     def set_business(self, buss):
         self.business = ','.join(BusinessCode.objects.get(pk=int(bus)).code.replace('SETAD_', '') for bus in buss)
+
+    @property
+    def all_business(self):
+        return self.business.replace(',', ', ')
+
+    @property
+    def get_role(self):
+        role = ''
+        if self.group_type == 'کاربر عملیات':
+            role = 'Operation'
+        elif self.group_type == 'کاربر آزمون':
+            role = 'Azmoon'
+        elif self.group_type == 'کاربر توسعه':
+            role = 'Developer'
+        return role
 
 
 class AzmoonDirectory(models.Model):
@@ -43,9 +59,13 @@ class AzmoonDirectory(models.Model):
     def __str__(self):
         return self.absolute_path
 
+    @property
+    def foreign_path(self):
+        return self.absolute_path
+
 
 class AzmoonDirectoryPermission(models.Model):
-    invoice      = models.OneToOneField(SetadUserInvoice, blank=False, on_delete=models.CASCADE)
+    invoice      = models.ForeignKey(SetadUserInvoice, blank=False, on_delete=models.CASCADE)
     directory    = models.ForeignKey(AzmoonDirectory, blank=False, on_delete=models.CASCADE)
     permission   = models.IntegerField(blank=False, default=256)
     created_by   = models.ForeignKey(IscUser, blank=False, on_delete=models.CASCADE)

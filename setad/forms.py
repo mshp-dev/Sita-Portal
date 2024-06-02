@@ -14,7 +14,8 @@ class SetadUserForm(forms.ModelForm):
     email        = forms.EmailField(max_length=120, required=True, widget=forms.EmailInput(attrs={"placeholder": "username@isc.co.ir", "class": "form-control"}))
     officephone  = forms.DecimalField(max_digits=8, required=True, widget=forms.TextInput(attrs={"placeholder": "123456798", "maxlength": "8", "class": "form-control"}))
     mobilephone  = forms.DecimalField(max_digits=11, required=True, widget=forms.TextInput(attrs={"placeholder": "09123456798", "maxlength": "11", "class": "form-control"}))
-    department   = forms.ChoiceField(required=True, widget=forms.Select(attrs={"class": "form-control form-select", "parent": "department"}))
+    department   = forms.CharField(max_length=200, required=True, widget=forms.TextInput(attrs={"placeholder": "گروه عملیات سامانه های اطلاعاتی و نظارتی", "class": "form-control"}))
+    group_type   = forms.ChoiceField(required=True, widget=forms.Select(attrs={"class": "form-control form-select", "parent": "department"}))
     business     = forms.MultipleChoiceField(required=False, widget=forms.SelectMultiple(attrs={"size": 10, "parent": "business"}))
     
     class Meta:
@@ -27,11 +28,16 @@ class SetadUserForm(forms.ModelForm):
             'officephone',
             'mobilephone',
             'department',
+            'group_type',
             'business'
         ]
 
+    def clean_group_type(self):
+        group_type = IscDepartmentCode.objects.get(id=self.cleaned_data.get('group_type'))
+        return group_type
+
     def clean_department(self):
-        dept = IscDepartmentCode.objects.get(id=self.cleaned_data.get('department'))
+        dept = self.cleaned_data.get('department')
         return dept
     
     def clean_business(self):

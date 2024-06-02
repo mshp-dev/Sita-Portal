@@ -23,14 +23,15 @@
             {% if not success %}
             <div style="direction: rtl" class="col">
               <p class="text-danger" style="font-size: 0.7rem"><strong>* وارد نمودن تمامی موارد ستاره دار الزامی است</strong></p>
-              <p class="text-danger" style="font-size: 0.7rem"><strong>* نام کاربری</strong> را همان نام کاربری دامین ایرانت وارد نمائید</p>
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* نام کاربری</strong> را همان نام کاربری دامین ایرانت یا عملیات وارد نمائید</p>
               <p class="text-danger" style="font-size: 0.7rem"><strong>* ایمیل</strong> را همان ایمیل دامین ایرانت وارد نمائید</p>
               <p class="text-danger" style="font-size: 0.7rem"><strong>* تلفن محل کار </strong> بدون پیش شماره و به طور کامل (هشت رقم) وارد شود</p>
               <p class="text-danger" style="font-size: 0.7rem">
                 <strong>* تلفن همراه </strong> در ده رقم بدون صفر و یا به طور کامل (یازده رقم) وارد شود
               </p>
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* نام گروه</strong> نام کامل گروه خود را به فارسی وارد نمائید</p>
+              <p class="text-danger" style="font-size: 0.7rem"><strong>* گروه کاری</strong> از بین توسعه، آزمون و یا عملیات انتخاب نمائید</p>
               <p class="text-danger" style="font-size: 0.7rem"><strong>* سامانه</strong> همان نام پروژه یا بیزینس که به تبادل فایل نیاز دارد</p>
-              <p class="text-danger" style="font-size: 0.7rem"><strong>* گروه</strong> از بین توسعه، آزمون و یا عملیات انتخاب نمائید</p>
             </div>
             <div style="display: none">
               <p id="current-access-type">{{ access_type }}</p>
@@ -93,14 +94,26 @@
               </div>
               <div class="form-group mb-4" style="direction: rtl">
                 <label for="department"
+                  >نام گروه <sup class="text-danger"><strong>*</strong></sup></label
+                >
+                <p>
+                  <span style="font-size: 0.7rem">لطفاً نام گروهی که در آن قرار دارید را به فارسی وارد نمائید.</span>
+                </p>
+                <div class="input-group" style="direction: ltr">
+                  <span class="input-group-text" id="department"><span class="fas fa-building"></span></span>
+                  {{ form.department }}
+                </div>
+              </div>
+              <div class="form-group mb-4" style="direction: rtl">
+                <label for="group_type"
                   >گروه کاری <sup class="text-danger"><strong>*</strong></sup></label
                 >
                 <p>
                   <span style="font-size: 0.7rem">لطفاً نوع گروهی که در آن قرار دارید را انتخاب نمائید.</span>
                 </p>
                 <div class="input-group" style="direction: ltr">
-                  <span class="input-group-text" id="department"><span class="fas fa-building"></span></span>
-                  {{ form.department }}
+                  <span class="input-group-text" id="group_type"><span class="fas fa-building"></span></span>
+                  {{ form.group_type }}
                 </div>
               </div>
               <div id="business-parent" class="form-group mb-4" style="direction: rtl">
@@ -244,11 +257,11 @@
     switch_business(this, "left_to_right");
   });
 
-  var dept = document.getElementById("id_department");
-  dept.addEventListener("change", function (event) {
-    var department = event.currentTarget.options[event.currentTarget.selectedIndex].text;
+  var gtype = document.getElementById("id_group_type");
+  gtype.addEventListener("change", function (event) {
+    var group_type = event.currentTarget.options[event.currentTarget.selectedIndex].text;
     var username = document.getElementById("id_username");
-    if (department == "کاربر عملیات") {
+    if (group_type == "کاربر عملیات") {
       if (username.value.search("@iranet.net") == -1 && username.value.search("@amaliat.local") == -1) {
         username.value = username.value + "@amaliat.local";
       } else if (username.value.search("@iranet.net") != -1) {
@@ -266,9 +279,9 @@
   var username = document.getElementById("id_username");
   username.addEventListener("change", function (event) {
     var uname = cleanInputValue(event.currentTarget.value, "username");
-    var dept = document.getElementById("id_department");
-    var department = dept.options[dept.selectedIndex].text;
-    if (department == "کاربر عملیات") {
+    var gtype = document.getElementById("id_group_type");
+    var group_type = gtype.options[gtype.selectedIndex].text;
+    if (group_type == "کاربر عملیات") {
       if (uname.search("@iranet.net") == -1 && uname.search("@amaliat.local") == -1) {
         uname = uname + "@amaliat.local";
       } else if (username.value.search("@iranet.net") != -1) {
@@ -282,6 +295,12 @@
       }
     }
     event.currentTarget.value = uname;
+  });
+
+  var department = document.getElementById("id_department");
+  department.addEventListener("change", function (event) {
+    var dept = cleanInputValue(event.currentTarget.value, "dept");
+    event.currentTarget.value = dept;
   });
 
   var email = document.getElementById("id_email");
@@ -331,8 +350,15 @@
       input = input.replace("amaliatlocal", "");
       input = input.replace("iranetnet", "");
     }
-    input = input.replace(/[\u0600-\u06FF]/g, "");
-    input = input.replace(/\s/g, "");
+    if (type == "dept") {
+      input = input.replace(/[a-z]/g, "");
+      input = input.replace(/[A-Z]/g, "");
+      input = input.replace(/\_/g, "");
+    }
+    if (type != "dept") {
+      input = input.replace(/\s/g, "");
+      input = input.replace(/[\u0600-\u06FF]/g, "");
+    }
     input = input.replace(/\-/g, "");
     input = input.replace(/\#/g, "");
     input = input.replace(/\!/g, "");

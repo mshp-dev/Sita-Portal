@@ -1,0 +1,6 @@
+m_shokripasha@isc.co.ir,AZAR,Operation
+m_shokripasha@isc.co.ir,DIBA,Operation
+m_shokripasha@isc.co.ir,DIBA2,Operation
+m_shokripasha@isc.co.ir,NAHAB,Operation
+m_shokripasha@isc.co.ir,SIAM,Operation
+m_shokripasha@isc.co.ir,SMSENGINE,Operation
