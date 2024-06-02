@@ -728,7 +728,7 @@ def export_setad_user_v2(invoice):
     for bus in all_business:
         webuser_file.write(f'{invoice.username},{bus},{invoice.get_role}\n')
     webuser_file.close()
-    export_files_with_sftp(files_list=[path,], dest=settings.SETAD_USERS_PATH, name='DEVOP_USERS_OPR.txt')
+    export_files_with_sftp(files_list=[path,], dest=settings.SETAD_USERS_PATH, name='DEVOPS_USERS.txt')
 
 
 def export_user_with_paths(id, isc_user):
