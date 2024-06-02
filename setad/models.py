@@ -38,11 +38,11 @@ class SetadUserInvoice(BaseInvoice):
     def get_role(self):
         role = ''
         if self.group_type == 'کاربر عملیات':
-            role = 'Operation'
+            role = 'OPERATION'
         elif self.group_type == 'کاربر آزمون':
-            role = 'Azmoon'
+            role = 'AZMOON'
         elif self.group_type == 'کاربر توسعه':
-            role = 'Developer'
+            role = 'DEVELOP'
         return role
 
 
