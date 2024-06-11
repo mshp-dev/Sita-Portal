@@ -1,0 +1,6 @@
+m_shokripasha@amaliat.local,AZAR,OPERATION
+m_shokripasha@amaliat.local,DIBA,OPERATION
+m_shokripasha@amaliat.local,DIBA2,OPERATION
+m_shokripasha@amaliat.local,NAHAB,OPERATION
+m_shokripasha@amaliat.local,SIAM,OPERATION
+m_shokripasha@amaliat.local,SMSENGINE,OPERATION
