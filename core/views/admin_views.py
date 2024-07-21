@@ -916,7 +916,7 @@ def debug_mode_actions_view(request, *args, **kwargs):
         return redirect('/error/401/')
 
     # buck insertion into or correction in db
-    insert_into_db()
+    # insert_into_db()
     # clean_up(flag='perm', action=False)
     # clean_up(flag='perm2', action=False)
     # clean_up(flag='dir', action=False)
