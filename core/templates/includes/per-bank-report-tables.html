@@ -1,0 +1,39 @@
+<!--Tables-->
+<div id="per-bank-downloadable" class="container">
+  <div style="display: none">
+    <p id="report"></p>
+  </div>
+  <div class="row mt-5 justify-content-center">
+    <div class="col-lg-12" style="direction: rtl">
+      <div class="col">
+        <input class="form-check-input" type="checkbox" id="show-all-2" checked="">
+        <label class="form-check-label" for="show-all-2">نمایش همه <strong style="font-size: 0.6rem">(برای پنهان نمودن موارد با تعداد صفر و حذف از گزارش، از این گزینه استفاده نمایید)</strong></label>
+      </div>
+      <div class="col">
+        <table class="table table-bordered" style="direction: rtl">
+          <tr>
+            <th class="col-1 text-center" scope="col"><span>ردیف</th>
+            <th class="col-4 text-center" scope="col"><span>پروژه/سامانه</th>
+            <th class="col-1 text-center" style="direction: ltr" scope="col"><span id="bic-desc">وضعیت پروژه</span></th>
+            <th class="col-1 text-center" style="direction: ltr" scope="col"><span>تعداد مسیر</span></th>
+            <th class="col-6 text-center" scope="col"><span>سازمان/بانک ها</span></th>
+            <th class="col-1 text-center" scope="col"><span>تعداد کاربران سازمان/بانک</span></th>
+            <th class="col-1 text-center" scope="col"><span>تعداد کاربران شرکت خدمات</span></th>
+          </tr>
+          {% for item in per_bank_report_items %}
+          <tr {% if item.dir_count == 0 and item.user_count == 0 %}role="count-zero-2"{% endif %}>
+            <td class="col-1" scope="col" id="{{ item.row_number }}-label">{{ item.row_number }}</td>
+            <td class="col-4" scope="col" id="{{ item.bus_code }}-label">{{ item.bus_description }}</td>
+            <td class="col-1" scope="col"><span>{% if item.enabled %}فعال{% endif %}</span></td>
+            <td class="col-1" scope="col" id="dir-count-label"><span>{{ item.dir_count }}</span></td>
+            <td class="col-6" scope="col" id="orgs"><span>{% for org in item.organizations %}{{ org.num }}-{{ org.org }}  {% endfor %}</span></td>
+            <td class="col-1" scope="col" id="user-count-label"><span>{{ item.user_count }}</span></td>
+            <td class="col-1" scope="col" id="user-count-label"><span>{{ item.opr_user_count }}</span></td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<!--End of Tables-->

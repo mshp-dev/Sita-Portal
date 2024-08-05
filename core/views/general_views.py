@@ -32,7 +32,7 @@ def index_view(request):
     context = {
         'users_count': MftUser.objects.all().count(),
         'directories_count': Directory.objects.all().count(),
-        'business_count': BusinessCode.objects.all().exclude(code__startswith='SETAD_', code=F('description')).count(),
+        'business_count': BusinessCode.objects.all().exclude(code__icontains='NO_PROJECT').exclude(code__startswith='SETAD_', code=F('description')).count(),
         'organizations_count': BankIdentifierCode.objects.all().count()
     }
     
@@ -383,4 +383,147 @@ def profile_view(request, *args, **kwargs):
 
     return render(request, "accounts/profile.html", context)
 
+
+@login_required(login_url="/login/")
+def generate_report_view(request, *args, **kwargs):
+    isc_user               = IscUser.objects.get(user=request.user)
+    username               = str(isc_user.user.username)
+    access                 = str(isc_user.role.code)
+    all_users_report_items = []
+    per_bank_report_items  = []
+    directory_indexes      = []
+    index_code             = request.GET.get('dd', '-2')
+    bic_code               = request.GET.get('bic', 'ALL')
+    
+    if not isc_user.user.is_staff and isc_user.role.code != 'CUSTOMER' and isc_user.role.code != 'VIEWER':
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
+        return redirect('/error/401/')
+    
+    all_buss = BusinessCode.objects.all().exclude(code__icontains='NO_PROJECT').exclude(code__startswith='SETAD_', code=F('description')).order_by('description')
+    
+    # row_number = 1
+        # for bus in all_buss:
+        #     all_users_report_items.append(
+        #         {
+        #             'row_number': row_number,
+        #             'bus_code': bus.code,
+        #             'bus_description': bus.description,
+        #             'dir_count': Directory.objects.filter(
+        #                 business=bus,
+        #                 index_code__code=index_code
+        #             ).count(),
+        #             'user_count': Permission.objects.filter(directory__name=bus.code, directory__business=bus, directory__parent=0).values('user').distinct().count()
+        #         }
+        #     )
+        #     row_number += 1
+    
+    if bic_code != 'ALL':
+        bic = BankIdentifierCode.objects.filter(code=bic_code)
+    else:
+        bic = BankIdentifierCode.objects.all().exclude(code='ISC')
+    row_number = 1
+    for bus in all_buss:
+        orgs = [
+            rte.mftuser.organization for rte in ReadyToExport.objects.filter(
+                mftuser__pk__in=[
+                    user['user'] for user in Permission.objects.filter(
+                        directory__name__in=[b.directory_name for b in bic],
+                        directory__business=bus,
+                        user__organization__in=bic
+                    ).values('user').distinct()
+                ],
+                number_of_exports__gte=1
+            )
+        ]
+        organizations = []
+        counter = 1
+        for org in BankIdentifierCode.objects.filter(code__in=[org.code for org in orgs]):
+            organizations.append({
+                'num': counter,
+                'org': org.description
+            })
+            counter += 1
+        enabled = None
+        if ReadyToExport.objects.filter(
+            mftuser__pk__in=[
+                user['user'] for user in Permission.objects.filter(
+                    directory__name__in=[b.directory_name for b in bic],
+                    directory__business=bus,
+                    user__organization__in=bic
+                ).values('user').distinct()
+            ],
+            number_of_exports__gte=1
+            ).count() >= 1 and ReadyToExport.objects.filter(
+                mftuser__pk__in=[
+                    user['user'] for user in Permission.objects.filter(
+                        directory__name__in=[b.directory_name for b in bic],
+                        directory__business=bus,
+                        directory__bic__in=bic,
+                        user__organization__code='ISC'
+                    ).values('user').distinct()
+                ],
+                number_of_exports__gte=1
+            ).count() >= 1:
+            enabled = True
+        else:
+            enabled = False
+        per_bank_report_items.append(
+            {
+                'row_number': row_number,
+                'bus_code': bus.code,
+                'bus_description': bus.description,
+                'dir_count': Directory.objects.filter(
+                    business=bus,
+                    index_code__code=index_code,
+                    bic__in=bic
+                ).count(),
+                'enabled': enabled,
+                'user_count': Permission.objects.filter(
+                    directory__name__in=[b.directory_name for b in bic],
+                    directory__business=bus,
+                    user__organization__in=bic
+                ).values('user').distinct().count(),
+                'opr_user_count': Permission.objects.filter(
+                    directory__name__in=[b.directory_name for b in bic],
+                    directory__business=bus,
+                    directory__bic__in=bic,
+                    user__organization__code="ISC"
+                ).values('user').distinct().count(),
+                'organizations': organizations
+            }
+        )
+        row_number += 1
+
+    context = {
+        "username": username,
+        "access": access,
+        "per_bank_report_items": per_bank_report_items,
+        "bics" : BankIdentifierCode.objects.all().order_by('id')
+        # "all_users_report_items": all_users_report_items,
+        # "directory_indexes" : DirectoryIndexCode.objects.all().order_by('id'),
+    }
+    return render(request, "core/report.html", context)
+
+
+@login_required(login_url="/login/")
+def download_report_view(request, *args, **kwargs):
+    isc_user         = IscUser.objects.get(user=request.user)
+    downloadable     = None
+    downloadable_url = ''
+    response         = None
+    
+    if not isc_user.user.is_staff and isc_user.role.code != 'CUSTOMER' and isc_user.role.code != 'VIEWER':
+        logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
+        return redirect('/error/401/')
+
+    # if kind == 'all-users-sub-dir':
+    #     downloadable_url = make_report_in_csv_format(dir_default_depth=extra, name="sita_user_dirs_report")
+    # elif kind == 'bic':
+    downloadable_url = make_report_in_csv_format(name="sita_user_dirs_per_bic_report")
+    response = FileResponse(open(downloadable_url, 'rb'), as_attachment=True)
+    response['Content-Disposition'] = f"attachment; filename=report.csv"
+    response['Content-Type'] = "text/csv"
+    logger.info(f'report for sita_user_dirs_per_bic_report generated and report.csv downloaded by {isc_user.user.username}.', request)
+    
+    return response
 

@@ -985,7 +985,81 @@ def make_report_in_csv_format(dir_default_depth, name='report'):
                     business=bus,
                     index_code=DirectoryIndexCode.objects.get(code=f'-{str(dir_default_depth)}')
                 ).count(),
-                MftUser.objects.filter(business=bus).count()
+                Permission.objects.filter(directory__name=bus.code, directory__business=bus, directory__parent=0).values('user').distinct().count()
+            ])
+            
+    return os.path.join(os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv'))
+
+
+def make_report_in_csv_format(name='report'):
+    all_buss = BusinessCode.objects.all().exclude(code__icontains='NO_PROJECT').exclude(code__startswith='SETAD_', code=F('description')).order_by('description')
+    path = os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv')
+    bic = BankIdentifierCode.objects.all().exclude(code='ISC')
+    with open(path, mode='w', encoding='utf-8') as csv_file:
+        csv_writer = csv.writer(csv_file, delimiter=',', lineterminator='\n')
+        csv_writer.writerow(['پروژه/سامانه', 'وضعیت استقرار در سیتا2', 'تعداد دایرکتوری ها', 'سازمان/بانک', 'تعداد کاربران سازمان/بانک', 'تعداد کاربران شرکت خدمات'])
+        for bus in all_buss:
+            orgs = [
+                rte.mftuser.organization for rte in ReadyToExport.objects.filter(
+                    mftuser__pk__in=[
+                        user['user'] for user in Permission.objects.filter(
+                            directory__name__in=[b.directory_name for b in bic],
+                            directory__business=bus,
+                            user__organization__in=bic
+                        ).values('user').distinct()
+                    ],
+                    number_of_exports__gte=1
+                )
+            ]
+            organizations = ''
+            counter = 1
+            for org in BankIdentifierCode.objects.filter(code__in=[org.code for org in orgs]):
+                organizations += f'{counter}-{org.description} '
+                counter += 1
+            enabled = 'فعال'
+            if ReadyToExport.objects.filter(
+                mftuser__pk__in=[
+                    user['user'] for user in Permission.objects.filter(
+                        directory__name__in=[b.directory_name for b in bic],
+                        directory__business=bus,
+                        user__organization__in=bic
+                    ).values('user').distinct()
+                ],
+                number_of_exports__gte=1
+                ).count() >= 1 and ReadyToExport.objects.filter(
+                    mftuser__pk__in=[
+                        user['user'] for user in Permission.objects.filter(
+                            directory__name__in=[b.directory_name for b in bic],
+                            directory__business=bus,
+                            directory__bic__in=bic,
+                            user__organization__code='ISC'
+                        ).values('user').distinct()
+                    ],
+                    number_of_exports__gte=1
+                ).count() >= 1:
+                enabled = True
+            else:
+                enabled = '-'
+            csv_writer.writerow([
+                bus.description,
+                enabled,
+                Directory.objects.filter(
+                    business=bus,
+                    index_code__code='-2',
+                    bic__in=bic
+                ).count(),
+                organizations,
+                Permission.objects.filter(
+                    directory__name__in=[b.directory_name for b in bic],
+                    directory__business=bus,
+                    user__organization__in=bic
+                ).values('user').distinct().count(),
+                Permission.objects.filter(
+                    directory__name__in=[b.directory_name for b in bic],
+                    directory__business=bus,
+                    directory__bic__in=bic,
+                    user__organization__code="ISC"
+                ).values('user').distinct().count()
             ])
             
     return os.path.join(os.path.join(settings.MEDIA_ROOT, 'exports', f'{name}.csv'))

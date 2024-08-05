@@ -82,6 +82,6 @@ urlpatterns = [
     path("error/<int:err>/", error_view, name="error-view"),
     path('download/mftuser/<int:id>/', download_mftuser_view, name='download-mftuser-view'),
     path('download/paths/', download_dirs_paths_view, name='download-dirs-paths-view'),
-    path('download/report/<int:dd>/', download_report_view, name='download-report-view'),
+    path('download/report/', download_report_view, name='download-report-view'),
     re_path(r'^.*\.*', error_view, name='error-view'),
 ]

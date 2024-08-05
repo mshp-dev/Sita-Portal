@@ -1,0 +1,39 @@
+<!--Tables-->
+<div id="all-users-downloadable" class="container">
+  <div style="display: none">
+    <p id="report"></p>
+  </div>
+  <div class="row mt-5 justify-content-center">
+    <div class="col-lg-12" style="direction: rtl">
+      {% comment %} <div id="header">
+      </div>
+      <div class="col mt-2 text-center">
+        <span class="h4">اطلاعات پوشه ها و سطح دسترسی</span>
+      </div> {% endcomment %}
+      <div class="col-4">
+        <input class="form-check-input" type="checkbox" id="show-all-1" checked="">
+        <label class="form-check-label" for="show-all-1">نمایش همه</label>
+      </div>
+      <div class="col">
+        <table class="table table-bordered" style="direction: rtl">
+          <tr>
+            <th class="col-1 text-center" scope="col"><span>ردیف</th>
+            <th class="col-4 text-center" scope="col"><span>پروژه/سامانه</th>
+            {% comment %} <th class="col-2 text-center" style="direction: ltr" scope="col"><span>تعداد مسیر/پوشه در لایه <span id="depth">سوم</span><p class="mt-2"><span id="path-example">/PROJECT/Organization/BusinessWorkingDir</span></p></span></th> {% endcomment %}
+            <th class="col-2 text-center" style="direction: ltr" scope="col"><span>تعداد مسیر/پوشه/سرشاخه ایجاد شده</span></th>
+            <th class="col-2 text-center" scope="col"><span>تعداد کاربران دارای دسترسی در این پروژه/سامانه</span></th>
+          </tr>
+          {% for item in all_users_report_items %}
+          <tr {% if item.dir_count == 0 and item.user_count == 0 %}role="count-zero-1"{% endif %}>
+            <td class="col-1" scope="col" id="{{ item.row_number }}-label">{{ item.row_number }}</td>
+            <td class="col-4" scope="col" id="{{ item.bus_code }}-label">{{ item.bus_description }}</td>
+            <td class="col-2" scope="col" id="dir-count-label"><span>{{ item.dir_count }}</span></td>
+            <td class="col-2" scope="col" id="user-count-label"><span>{{ item.user_count }}</span></td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<!--End of Tables-->
