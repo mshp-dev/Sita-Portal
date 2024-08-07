@@ -1,6 +1,37 @@
 from django.db import models
 from django.contrib import admin
+from django.conf import settings
+
+from mftusers.utils import export_user_with_paths_v2, export_files_with_sftp
 from .models import *
+
+
+@admin.action(description="Set is_confirmed to True")
+def confirm_selected_permissions(modeladmin, request, queryset):
+    queryset.update(is_confirmed=True)
+
+
+@admin.action(description="Set is_confirmed to False")
+def unconfirm_selected_permissions(modeladmin, request, queryset):
+    queryset.update(is_confirmed=False)
+
+
+@admin.action(description="Reproduce export of users")
+def make_ready_to_export_again(modeladmin, request, queryset):
+    isc_user = IscUser.objects.get(user=request.user)
+    for rte in queryset:
+        export_user_with_paths_v2(rte.mftuser, isc_user)
+
+
+@admin.action(description="Export selected users with sftp")
+def export_selected_mftusers_with_sftp(modeladmin, request, queryset):
+    for rte in queryset:
+        rte.number_of_exports += 1
+        rte.save()
+        if rte.mftuser.organization.sub_domain == DomainName.objects.get(code='nibn.ir'):
+            export_files_with_sftp(files_list=list[rte.webuser.path,], dest=settings.SFTP_DEFAULT_PATH)
+        else:
+            export_files_with_sftp(files_list=list[rte.webuser.path,], dest=settings.SFTP_EXTERNAL_USERS_PATH)
 
 
 class CodingTypeAdmin(admin.ModelAdmin):
@@ -75,6 +106,7 @@ class PermissionAdmin(admin.ModelAdmin):
     list_filter = ['is_confirmed', 'permission', 'directory__index_code__code', 'directory__bic', 'directory__business']
     search_fields = ['user__username', 'directory__name', 'directory__relative_path']
     ordering = ['user__username', 'directory__relative_path']
+    actions = [confirm_selected_permissions, unconfirm_selected_permissions]
 
 
 # class CustomerAccessAdmin(admin.ModelAdmin):
@@ -98,6 +130,7 @@ class CustomerBankAdmin(admin.ModelAdmin):
 class ReadyToExportAdmin(admin.ModelAdmin):
     list_display = ['mftuser', 'created_by', 'created_at', 'number_of_exports', 'number_of_downloads']
     search_fields = ['mftuser__username']
+    actions = [make_ready_to_export_again] #, export_selected_mftusers_with_sftp
 
 
 admin.site.register(CodingType, CodingTypeAdmin)
