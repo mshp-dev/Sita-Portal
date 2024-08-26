@@ -97,6 +97,7 @@
             </div>
           </div>
         </div>
+        {% if access != 'CUSTOMER' %}
         <div class="col-md-6 col-lg-4 text-center">
           <div class="card border-gray-300 mb-4">
             <div class="card-body py-5">
@@ -115,6 +116,7 @@
             </div>
           </div>
         </div>
+        {% endif %}
         {% comment %} {% if access != 'CUSTOMER' %} {% endcomment %}
         <div class="col-md-6 col-lg-4 text-center">
           <div class="card border-gray-300 mb-4">

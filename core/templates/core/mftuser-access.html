@@ -55,16 +55,17 @@
 
   <div class="section section-md">
     <div class="container">
+      <p id="current-user-id" style="display: none">{{ mftuser.id }}</p>
+      {% if access != 'CUSTOMER' %}
       <div class="row mb-4">
         <div class="col-12 mx-auto">
           <div class="mx-auto text-center" style="direction: rtl">
             <p class="h4 my-1 me-2" for="select-used-business">اختصاص دسترسی در مسیرهای سامانه/پروژه(هایی) که سرویس می دهید:</p>
-            <p id="current-user-id" style="display: none">{{ mftuser.id }}</p>
           </div>
           {% include "includes/directories-list.html" %}
         </div>
       </div>
-      {% if access != 'ADMIN' %}
+      {% endif %} {% if access == 'OPERATION' %}
       <div class="row mb-10">
         <input
           type="button"
@@ -74,7 +75,7 @@
           onClick="makeInvoice();"
         />
       </div>
-      {% endif %} {% if access == 'OPERATION' %}
+      {% endif %} {% if access != 'ADMIN' %}
       <div class="row">
         <script type="text/javascript">
           $(function () {

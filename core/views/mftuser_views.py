@@ -533,7 +533,8 @@ def mftuser_access_view(request, uid, rid=-1, dir_name="", *args, **kwargs):
                     buss.append(bus)
         elif isc_user.role.code == 'CUSTOMER':
             buss = list(mftuser.owned_business.all())
-            buss += list(mftuser.used_business.all())
+            # buss += list(mftuser.used_business.all())
+            used_buss = [{'value': f'{bus.pk}', 'name': f'{bus.description}'} for bus in buss]
         elements = get_specific_root_dir(buss, bic)
 
     permissions = Permission.objects.filter(user=mftuser)
@@ -566,16 +567,17 @@ def mftuser_used_business_access_view(request, uid, bid=-1, *args, **kwargs):
     bic = BankIdentifierCode.objects.get(code=mftuser.organization.code)
     elements = None
     
-    if not isc_user.user.is_staff and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=used_buss).exists():
+    if not isc_user.user.is_staff and not CustomerBank.objects.filter(user=isc_user, access_on_bic=bic).exists() and not OperationBusiness.objects.filter(user=isc_user, access_on_bus__in=used_buss).exists():
         logger.fatal(f'unauthorized trying access of {isc_user.user.username} to {request.path}.', request)
         return redirect('/error/401/')
 
-    if isc_user.role.code != 'OPERATION':
-        return redirect(f'/mftuser/{mftuser.id}/directories/')
+    # if isc_user.role.code != 'OPERATION':
+    #     return redirect(f'/mftuser/{mftuser.id}/directories/')
 
     elements = get_specific_root_dir(used_buss, bic)    
     permissions = Permission.objects.filter(user=mftuser)
-    mftuser.used_business.add(bid)
+    if mftuser.organization.code == 'ISC':
+        mftuser.used_business.add(bid)
     confirmed = False
     i = len(permissions)
     if i != 0:

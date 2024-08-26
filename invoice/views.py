@@ -50,7 +50,7 @@ def invoice_create_view(request, *args, **kwargs):
                         bus_dirs = Directory.objects.filter(business__in=mftuser.owned_business.all()).order_by('relative_path')
                     check_directories_minimum_permissions(isc_user, mftuser)
                     check_directory_tree_permission(isc_user, mftuser)
-                    permissions = Permission.objects.filter(user=mftuser, directory__in=bus_dirs, is_confirmed=False)
+                    permissions = Permission.objects.filter(user=mftuser, directory__in=bus_dirs, is_confirmed=False, created_by=isc_user)
                     if permissions.filter(permission__in=[1, 2, 32, 4]).exists():
                         for p in permissions.values('id').distinct():
                             perms_str += f'{p["id"]},'
