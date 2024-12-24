@@ -7,12 +7,12 @@ from .models import *
 
 
 @admin.action(description="Set is_confirmed to True")
-def confirm_selected_permissions(modeladmin, request, queryset):
+def confirm_selected_objects(modeladmin, request, queryset):
     queryset.update(is_confirmed=True)
 
 
 @admin.action(description="Set is_confirmed to False")
-def unconfirm_selected_permissions(modeladmin, request, queryset):
+def unconfirm_selected_objects(modeladmin, request, queryset):
     queryset.update(is_confirmed=False)
 
 
@@ -99,6 +99,7 @@ class DirectoryAdmin(admin.ModelAdmin):
     list_filter = ['index_code__code', 'bic', 'business']
     search_fields = ['relative_path', 'bic__description', 'business__description']
     ordering = ['name', 'relative_path']
+    actions = [confirm_selected_objects, unconfirm_selected_objects]
 
 
 class PermissionAdmin(admin.ModelAdmin):
@@ -106,7 +107,7 @@ class PermissionAdmin(admin.ModelAdmin):
     list_filter = ['is_confirmed', 'permission', 'directory__index_code__code', 'directory__bic', 'directory__business']
     search_fields = ['user__username', 'directory__name', 'directory__relative_path']
     ordering = ['user__username', 'directory__relative_path']
-    actions = [confirm_selected_permissions, unconfirm_selected_permissions]
+    actions = [confirm_selected_objects, unconfirm_selected_objects]
 
 
 # class CustomerAccessAdmin(admin.ModelAdmin):

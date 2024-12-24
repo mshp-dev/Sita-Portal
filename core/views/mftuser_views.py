@@ -109,6 +109,8 @@ def mftuser_create_view(request, *args, **kwargs):
                     buss += f'{str(bus)}،'
                 project = "سامانه های" if mftuser.owned_business.all().count() > 1 else "سامانه"
                 mftuser.description = f'{project} {buss[:-1]}'
+                if len(mftuser.description) > 512:
+                    mftuser.description = f'کاربر جامع {mftuser_origin.organization.description}'
             mftuser.save()
             msg = f'<p>کاربر {mftuser.username} ایجاد شد.<p><br >{bus_error}'
             success = True
@@ -362,7 +364,7 @@ def mftuser_details_view(request, id, *args, **kwargs):
             mftuser_origin.owned_business.clear()
             mftuser_origin.is_confirmed = False
             mftuser_origin.email = mftuser.email
-            mftuser_origin.description = mftuser.description
+            # mftuser_origin.description = mftuser.description
             mftuser_origin.officephone = mftuser.officephone
             mftuser_origin.mobilephone = mftuser.mobilephone
             mftuser_origin.alias = mftuser.alias
@@ -403,6 +405,13 @@ def mftuser_details_view(request, id, *args, **kwargs):
                         logger.error(f'directory in {bus.code}/{mftuser_origin.organization.directory_name} does not exists.', request)
                         msg += f'<strong>امکان افزودن پروژه/سامانه {bus.description} نمی باشد</strong>'
                 msg += '<strong>اطلاعات کاربر بروزرسانی شد</strong>'
+                buss = ''
+                for bus in mftuser_origin.owned_business.all():
+                    buss += f'{str(bus)}،'
+                project = "سامانه های" if mftuser_origin.owned_business.all().count() > 1 else "سامانه"
+                mftuser_origin.description = f'{project} {buss[:-1]}'
+                if len(mftuser_origin.description) > 512:
+                    mftuser_origin.description = f'کاربر جامع {mftuser_origin.organization.description}'
                 mftuser_origin.save()
         else:
             msg = form.errors

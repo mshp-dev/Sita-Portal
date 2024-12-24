@@ -321,6 +321,7 @@ def create_default_permission(isc_user, mftuser, last_dir, business=None, home_d
 def check_directory_tree_permission(isc_user, mftuser):
     user_dirs = Permission.objects.filter(~Q(permission=256), user=mftuser, directory__children='').values('directory').distinct()
     for dir_ in Directory.objects.filter(pk__in=[ud['directory'] for ud in user_dirs]):
+        print(f'did: {dir_.parent}')
         current_dir = Directory.objects.get(pk=dir_.parent) #dir_
         last_dir_is_confirmed = current_dir.is_confirmed
         dir_index = int(current_dir.index_code.code)
@@ -1950,6 +1951,15 @@ def clean_up(flag='', action=False, *args, **kwargs):
                 print(f'{p.user.username} has MODIFY access on {p.directory.relative_path} without RENAME')
                 if action:
                     Permission.objects.create(permission=8, user=p.user, directory=p.directory, created_by=isc_user, is_confirmed=p.is_confirmed)
+    elif flag == 'dup_perm':
+        print('Cleanup duplicate permissions.')
+        for d in Directory.objects.filter(parent=0):
+            for u in MftUser.objects.all():
+                if Permission.objects.filter(directory=d, user=u).count() > 1:
+                    print(f'user with id {u.id} have more than one list permission on dir with id {d.id}')
+                    if action:
+                        perm = Permission.objects.filter(directory=d, user=u).first()
+                        perm.delete()
     elif flag == 'mftuser':
         print('Cleanup mftusers.')
         for u in MftUser.objects.all():

@@ -866,6 +866,7 @@ def debug_mode_actions_view(request, *args, **kwargs):
     # clean_up(flag='dir', action=False)
     # clean_up(flag='dir3', action=False, bic_name="FIU")
     # clean_up(flag='inv', action=False)
+    # clean_up(flag='dup_perm', action=True)
     # dirs = Directory.objects.filter(name='Test')
     # refactor_directory(operation='rename', action=False, old_name='TRANSACTION', new_name='BANKIRAN')
 
